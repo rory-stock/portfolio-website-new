@@ -26,6 +26,10 @@ export default defineNuxtConfig({
     preview: {
       api: 'https://api.nuxt.studio'
     },
+    database: {
+      type: 'd1',
+      bindingName: 'portfolio_db_binding'
+    },
   },
   // ******************************************* //
 
