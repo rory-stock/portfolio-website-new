@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 201.03 201.07">
+  <defs>
+    <style>
+
+        @font-face {
+            font-family: "font-family: neue-haas-grotesk-display;"
+            src:
+                url("https://use.typekit.net/vim6nmj.css")
+                format("css")
+        }
+
+      .cls-1 {
+        fill: #000000;
+      }
+
+
+      .cls-2 {
+        font-family: neue-haas-grotesk-display, sans-serif;
+        font-size: 100px;
+        font-weight: 900;
+        font-style: normal;
+        fill: #ffffff;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .cls-1 {
+          fill: #ffffff;
+        }
+
+        .cls-2 {
+          fill: #000000;
+        }
+      }
+    </style>
+  </defs>
+  <path class="cls-1" d="M193.32,100.53c0,51.26-39.82,92.81-92.81,92.81S7.77,152.73,7.71,100.53C7.64,48.87,45.95,7.72,100.51,7.72s92.81,37.41,92.81,92.81Z"/>
+  <text class="cls-2" transform="translate(32.39 130.56)"><tspan x="0" y="0">RS</tspan></text>
+</svg>

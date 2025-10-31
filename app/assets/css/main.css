@@ -1,0 +1,33 @@
+@import url("https://use.typekit.net/xco3cyn.css");
+@import "tailwindcss";
+
+@theme {
+    /*  CUSTOM FONTS */
+    --font-neue-display: neue-haas-grotesk-display, sans-serif;
+    --font-neue-text: neue-haas-grotesk-text, sans-serif;
+    /* ************************************************** */
+
+    /*  CUSTOM ANIMATIONS */
+    --animate-menu-drop: menu-drop 0.3s ease-in-out;
+    --animate-menu-item-fade: menu-item-fade 1.5s ease-in-out;
+    /* ************************************************** */
+
+    /*  CUSTOM ANIMATION KEYFRAMES */
+    @keyframes menu-drop {
+        0% {
+            height: 0;
+        }
+        100% {
+            height: 100%;
+        }
+    }
+    @keyframes menu-item-fade {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+    /* ************************************************** */
+}

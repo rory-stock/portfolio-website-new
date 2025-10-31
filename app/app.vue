@@ -1,6 +1,57 @@
 <template>
   <div>
     <NuxtRouteAnnouncer />
-    <NuxtWelcome />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>
+
+<script setup lang="ts">
+useSchemaOrg([
+  definePerson({
+    name: "Rory Stock",
+    givenName: "Rory",
+    familyName: "Stock",
+    gender: "male",
+
+    // image: "", TODO
+    description: "Commercial and sports photographer based in New Zealand.",
+    hasOccupation: {
+      "@type": "Occupation",
+      name: "Photographer",
+    },
+
+    url: "https://roystock.com",
+    sameAs: [
+      "https://www.instagram.com/rorystockphoto",
+      "https://www.linkedin.com/in/rorystock",
+    ],
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        email: "hello@rorystock.com",
+        contactType: "business",
+        availableLanguage: "english",
+      },
+      {
+        "@type": "ContactPoint",
+        email: "rorystock06@gmail.com",
+        contactType: "personal",
+      },
+    ],
+  }),
+]);
+</script>
+
+<style>
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.4s;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  filter: blur(1rem);
+}
+</style>
