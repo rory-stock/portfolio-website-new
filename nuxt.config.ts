@@ -44,7 +44,7 @@ export default defineNuxtConfig({
     blockAiBots: true,
   },
   seo: {
-    redirectToCanonicalSiteUrl: true,
+    // redirectToCanonicalSiteUrl: true, TODO: Enable when using a custom domain
     meta: {
       author: "Rory Stock",
     },
