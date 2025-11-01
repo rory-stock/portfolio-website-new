@@ -1,6 +1,3 @@
-<script setup lang="ts">
-</script>
-
 <template>
   <div class="flex flex-col min-h-screen">
     <AppHeader />
@@ -10,5 +7,3 @@
     <AppFooter />
   </div>
 </template>
-
-<style scoped></style>

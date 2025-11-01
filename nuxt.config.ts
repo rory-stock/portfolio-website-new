@@ -34,6 +34,26 @@ export default defineNuxtConfig({
   },
   // ******************************************* //
 
+  //*********** Image Configuration *********** //
+  image: {
+    provider: 'ipx',
+    domains: ['images.rorystock.com'],
+    alias: {
+      r2: "https://images.rorystock.com",
+    },
+    quality: 80,
+    format: ['webp', 'avif'],
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536,
+    },
+  },
+  // ******************************************* //
+
   // *********** Site Metadata and SEO *********** //
   site: {
     url: "https://rorystock.com",

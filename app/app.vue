@@ -1,26 +1,12 @@
-<template>
-  <div>
-    <NuxtRouteAnnouncer />
-    <NuxtLayout>
-      <NuxtPage />
-    </NuxtLayout>
-  </div>
-</template>
-
 <script setup lang="ts">
 useHead({
-  titleTemplate: (title) => {
-    return title
-      ? "Rory Stock - ${title}"
-      : "Rory Stock - New Zealand Based Photographer";
-  },
-  bodyAttrs: {
-    class: "bg-white",
-  },
-  htmlAttrs: {
-    class: "bg-black",
-  },
-})
+  titleTemplate: (title) =>
+    title
+      ? `Rory Stock - ${title}`
+      : "Rory Stock - New Zealand Based Photographer",
+  bodyAttrs: { class: "bg-white" },
+  htmlAttrs: { class: "bg-black" },
+});
 
 useSchemaOrg([
   definePerson({
@@ -28,15 +14,12 @@ useSchemaOrg([
     givenName: "Rory",
     familyName: "Stock",
     gender: "male",
-
-    // image: "", TODO
     description: "Commercial and sports photographer based in New Zealand.",
     hasOccupation: {
       "@type": "Occupation",
       name: "Photographer",
     },
-
-    url: "https://roystock.com",
+    url: "https://rorystock.com",
     sameAs: [
       "https://www.instagram.com/rorystockphoto",
       "https://www.linkedin.com/in/rorystock",
@@ -57,6 +40,13 @@ useSchemaOrg([
   }),
 ]);
 </script>
+
+<template>
+  <NuxtRouteAnnouncer />
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
+</template>
 
 <style>
 .page-enter-active,

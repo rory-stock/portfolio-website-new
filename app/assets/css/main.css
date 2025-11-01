@@ -7,6 +7,8 @@
     --font-neue-text: neue-haas-grotesk-text, sans-serif;
     /* ************************************************** */
 
+    --color-blue-499: #2068ff;
+
     /*  CUSTOM ANIMATIONS */
     --animate-menu-drop: menu-drop 0.3s ease-in-out;
     --animate-menu-item-fade: menu-item-fade 1.5s ease-in-out;

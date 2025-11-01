@@ -15,7 +15,7 @@ export default defineContentConfig({
       schema: z.object({
         email: z.string().email(),
         location: z.string(),
-        copyright: z.string()
+        copyright: z.string(),
       }),
     }),
     // ************************************** //
