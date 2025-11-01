@@ -8,6 +8,20 @@
 </template>
 
 <script setup lang="ts">
+useHead({
+  titleTemplate: (title) => {
+    return title
+      ? "Rory Stock - ${title}"
+      : "Rory Stock - New Zealand Based Photographer";
+  },
+  bodyAttrs: {
+    class: "bg-white",
+  },
+  htmlAttrs: {
+    class: "bg-black",
+  },
+})
+
 useSchemaOrg([
   definePerson({
     name: "Rory Stock",

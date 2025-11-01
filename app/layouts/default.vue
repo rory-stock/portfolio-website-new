@@ -1,9 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+</script>
 
 <template>
-  <div>
+  <div class="flex flex-col min-h-screen">
     <AppHeader />
-    <main>
+    <main class="flex-1">
       <slot />
     </main>
     <AppFooter />

@@ -19,6 +19,7 @@ export default defineNuxtConfig({
     "nuxt-seo-utils",
   ],
   vite: { plugins: [tailwindcss()] },
+  css: ['./app/assets/css/main.css'],
   app: {
     pageTransition: { name: "page", mode: "out-in" },
   },
@@ -26,18 +27,18 @@ export default defineNuxtConfig({
     preview: {
       api: 'https://api.nuxt.studio'
     },
-    database: {
-      type: 'd1',
-      bindingName: 'portfolio_db_binding'
-    },
+    // database: {
+    //   type: 'd1',
+    //   bindingName: 'portfolio_db_binding'
+    // },
   },
   // ******************************************* //
 
   // *********** Site Metadata and SEO *********** //
   site: {
     url: "https://rorystock.com",
-    // name: "Rory Stock",
-    // description: "Rory Stock is a commercial photographer based in New Zealand",
+    name: "Rory Stock",
+    description: "Rory Stock is a commercial photographer based in New Zealand",
     defaultLocale: "en",
   },
   sitemap: {
