@@ -36,8 +36,8 @@ export default defineNuxtConfig({
   // *********** Site Metadata and SEO *********** //
   site: {
     url: "https://rorystock.com",
-    name: "Rory Stock",
-    description: "Rory Stock is a commercial photographer based in New Zealand",
+    // name: "Rory Stock",
+    // description: "Rory Stock is a commercial photographer based in New Zealand",
     defaultLocale: "en",
   },
   sitemap: {
