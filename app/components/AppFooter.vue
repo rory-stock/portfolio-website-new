@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const footer = await queryCollection("footer").first();
+const { data: footer } = await useAsyncData("footer-data", () =>
+  queryCollection("footer").first()
+);
 </script>
 
 <template>

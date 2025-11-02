@@ -27,10 +27,10 @@ export default defineNuxtConfig({
     preview: {
       api: 'https://api.nuxt.studio'
     },
-    database: {
-      type: 'd1',
-      bindingName: 'portfolio_db_binding'
-    },
+    // database: {
+    //   type: 'd1',
+    //   bindingName: 'portfolio_db_binding',
+    // },
   },
   // ******************************************* //
 
@@ -39,7 +39,7 @@ export default defineNuxtConfig({
     provider: 'ipx',
     domains: ['images.rorystock.com'],
     alias: {
-      r2: "https://images.rorystock.com",
+      r2: "https://images.rorystock.com/rebuild",
     },
     quality: 80,
     format: ['webp', 'avif'],
