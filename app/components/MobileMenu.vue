@@ -15,7 +15,7 @@ const links = [
   <div class="md:hidden">
     <Teleport to="#mobile-menu-teleport">
       <div
-        class="absolute w-full bg-black transition-all duration-500 ease-in-out md:hidden"
+        class="absolute z-50 w-full bg-black transition-all duration-500 ease-in-out md:hidden"
         :class="isOpen ? 'block h-screen' : 'h-0'"
       >
         <!--------------------- MOBILE MENU --------------------->

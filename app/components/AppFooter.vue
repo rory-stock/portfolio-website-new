@@ -18,8 +18,8 @@ const { data: footer } = await useAsyncData("footer-data", () =>
             :to="`mailto:${footer?.email}`"
             target="_blank"
             aria-label="Email link"
-          >
-            <p class="lowercase underline">{{ footer?.email }}</p>
+            class="lowercase underline transition-opacity duration-100 hover:opacity-80"
+            >{{ footer?.email }}
           </NuxtLink>
         </div>
         <!----------------------------------------->
@@ -34,8 +34,9 @@ const { data: footer } = await useAsyncData("footer-data", () =>
             to="https://www.instagram.com/rorystockphoto/"
             target="_blank"
             aria-label="Instagram profile link"
+            class="lowercase underline transition-opacity duration-100 hover:opacity-80"
           >
-            <p class="lowercase underline">@rorystockphoto</p>
+            @rorystockphoto
           </NuxtLink>
         </div>
         <!----------------------------------------->

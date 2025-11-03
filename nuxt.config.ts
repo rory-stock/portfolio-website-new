@@ -18,31 +18,36 @@ export default defineNuxtConfig({
     "nuxt-schema-org",
     "nuxt-seo-utils",
   ],
-  vite: { plugins: [tailwindcss()] },
-  css: ['./app/assets/css/main.css'],
+  vite: {
+    plugins: [tailwindcss()],
+    server: {
+      allowedHosts: ["test.rorystock.com"],
+    },
+  },
+  css: ["./app/assets/css/main.css"],
   app: {
     pageTransition: { name: "page", mode: "out-in" },
   },
   content: {
     preview: {
-      api: 'https://api.nuxt.studio'
+      api: "https://api.nuxt.studio",
     },
     database: {
-      type: 'd1',
-      bindingName: 'portfolio_db_binding',
+      type: "d1",
+      bindingName: "portfolio_db_binding",
     },
   },
   // ******************************************* //
 
   //*********** Image Configuration *********** //
   image: {
-    provider: 'ipx',
-    domains: ['images.rorystock.com'],
-    alias: {
-      r2: "https://images.rorystock.com/rebuild",
+    provider: "cloudflare",
+    cloudflare: {
+      baseURL: "https://images.rorystock.com",
     },
+    domains: ["images.rorystock.com"],
     quality: 80,
-    format: ['webp', 'avif'],
+    format: ["webp", "avif"],
     screens: {
       xs: 320,
       sm: 640,
