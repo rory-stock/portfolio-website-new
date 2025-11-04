@@ -17,7 +17,6 @@ export default defineNuxtConfig({
     "nuxt-schema-org",
     "nuxt-seo-utils",
     "@nuxt/content",
-    "@nuxt/fonts",
   ],
   vite: {
     plugins: [tailwindcss()],
@@ -82,19 +81,6 @@ export default defineNuxtConfig({
   },
   sourcemap: {
     client: "hidden",
-  },
-  // ******************************************* //
-
-  // *********** Fonts Configuration *********** //
-  fonts: {
-    families: [
-      { name: "Geist", provider: "google" },
-    ],
-    defaults: {
-      weights: [400, 500, 700],
-      styles: ["normal"],
-      subsets: ["latin"],
-    },
   },
   // ******************************************* //
 });

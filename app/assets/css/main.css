@@ -8,8 +8,8 @@
   --font-neue-montreal-medium-semi: "Neue Montreal Medium Semi", sans-serif;
   --font-neue-montreal-medium-bold: "Neue Montreal Medium Bold", sans-serif;
 
-  --font-ghost-regular: "Ghost Regular", sans-serif;
-  --font-ghost-italic: "Ghost Italic", sans-serif;
+  --font-ghost-regular: "Ghost Regular", serif;
+  --font-ghost-italic: "Ghost Italic", serif;
   /* ************************************************** */
 
   /************** CUSTOM ANIMATIONS **************/
@@ -39,9 +39,17 @@
 
 /********************************************************/
 @layer base {
+    @font-face {
+        font-family: "Geist";
+        src: url("/fonts/Geist-Medium.woff2") format("woff2");
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+    }
+
   @font-face {
     font-family: "Neue Montreal Medium";
-    src: url("/fonts/OTNeueMontreal-MediumSqueezed.otf") format("opentype");
+    src: url("/fonts/OTNeueMontreal-MediumSqueezed.woff2") format("woff2");
     font-weight: 530;
     font-style: normal;
     font-display: swap;
@@ -49,7 +57,7 @@
 
   @font-face {
     font-family: "Neue Montreal Medium Bold";
-    src: url("/fonts/OTNeueMontreal-SemiBoldSqueezed.otf") format("opentype");
+    src: url("/fonts/OTNeueMontreal-SemiBoldSqueezed.woff2") format("woff2");
     font-weight: 700;
     font-style: normal;
     font-display: swap;
@@ -57,8 +65,8 @@
 
   @font-face {
     font-family: "Neue Montreal Medium Semi";
-    src: url("/fonts/OTNeueMontreal-SemiBoldSemiSqueezed.otf")
-      format("opentype");
+    src: url("/fonts/OTNeueMontreal-SemiBoldSemiSqueezed.woff2")
+      format("woff2");
     font-weight: 530;
     font-style: normal;
     font-display: swap;
@@ -67,14 +75,12 @@
   @font-face {
     font-family: "Ghost Regular";
     src: url("/fonts/TWKGhost-Regular.woff2") format("woff2");
-    font-weight: 400;
     font-style: normal;
   }
 
   @font-face {
     font-family: "Ghost Italic";
     src: url("/fonts/TWKGhost-Italic.woff2") format("woff2");
-    font-weight: 400;
     font-style: italic;
   }
 }
