@@ -19,7 +19,7 @@ defineProps({ error: Object });
         }}
       </h1>
 
-      <p class="text-lg text-black selection:bg-black selection:text-white">
+      <p class="text-lg md:text-xl md:font-medium text-black selection:bg-black selection:text-white">
         {{ error?.message || "An unexpected error occurred" }}
       </p>
 

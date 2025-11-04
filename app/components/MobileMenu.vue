@@ -5,7 +5,7 @@ defineProps({
 const route = useRoute();
 
 const links = [
-  { to: "/", name: "index", label: "Home" },
+  { to: "/", name: "index", label: "Overview" },
   { to: "/journal", name: "journal", label: "Journal" },
   { to: "/info", name: "info", label: "Info" },
 ];
@@ -20,14 +20,14 @@ const links = [
       >
         <!--------------------- MOBILE MENU --------------------->
         <div
-          class="h-full items-center justify-center gap-4 text-3xl font-bold"
+          class="h-full text-white items-center justify-center gap-4 text-3xl"
           :class="isOpen ? 'flex animate-menu-item-fade flex-col' : 'hidden'"
         >
           <NuxtLink
             v-for="link in links"
             :key="link.name"
             :to="link.to"
-            :class="route.name === link.name ? 'text-blue-499' : 'text-white'"
+            :class="route.name === link.name ? 'font-ghost-italic' : 'font-ghost-regular'"
           >
             {{ link.label }}
           </NuxtLink>

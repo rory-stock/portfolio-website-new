@@ -8,7 +8,7 @@ const { data: footer } = await useAsyncData("footer-data", () =>
   <footer class="bg-black">
     <!------------------- PERSONAL/CONTACT INFO ------------------->
     <div
-      class="px-2 pt-5 pb-5 font-neue-text text-xs font-medium text-white selection:bg-white selection:text-black md:px-5 md:text-base"
+      class="px-2 pt-5 pb-5 font-geist text-xs font-medium text-white selection:bg-white selection:text-black md:px-5 md:text-base"
     >
       <div class="flex justify-between">
         <!----------------- EMAIL ----------------->
@@ -50,7 +50,7 @@ const { data: footer } = await useAsyncData("footer-data", () =>
       </div>
 
       <!---------------- Copyright ------------------>
-      <p class="mt-5">{{ footer?.copyright }}</p>
+      <p class="mt-7 font-normal">{{ footer?.copyright }}</p>
       <!--------------------------------------------->
     </div>
   </footer>

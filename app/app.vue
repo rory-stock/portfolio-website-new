@@ -8,6 +8,7 @@ useHead({
   htmlAttrs: { class: "bg-black" },
 });
 
+
 useSchemaOrg([
   definePerson({
     name: "Rory Stock",

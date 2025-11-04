@@ -1,7 +1,5 @@
 <script setup lang="ts">
-useHead({
-  title: "Overview",
-});
+useHead({ title: "Overview" });
 
 const { data: home } = await useAsyncData(() =>
   queryCollection("content").path("/").first()
@@ -9,8 +7,9 @@ const { data: home } = await useAsyncData(() =>
 </script>
 
 <template>
-  <ContentRenderer v-if="home" :value="home" />
-  <div v-else>Home not found</div>
+  <div>
+    Page: Journal
+  </div>
 </template>
 
 <style scoped></style>

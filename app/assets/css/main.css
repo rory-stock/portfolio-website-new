@@ -1,40 +1,81 @@
-@import url("https://use.typekit.net/xco3cyn.css");
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
 @import "tailwindcss";
 
 @theme {
-    /*  CUSTOM FONTS */
-    --font-neue-display: neue-haas-grotesk-display, sans-serif;
-    --font-neue-text: neue-haas-grotesk-text, sans-serif;
+  /************** CUSTOM FONTS **************/
+  --font-geist: Geist, sans-serif;
 
-    --font-geist: Geist, sans-serif;
+  --font-neue-montreal-medium: "Neue Montreal Medium", sans-serif;
+  --font-neue-montreal-medium-semi: "Neue Montreal Medium Semi", sans-serif;
+  --font-neue-montreal-medium-bold: "Neue Montreal Medium Bold", sans-serif;
 
-    --font-georgia: Georgia, serif;
-    /* ************************************************** */
+  --font-ghost-regular: "Ghost Regular", sans-serif;
+  --font-ghost-italic: "Ghost Italic", sans-serif;
+  /* ************************************************** */
 
-    --color-blue-499: #2068ff;
+  /************** CUSTOM ANIMATIONS **************/
+  --animate-menu-drop: menu-drop 0.3s ease-in-out;
+  --animate-menu-item-fade: menu-item-fade 1.5s ease-in-out;
+  /* ************************************************** */
 
-    /*  CUSTOM ANIMATIONS */
-    --animate-menu-drop: menu-drop 0.3s ease-in-out;
-    --animate-menu-item-fade: menu-item-fade 1.5s ease-in-out;
-    /* ************************************************** */
-
-    /*  CUSTOM ANIMATION KEYFRAMES */
-    @keyframes menu-drop {
-        0% {
-            height: 0;
-        }
-        100% {
-            height: 100%;
-        }
+  /************* CUSTOM ANIMATION KEYFRAMES **************/
+  @keyframes menu-drop {
+    0% {
+      height: 0;
     }
-    @keyframes menu-item-fade {
-        0% {
-            opacity: 0;
-        }
-        100% {
-            opacity: 1;
-        }
+    100% {
+      height: 100%;
     }
-    /* ************************************************** */
+  }
+  @keyframes menu-item-fade {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  /* ************************************************** */
 }
+
+/********************************************************/
+@layer base {
+  @font-face {
+    font-family: "Neue Montreal Medium";
+    src: url("/fonts/OTNeueMontreal-MediumSqueezed.otf") format("opentype");
+    font-weight: 530;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Neue Montreal Medium Bold";
+    src: url("/fonts/OTNeueMontreal-SemiBoldSqueezed.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Neue Montreal Medium Semi";
+    src: url("/fonts/OTNeueMontreal-SemiBoldSemiSqueezed.otf")
+      format("opentype");
+    font-weight: 530;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Ghost Regular";
+    src: url("/fonts/TWKGhost-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: "Ghost Italic";
+    src: url("/fonts/TWKGhost-Italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+  }
+}
+/********************************************************/
