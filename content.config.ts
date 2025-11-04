@@ -38,6 +38,7 @@ export default defineContentConfig({
           .string()
           .datetime()
           .default(() => new Date().toISOString()),
+        publishedAt: z.string().datetime().optional(),
       }),
     }),
 
