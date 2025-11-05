@@ -1,6 +1,11 @@
 <script setup lang="ts">
 useHead({ title: "Overview" });
 
+useSeoMeta({
+  ogImage: "https://images.rorystock.com/cdn-cgi/image/w=1200,h=630/meta/overview-og-image.jpg",
+  twitterImage: "https://images.rorystock.com/cdn-cgi/image/w=1200,h=675/meta/overview-twitter-image.jpg",
+})
+
 const { data: home } = await useAsyncData(() =>
   queryCollection("content").path("/").first()
 );
@@ -8,7 +13,7 @@ const { data: home } = await useAsyncData(() =>
 
 <template>
   <div>
-    Page: Journal
+    Page: Overview
   </div>
 </template>
 

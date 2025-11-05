@@ -1,8 +1,13 @@
 <script setup lang="ts">
 useHead({ title: "Info" });
 
+useSeoMeta({
+  ogImage: "https://images.rorystock.com/cdn-cgi/image/w=1200,h=630/meta/info-og-image.jpg",
+  twitterImage: "https://images.rorystock.com/cdn-cgi/image/w=1200,h=675/meta/info-twitter-image.jpg",
+})
+
 const { data: image } = await useAsyncData("profile-image", () =>
-  queryCollection("images").first()
+  queryCollection("profile").first()
 );
 
 const { data: info } = await useAsyncData("contact-info", () =>

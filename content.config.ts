@@ -18,29 +18,32 @@ export default defineContentConfig({
       }),
     }),
 
-    images: defineCollection({
+    profile: defineCollection({
       type: "data",
-      source: "images/*.json",
+      source: "profile/*.json",
       schema: z.object({
         path: z.string(),
         alt: z.string(),
-        type: z.enum(["portfolio", "journal", "profile"]),
-
-        title: z.string().optional(),
-        description: z.string().optional(),
-        category: z.string().optional(),
-        order: z.number().optional(),
-
-        width: z.number().optional(),
-        height: z.number().optional(),
-
-        uploadedAt: z
-          .string()
-          .datetime()
-          .default(() => new Date().toISOString()),
-        publishedAt: z.string().datetime().optional(),
+        width: z.number(),
+        height: z.number(),
       }),
     }),
+
+    // journal: defineCollection({
+    //   type: "data",
+    //   source: "journal/*.json",
+    //   schema: z.object({
+    //     path: z.string(),
+    //     alt: z.string(),
+    //     title: z.string().optional(),
+    //     description: z.string().optional(),
+    //     uploadedAt: z
+    //       .string()
+    //       .datetime()
+    //       .default(() => new Date().toISOString()),
+    //     publishedAt: z.string().datetime().optional(),
+    //   }),
+    // }),
 
     contactInfo: defineCollection({
       type: "data",
