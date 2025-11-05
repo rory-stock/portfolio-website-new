@@ -9,8 +9,8 @@ const links = [
 
 const getLinkClass = (name: string) => {
   return route.name === name
-    ? "font-ghost-italic"
-    : "font-ghost-regular hover:font-ghost-italic";
+    ? "font-ghost-italic italic"
+    : "font-ghost-regular hover:font-ghost-italic hover:italic";
 };
 </script>
 

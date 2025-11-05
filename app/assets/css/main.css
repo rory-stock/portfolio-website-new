@@ -4,7 +4,6 @@
   /************** CUSTOM FONTS **************/
   --font-geist: Geist, sans-serif;
 
-  --font-neue-montreal-medium: "Neue Montreal Medium", sans-serif;
   --font-neue-montreal-medium-semi: "Neue Montreal Medium Semi", sans-serif;
   --font-neue-montreal-medium-bold: "Neue Montreal Medium Bold", sans-serif;
 
@@ -46,14 +45,6 @@
         font-style: normal;
         font-display: swap;
     }
-
-  @font-face {
-    font-family: "Neue Montreal Medium";
-    src: url("/fonts/OTNeueMontreal-MediumSqueezed.woff2") format("woff2");
-    font-weight: 530;
-    font-style: normal;
-    font-display: swap;
-  }
 
   @font-face {
     font-family: "Neue Montreal Medium Bold";

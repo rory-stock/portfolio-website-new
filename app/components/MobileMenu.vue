@@ -27,7 +27,7 @@ const links = [
             v-for="link in links"
             :key="link.name"
             :to="link.to"
-            :class="route.name === link.name ? 'font-ghost-italic' : 'font-ghost-regular'"
+            :class="route.name === link.name ? 'font-ghost-italic italic' : 'font-ghost-regular'"
           >
             {{ link.label }}
           </NuxtLink>
