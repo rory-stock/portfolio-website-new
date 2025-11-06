@@ -20,14 +20,18 @@ const links = [
       >
         <!--------------------- MOBILE MENU --------------------->
         <div
-          class="h-full text-white items-center justify-center gap-4 text-3xl"
+          class="h-full items-center justify-center gap-4 text-3xl text-white"
           :class="isOpen ? 'flex animate-menu-item-fade flex-col' : 'hidden'"
         >
           <NuxtLink
             v-for="link in links"
             :key="link.name"
             :to="link.to"
-            :class="route.name === link.name ? 'font-ghost-italic italic' : 'font-ghost-regular'"
+            :class="
+              route.name === link.name
+                ? 'font-ghost-italic italic'
+                : 'font-ghost'
+            "
           >
             {{ link.label }}
           </NuxtLink>

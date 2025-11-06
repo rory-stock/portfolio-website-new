@@ -10,7 +10,7 @@ const links = [
 const getLinkClass = (name: string) => {
   return route.name === name
     ? "font-ghost-italic italic"
-    : "font-ghost-regular hover:font-ghost-italic hover:italic";
+    : "font-ghost hover:font-ghost-italic hover:italic";
 };
 </script>
 

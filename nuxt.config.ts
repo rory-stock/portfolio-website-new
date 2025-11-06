@@ -17,6 +17,8 @@ export default defineNuxtConfig({
     "nuxt-schema-org",
     "nuxt-seo-utils",
     "@nuxt/content",
+    "nuxt-auth-utils",
+    "@nuxt/fonts",
   ],
   vite: {
     plugins: [tailwindcss()],
@@ -36,6 +38,14 @@ export default defineNuxtConfig({
       type: "d1",
       bindingName: "portfolio_db_binding",
     },
+  },
+  runtimeConfig: {
+    session: {
+      password: process.env.NUXT_SESSION_PASSWORD || "",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    },
+    adminEmail: process.env.ADMIN_EMAIL,
+    adminPasswordHash: process.env.ADMIN_PASSWORD_HASH,
   },
   // ******************************************* //
 
@@ -72,6 +82,7 @@ export default defineNuxtConfig({
   },
   robots: {
     blockAiBots: true,
+    disallow: ["/login"],
   },
   seo: {
     // redirectToCanonicalSiteUrl: true, TODO: Enable when using a custom domain
@@ -83,4 +94,17 @@ export default defineNuxtConfig({
     client: "hidden",
   },
   // ******************************************* //
+
+  // ****************** UI ****************** //
+  fonts: {
+    families: [
+      { name: "Geist", provider: "google" },
+    ],
+    defaults: {
+      weights: [300, 400, 500, 600, 700],
+      styles: ["normal", "italic"],
+      subsets: ["latin"],
+    },
+  },
+  // ************************************* //
 });

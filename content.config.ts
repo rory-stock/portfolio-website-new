@@ -3,11 +3,6 @@ import { z } from "zod";
 
 export default defineContentConfig({
   collections: {
-    content: defineCollection({
-      type: "page",
-      source: "*.md",
-    }),
-
     footer: defineCollection({
       type: "data",
       source: "footer/*.json",

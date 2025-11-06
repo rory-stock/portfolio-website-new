@@ -8,7 +8,6 @@ useHead({
   htmlAttrs: { class: "bg-black" },
 });
 
-
 useSchemaOrg([
   definePerson({
     name: "Rory Stock",
@@ -43,10 +42,10 @@ useSchemaOrg([
 </script>
 
 <template>
-  <NuxtRouteAnnouncer />
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+    <NuxtRouteAnnouncer />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
 </template>
 
 <style>
