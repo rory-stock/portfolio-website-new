@@ -82,7 +82,7 @@ export default defineNuxtConfig({
   },
   robots: {
     blockAiBots: true,
-    disallow: ["/login"],
+    disallow: ["/admin", "/login"],
   },
   seo: {
     // redirectToCanonicalSiteUrl: true, TODO: Enable when using a custom domain
@@ -97,9 +97,7 @@ export default defineNuxtConfig({
 
   // ****************** UI ****************** //
   fonts: {
-    families: [
-      { name: "Geist", provider: "google" },
-    ],
+    families: [{ name: "Geist", provider: "google" }],
     defaults: {
       weights: [300, 400, 500, 600, 700],
       styles: ["normal", "italic"],

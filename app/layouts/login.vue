@@ -1,7 +1,5 @@
 <template>
-  <div class="flex min-h-screen flex-col">
-    <main class="flex-1 bg-neutral-980">
-      <slot />
-    </main>
-  </div>
+  <main class="bg-neutral-980">
+    <slot />
+  </main>
 </template>
