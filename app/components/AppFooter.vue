@@ -52,7 +52,7 @@ const { data: footer } = await useAsyncData("footer-data", () =>
       <!---------------- Copyright ------------------>
       <div class="mt-7 flex justify-between">
         <p>{{ footer?.copyright }}</p>
-        <button @click="navigateTo('/admin', { external: true })" class="cursor-pointer">
+        <button @click="navigateTo('/admin')" class="cursor-pointer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18.41"

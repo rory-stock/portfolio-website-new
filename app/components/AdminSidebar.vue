@@ -28,7 +28,7 @@ async function logout() {
   try {
     await $fetch("/api/logout", { method: "POST" });
     await clear();
-    await navigateTo("/", { external: true });
+    await navigateTo("/");
   } catch {
     alert("Logout failed");
   }
@@ -106,7 +106,7 @@ async function logout() {
       </button>
       <button
         class="mb-2 flex cursor-pointer items-center rounded-lg bg-neutral-100 px-2 py-1 text-[0.95rem] text-neutral-900 transition-opacity select-none hover:opacity-85"
-        @click="navigateTo('/', { external: true })"
+        @click="navigateTo('/')"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

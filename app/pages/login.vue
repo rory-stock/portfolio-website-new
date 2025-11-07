@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { reloadNuxtApp } from "#app";
+
 definePageMeta({
   layout: "login",
 });
@@ -20,7 +22,7 @@ async function login() {
       body: credentials,
     });
 
-    await navigateTo("/admin", { external: true });
+    reloadNuxtApp({ path: "/admin" });
   } catch {
     alert("Login failed");
   }
@@ -30,13 +32,11 @@ async function logout() {
   try {
     await $fetch("/api/logout", { method: "POST" });
     await clear();
-    await navigateTo("/", { external: true });
+    await navigateTo("/");
   } catch {
     alert("Logout failed");
   }
 }
-
-async function reloadNuxtApp(options: { path: string }) {}
 </script>
 
 <template>
@@ -115,7 +115,7 @@ async function reloadNuxtApp(options: { path: string }) {}
           </button>
           <!-- Home navigation button -->
           <button
-            @click="navigateTo('/', { external: true })"
+            @click="navigateTo('/')"
             class="w-full cursor-pointer rounded-lg bg-neutral-100 px-4 py-1.5 text-[0.95rem] text-black transition-opacity duration-200 hover:opacity-85"
           >
             Home

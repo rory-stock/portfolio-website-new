@@ -13,31 +13,33 @@ const links = [
 
 <template>
   <div class="md:hidden">
-    <Teleport to="#mobile-menu-teleport">
-      <div
-        class="absolute z-50 w-full bg-black transition-all duration-500 ease-in-out md:hidden"
-        :class="isOpen ? 'block h-screen' : 'h-0'"
-      >
-        <!--------------------- MOBILE MENU --------------------->
+    <ClientOnly>
+      <Teleport to="#mobile-menu-teleport">
         <div
-          class="h-full items-center justify-center gap-4 text-3xl text-white"
-          :class="isOpen ? 'flex animate-menu-item-fade flex-col' : 'hidden'"
+          class="absolute z-50 w-full bg-black transition-all duration-500 ease-in-out md:hidden"
+          :class="isOpen ? 'block h-screen' : 'h-0'"
         >
-          <NuxtLink
-            v-for="link in links"
-            :key="link.name"
-            :to="link.to"
-            :class="
-              route.name === link.name
-                ? 'font-ghost-italic italic'
-                : 'font-ghost'
-            "
+          <!--------------------- MOBILE MENU --------------------->
+          <div
+            class="h-full items-center justify-center gap-4 text-3xl text-white"
+            :class="isOpen ? 'flex animate-menu-item-fade flex-col' : 'hidden'"
           >
-            {{ link.label }}
-          </NuxtLink>
-          <!------------------------------------------------------->
+            <NuxtLink
+              v-for="link in links"
+              :key="link.name"
+              :to="link.to"
+              :class="
+                route.name === link.name
+                  ? 'font-ghost-italic italic'
+                  : 'font-ghost'
+              "
+            >
+              {{ link.label }}
+            </NuxtLink>
+            <!------------------------------------------------------->
+          </div>
         </div>
-      </div>
-    </Teleport>
+      </Teleport>
+    </ClientOnly>
   </div>
 </template>
