@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const rows = await db
     .select()
     .from(content)
-    .where(eq(content.table, table as string));
+    .where(eq(content.tableName, table as string));
 
   return rows;
 });

@@ -26,6 +26,16 @@ export default defineNuxtConfig({
       allowedHosts: ["test.rorystock.com"],
     },
   },
+  $development: {
+    nitro: {
+      devProxy: {
+        "/api": {
+          target: "http://localhost:8787/api",
+          changeOrigin: true,
+        }
+      }
+    },
+  },
   css: ["./app/assets/css/main.css"],
   app: {
     pageTransition: { name: "page", mode: "out-in" },
