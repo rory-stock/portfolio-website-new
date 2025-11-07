@@ -1,0 +1,10 @@
+name = "portfolio-website"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio_db"
+database_id = "fda1e00d-010a-4195-9ef8-aef64fa55070"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "portfolio-image-storage"
