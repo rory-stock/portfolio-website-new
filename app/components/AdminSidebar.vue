@@ -28,7 +28,7 @@ async function logout() {
   try {
     await $fetch("/api/logout", { method: "POST" });
     await clear();
-    reloadNuxtApp({ path: "/" });
+    await navigateTo("/", { external: true });
   } catch {
     alert("Logout failed");
   }
@@ -106,7 +106,7 @@ async function logout() {
       </button>
       <button
         class="mb-2 flex cursor-pointer items-center rounded-lg bg-neutral-100 px-2 py-1 text-[0.95rem] text-neutral-900 transition-opacity select-none hover:opacity-85"
-        @click="reloadNuxtApp({ path: '/' })"
+        @click="navigateTo('/', { external: true })"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

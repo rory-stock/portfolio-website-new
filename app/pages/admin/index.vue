@@ -1,4 +1,10 @@
 <script setup lang="ts">
+const { fetch: refreshSession } = useUserSession();
+
+onMounted(async () => {
+  await refreshSession();
+})
+
 definePageMeta({
   middleware: ["authenticated"],
   layout: "admin",
