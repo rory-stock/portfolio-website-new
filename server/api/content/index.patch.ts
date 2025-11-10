@@ -31,7 +31,11 @@ export default defineEventHandler(async (event) => {
         .where(and(eq(content.key, key), eq(content.table, table)))
     )
   );
-  console.log('Database binding:', event.context.cloudflare?.env?.DB)
-  console.log('Update params:', { table, updates })
-  return { success: true };
+  return {
+    hasCloudflare: !!event.context.cloudflare,
+    hasEnv: !!event.context.cloudflare?.env,
+    hasDB: !!event.context.cloudflare?.env?.DB,
+    hasR2: !!event.context.cloudflare?.env?.BUCKET,
+    success: true
+  };
 });
