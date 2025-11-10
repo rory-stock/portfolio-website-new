@@ -9,8 +9,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: "Unauthorized" });
   }
 
-  const body = await readBody(event);
-  const id = parseInt(body.id);
+  const idParam = getRouterParam(event, "id");
+  const id = parseInt(idParam || "");
 
   if (!id || isNaN(id)) {
     throw createError({ statusCode: 400, message: "Invalid image ID" });

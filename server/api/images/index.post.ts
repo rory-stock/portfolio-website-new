@@ -1,4 +1,3 @@
-// server/api/images.post.ts
 import { nanoid } from "nanoid";
 import sharp from "sharp";
 
@@ -8,7 +7,6 @@ import { images } from "~~/server/db/schema";
 const ALLOWED_CONTEXTS = ["home", "journal", "info"] as const;
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB
 const TARGET_SIZE = 2 * 1024 * 1024; // 2MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);
