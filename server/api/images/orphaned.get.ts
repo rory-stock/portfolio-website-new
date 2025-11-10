@@ -1,8 +1,6 @@
-import { eq } from "drizzle-orm";
-
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
-import { deleteR2Object } from "~~/server/utils/r2";
+import { listR2Objects } from "~~/server/utils/r2";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);
@@ -10,46 +8,27 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: "Unauthorized" });
   }
 
-  const idParam = getRouterParam(event, "id");
-  const id = parseInt(idParam || "");
-
-  if (!id || isNaN(id)) {
-    throw createError({ statusCode: 400, message: "Invalid image ID" });
-  }
-
   const db = useDB(event);
 
-  // Find the image record
-  const imageRecord = await db
-    .select()
-    .from(images)
-    .where(eq(images.id, id))
-    .limit(1);
+  // Get all R2 files
+  const r2Files = await listR2Objects();
 
-  if (imageRecord.length === 0) {
-    throw createError({ statusCode: 404, message: "Image not found" });
-  }
+  // Get all unique r2_paths from DB
+  const dbRecords = await db
+    .selectDistinct({ r2_path: images.r2_path })
+    .from(images);
 
-  const r2_path = imageRecord[0].r2_path;
+  const dbPaths = new Set(dbRecords.map((r) => r.r2_path));
 
-  // Find all records with the same r2_path
-  const relatedRecords = await db
-    .select()
-    .from(images)
-    .where(eq(images.r2_path, r2_path));
+  // Find R2 files that don't exist in DB
+  const orphaned = r2Files.filter((file) => !dbPaths.has(file.key));
 
-  // Delete the requested DB record
-  await db.delete(images).where(eq(images.id, id));
-
-  // If this was the last/only context, delete from R2
-  if (relatedRecords.length === 1) {
-    try {
-      await deleteR2Object(r2_path);
-    } catch (error) {
-      console.error("R2 Delete Error:", error);
-      // Don't throw - DB record is already deleted
-    }
-  }
-
-  return { success: true, id };
+  return {
+    orphaned: orphaned.map((file) => ({
+      key: file.key,
+      size: file.size,
+      lastModified: file.lastModified,
+    })),
+    total: orphaned.length,
+  };
 });

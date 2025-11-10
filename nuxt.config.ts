@@ -16,7 +16,6 @@ export default defineNuxtConfig({
     "@nuxtjs/sitemap",
     "nuxt-schema-org",
     "nuxt-seo-utils",
-    "@nuxt/content",
     "nuxt-auth-utils",
     "@nuxt/fonts",
   ],
@@ -32,15 +31,6 @@ export default defineNuxtConfig({
   css: ["./app/assets/css/main.css"],
   app: {
     pageTransition: { name: "page", mode: "out-in" },
-  },
-  content: {
-    preview: {
-      api: "https://api.nuxt.studio",
-    },
-    database: {
-      type: "d1",
-      bindingName: "portfolio_db",
-    },
   },
   runtimeConfig: {
     session: {
