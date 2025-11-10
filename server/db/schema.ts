@@ -20,7 +20,6 @@ export const images = sqliteTable("images", {
   height: integer("height").notNull(),
   file_size: integer("file_size").notNull(),
   original_filename: text("original_filename").notNull(),
-  exif_data: text("exif_data"),
   is_primary: integer("is_primary", { mode: "boolean" })
     .notNull()
     .default(true),

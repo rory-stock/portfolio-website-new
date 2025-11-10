@@ -1,0 +1,1 @@
+ALTER TABLE `images` DROP COLUMN `exif_data`;

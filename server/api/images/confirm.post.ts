@@ -1,7 +1,7 @@
-import sharp from "sharp";
+import imageSize from "image-size";
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
-import { getR2Client, getR2Object, deleteR2Object } from "~~/server/utils/r2";
+import { getR2Object, deleteR2Object } from "~~/server/utils/r2";
 
 const ALLOWED_CONTEXTS = ["home", "journal", "info"] as const;
 
@@ -59,59 +59,12 @@ export default defineEventHandler(async (event) => {
     }
     const buffer = Buffer.concat(chunks);
 
-    // Process with Sharp
-    const image = sharp(buffer);
-    const metadata = await image.metadata();
+    const dimensions = imageSize(buffer);
+    const width = dimensions.width || 0;
+    const height = dimensions.height || 0;
+    const fileSize = buffer.length;
 
-    // Extract EXIF data
-    const exifData = metadata.exif
-      ? JSON.stringify({
-          width: metadata.width,
-          height: metadata.height,
-          format: metadata.format,
-          space: metadata.space,
-          density: metadata.density,
-          hasAlpha: metadata.hasAlpha,
-          orientation: metadata.orientation,
-        })
-      : null;
-
-    // Compress to JPEG, strip EXIF, target 2MB
-    const TARGET_SIZE = 2 * 1024 * 1024;
-    let quality = 90;
-    let compressed = await image
-      .rotate() // Auto-rotate based on EXIF
-      .jpeg({ quality, mozjpeg: true })
-      .toBuffer();
-
-    // Iteratively reduce quality if still too large
-    while (compressed.length > TARGET_SIZE && quality > 60) {
-      quality -= 10;
-      compressed = await sharp(buffer)
-        .rotate()
-        .jpeg({ quality, mozjpeg: true })
-        .toBuffer();
-    }
-
-    const finalMetadata = await sharp(compressed).metadata();
-    const width = finalMetadata.width || 0;
-    const height = finalMetadata.height || 0;
-    const fileSize = compressed.length;
-
-    // Upload compressed version back to R2
-    const client = getR2Client();
     const config = useRuntimeConfig();
-    const { PutObjectCommand } = await import("@aws-sdk/client-s3");
-
-    await client.send(
-      new PutObjectCommand({
-        Bucket: config.r2BucketName,
-        Key: r2_path,
-        Body: compressed,
-        ContentType: "image/jpeg",
-      })
-    );
-
     const url = `${config.r2PublicUrl}/${r2_path}`;
     const filename = r2_path.split("/").pop() || "unknown.jpg";
 
@@ -127,7 +80,6 @@ export default defineEventHandler(async (event) => {
         height,
         file_size: fileSize,
         original_filename: filename,
-        exif_data: exifData,
         is_primary: false,
         uploaded_at: new Date(),
       },
@@ -141,7 +93,6 @@ export default defineEventHandler(async (event) => {
         height,
         file_size: fileSize,
         original_filename: filename,
-        exif_data: exifData,
         is_primary: false,
         uploaded_at: new Date(),
       })),
