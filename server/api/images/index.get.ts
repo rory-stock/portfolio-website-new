@@ -1,4 +1,4 @@
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, asc } from "drizzle-orm";
 
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
@@ -6,6 +6,7 @@ import { useDB } from "~~/server/db/client";
 export default defineEventHandler(async (event) => {
   const db = useDB(event);
   const query = getQuery(event);
+  const session = await getUserSession(event);
 
   // Parse query params
   const context = query.context as string | undefined;
@@ -16,11 +17,12 @@ export default defineEventHandler(async (event) => {
         ? false
         : undefined;
   const r2Path = query.r2_path as string | undefined;
-  const limit = Math.min(Number(query.limit) || 50, 200);
-  const offset = Number(query.offset) || 0;
 
   // Build where conditions
   const conditions = [];
+  if (!session?.user) {
+    conditions.push(eq(images.is_public, true));
+  }
   if (context) {
     conditions.push(eq(images.context, context));
   }
@@ -39,9 +41,7 @@ export default defineEventHandler(async (event) => {
       .select()
       .from(images)
       .where(whereClause)
-      .orderBy(desc(images.uploaded_at))
-      .limit(limit)
-      .offset(offset),
+      .orderBy(asc(images.order), desc(images.uploaded_at)),
     db
       .select({ count: sql<number>`count(*)` })
       .from(images)
@@ -51,7 +51,5 @@ export default defineEventHandler(async (event) => {
   return {
     images: imageResults,
     total: Number(countResult[0].count),
-    limit,
-    offset,
   };
 });

@@ -24,5 +24,9 @@ export const images = sqliteTable("images", {
   is_primary: integer("is_primary", { mode: "boolean" })
     .notNull()
     .default(true),
+  is_public: integer("is_public", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  order: integer("order"),
   uploaded_at: integer("uploaded_at", { mode: "timestamp" }).notNull(),
 });

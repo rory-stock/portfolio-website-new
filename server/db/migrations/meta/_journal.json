@@ -15,6 +15,20 @@
       "when": 1762745739170,
       "tag": "0001_furry_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1762760387079,
+      "tag": "0002_ambiguous_fantastic_four",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1762763343722,
+      "tag": "0003_cynical_sue_storm",
+      "breakpoints": true
     }
   ]
 }

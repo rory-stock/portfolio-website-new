@@ -16,12 +16,14 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   // Validate body
-  const { alt, is_primary, add_contexts, remove_contexts } = body as {
-    alt?: string;
-    is_primary?: boolean;
-    add_contexts?: string[];
-    remove_contexts?: string[];
-  };
+  const { alt, is_primary, is_public, add_contexts, remove_contexts } =
+    body as {
+      alt?: string;
+      is_primary?: boolean;
+      is_public?: boolean;
+      add_contexts?: string[];
+      remove_contexts?: string[];
+    };
 
   // Validation
   if (add_contexts && remove_contexts) {
@@ -79,6 +81,11 @@ export default defineEventHandler(async (event) => {
 
     // Set this image's primary status
     await db.update(images).set({ is_primary }).where(eq(images.id, id));
+  }
+
+  // Handle is_public toggle
+  if (is_public !== undefined) {
+    await db.update(images).set({ is_public }).where(eq(images.id, id));
   }
 
   // Handle remove_contexts
