@@ -4,6 +4,7 @@
 .nuxt
 .nitro
 .cache
+.wrangler
 dist
 
 # Node dependencies
@@ -20,5 +21,6 @@ logs
 
 # Local env files
 .env
+wrangler.toml
 .env.*
 !.env.example
