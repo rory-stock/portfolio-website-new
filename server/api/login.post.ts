@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
         isAdmin: true,
       },
     });
-    return {};
+    return { success: true };
   }
 
   throw createError({

@@ -1,6 +1,6 @@
 CREATE TABLE `content` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`tableName` text NOT NULL,
+	`table` text NOT NULL,
 	`key` text NOT NULL,
 	`value` text NOT NULL,
 	`updated_at` integer

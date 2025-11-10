@@ -2,7 +2,7 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const content = sqliteTable("content", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  tableName: text("table").notNull(), // 'info', 'journal', 'overview'
+  table: text("table").notNull(), // 'info', 'journal', 'overview'
   key: text("key").notNull(), // 'contactHeader', 'bio', etc
   value: text("value").notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
@@ -12,13 +12,17 @@ export const content = sqliteTable("content", {
 
 export const images = sqliteTable("images", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  context: text("context").notNull(), // 'profile', 'journal', 'overview'
-  r2Path: text("r2_path").notNull(),
+  context: text("context").notNull(),
+  r2_path: text("r2_path").notNull(),
   url: text("url").notNull(),
-  alt: text("alt").notNull(),
-  width: integer("width"),
-  height: integer("height"),
-  uploadedAt: integer("uploaded_at", { mode: "timestamp" }).$defaultFn(
-    () => new Date()
-  ),
+  alt: text("alt").default(""),
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
+  file_size: integer("file_size").notNull(),
+  original_filename: text("original_filename").notNull(),
+  exif_data: text("exif_data"),
+  is_primary: integer("is_primary", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  uploaded_at: integer("uploaded_at", { mode: "timestamp" }).notNull(),
 });

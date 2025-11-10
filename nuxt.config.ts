@@ -26,15 +26,8 @@ export default defineNuxtConfig({
       allowedHosts: ["test.rorystock.com"],
     },
   },
-  $development: {
-    nitro: {
-      devProxy: {
-        "/api": {
-          target: "http://localhost:8787/api",
-          changeOrigin: true,
-        }
-      }
-    },
+  nitro: {
+    preset: "cloudflare-pages",
   },
   css: ["./app/assets/css/main.css"],
   app: {
@@ -46,7 +39,7 @@ export default defineNuxtConfig({
     },
     database: {
       type: "d1",
-      bindingName: "portfolio_db_binding",
+      bindingName: "portfolio_db",
     },
   },
   runtimeConfig: {

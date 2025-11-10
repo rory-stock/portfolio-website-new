@@ -19,16 +19,20 @@
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.4.1",
     "drizzle-orm": "^0.44.7",
+    "nanoid": "^5.1.6",
     "nuxt": "^4.2.0",
     "nuxt-auth-utils": "^0.5.25",
     "nuxt-schema-org": "^5.0.9",
     "nuxt-seo-utils": "^7.0.18",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.1.16",
     "vue": "^3.5.22",
-    "vue-router": "^4.6.3"
+    "vue-router": "^4.6.3",
+    "wrangler": "^4.46.0"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
+    "@types/sharp": "^0.31.1",
     "drizzle-kit": "^0.31.6",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",

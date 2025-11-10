@@ -1,26 +1,36 @@
-import { eq, and } from 'drizzle-orm'
-import { content } from '~~/server/db/schema'
+import { eq, and } from "drizzle-orm";
+import { content } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 
-const ALLOWED_TABLES = ['info', 'journal', 'overview'] as const
+const ALLOWED_TABLES = ["info", "journal", "overview"] as const;
 
 export default defineEventHandler(async (event) => {
-  const { loggedIn } = await getUserSession(event)
-  if (!loggedIn) {
-    throw createError({ statusCode: 401, message: 'Unauthorized' })
+  const session = await getUserSession(event);
+  if (!session.user) {
+    throw createError({ statusCode: 401, message: "Unauthorized" });
   }
 
-  const { table, id, value } = await readBody(event)
+  const { table, updates } = await readBody(event);
 
   if (!table || !ALLOWED_TABLES.includes(table as any)) {
-    throw createError({ statusCode: 400, message: 'Invalid table' })
+    throw createError({ statusCode: 400, message: "Invalid table" });
   }
 
-  const db = useDB(event)
-  await db
-    .update(content)
-    .set({ value, updatedAt: new Date() })
-    .where(and(eq(content.id, id), eq(content.tableName, table)))
+  if (!Array.isArray(updates) || updates.length === 0) {
+    throw createError({ statusCode: 400, message: "Updates array required" });
+  }
 
-  return { success: true }
-})
+  const db = useDB(event);
+
+  // Update each key-value pair
+  await Promise.all(
+    updates.map(({ key, value }) =>
+      db
+        .update(content)
+        .set({ value, updatedAt: new Date() })
+        .where(and(eq(content.key, key), eq(content.table, table)))
+    )
+  );
+
+  return { success: true };
+});
