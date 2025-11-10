@@ -22,16 +22,32 @@ export default defineEventHandler(async (event) => {
 
   const db = useDB(event);
 
-  // Update each key-value pair
+  // Upsert: update if exists, insert if not
   await Promise.all(
-    updates.map(({ key, value }) =>
-      db
-        .update(content)
-        .set({ value, updatedAt: new Date() })
+    updates.map(async ({ key, value }) => {
+      const existing = await db
+        .select()
+        .from(content)
         .where(and(eq(content.key, key), eq(content.table, table)))
-    )
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Update existing
+        await db
+          .update(content)
+          .set({ value, updatedAt: new Date() })
+          .where(and(eq(content.key, key), eq(content.table, table)));
+      } else {
+        // Insert new
+        await db.insert(content).values({
+          table,
+          key,
+          value,
+          updatedAt: new Date(),
+        });
+      }
+    })
   );
-  return {
-    success: true
-  };
+
+  return { success: true };
 });
