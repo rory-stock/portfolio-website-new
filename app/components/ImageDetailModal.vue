@@ -25,10 +25,11 @@
         <div class="space-y-6 p-6">
           <!-- Image preview -->
           <div class="flex justify-center rounded bg-neutral-950 p-4">
-            <img
-              :src="image.url"
+            <NuxtPicture
+              :src="`${image.r2_path}`"
               :alt="image.alt"
-              class="max-h-96 max-w-full object-contain"
+              format="webp"
+              class="max-h-1/12 object-contain"
             />
           </div>
 
@@ -90,7 +91,7 @@
                 role="switch"
                 :aria-checked="formData.is_public"
                 @click="formData.is_public = !formData.is_public"
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                class="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors"
                 :class="formData.is_public ? 'bg-blue-600' : 'bg-neutral-700'"
               >
                 <span
@@ -107,7 +108,7 @@
               <button
                 type="submit"
                 :disabled="!hasChanges || saving"
-                class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {{ saving ? "Saving..." : "Save Changes" }}
               </button>
@@ -115,7 +116,7 @@
                 type="button"
                 @click="handleDiscard"
                 :disabled="!hasChanges || saving"
-                class="rounded border border-neutral-700 px-4 py-2 text-neutral-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+                class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-neutral-200 hover:bg-neutral-800 disabled:opacity-50"
               >
                 Discard Changes
               </button>
@@ -123,7 +124,7 @@
                 type="button"
                 @click="handleDelete"
                 :disabled="deleting"
-                class="ml-auto rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                class="ml-auto cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
               >
                 {{ deleting ? "Deleting..." : "Delete Image" }}
               </button>
@@ -138,6 +139,7 @@
 <script setup lang="ts">
 interface Image {
   id: number;
+  r2_path: string;
   url: string;
   alt: string;
   width: number;

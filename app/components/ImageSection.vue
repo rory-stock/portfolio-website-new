@@ -47,7 +47,7 @@
           type="button"
           @click="handleSaveOrder"
           :disabled="!orderChanged || saving"
-          class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {{ saving ? "Saving Order..." : "Save Order" }}
         </button>
@@ -55,7 +55,7 @@
           type="button"
           @click="handleDiscardOrder"
           :disabled="!orderChanged || saving"
-          class="rounded border border-neutral-700 px-4 py-2 text-neutral-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+          class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-neutral-200 hover:bg-neutral-800 disabled:opacity-50"
         >
           Discard Order Changes
         </button>
@@ -209,7 +209,7 @@ const handleTogglePrimary = async (image: Image) => {
     });
 
     success("Primary status updated");
-    fetchImages();
+    await fetchImages();
   } catch (e: any) {
     showError(e.message || "Failed to update primary status");
   }

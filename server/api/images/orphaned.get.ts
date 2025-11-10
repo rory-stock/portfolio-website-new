@@ -1,43 +1,55 @@
-import { images } from "~~/server/db/schema";
+import { eq } from "drizzle-orm";
+
 import { useDB } from "~~/server/db/client";
+import { images } from "~~/server/db/schema";
+import { deleteR2Object } from "~~/server/utils/r2";
 
 export default defineEventHandler(async (event) => {
-  const { user } = await requireUserSession(event);
-  if (!user) {
+  const session = await getUserSession(event);
+  if (!session.user) {
     throw createError({ statusCode: 401, message: "Unauthorized" });
   }
 
-  const db = useDB(event);
-  const r2 = event.context.cloudflare?.env?.IMAGES;
+  const idParam = getRouterParam(event, "id");
+  const id = parseInt(idParam || "");
 
-  if (!r2) {
-    throw createError({
-      statusCode: 500,
-      message: "R2 binding not found",
-    });
+  if (!id || isNaN(id)) {
+    throw createError({ statusCode: 400, message: "Invalid image ID" });
   }
 
-  // Get all r2_paths from DB
-  const dbImages = await db.select({ r2_path: images.r2_path }).from(images);
+  const db = useDB(event);
 
-  const dbPaths = new Set(dbImages.map((img) => img.r2_path));
+  // Find the image record
+  const imageRecord = await db
+    .select()
+    .from(images)
+    .where(eq(images.id, id))
+    .limit(1);
 
-  // List all R2 objects
-  const contexts = ["home", "journal", "info"];
-  const orphaned: string[] = [];
+  if (imageRecord.length === 0) {
+    throw createError({ statusCode: 404, message: "Image not found" });
+  }
 
-  for (const context of contexts) {
-    const listed = await r2.list({ prefix: `${context}/` });
+  const r2_path = imageRecord[0].r2_path;
 
-    for (const object of listed.objects) {
-      if (!dbPaths.has(object.key)) {
-        orphaned.push(object.key);
-      }
+  // Find all records with the same r2_path
+  const relatedRecords = await db
+    .select()
+    .from(images)
+    .where(eq(images.r2_path, r2_path));
+
+  // Delete the requested DB record
+  await db.delete(images).where(eq(images.id, id));
+
+  // If this was the last/only context, delete from R2
+  if (relatedRecords.length === 1) {
+    try {
+      await deleteR2Object(r2_path);
+    } catch (error) {
+      console.error("R2 Delete Error:", error);
+      // Don't throw - DB record is already deleted
     }
   }
 
-  return {
-    orphaned,
-    count: orphaned.length,
-  };
+  return { success: true, id };
 });

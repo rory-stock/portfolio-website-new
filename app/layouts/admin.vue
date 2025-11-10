@@ -2,7 +2,7 @@
   <main class="flex h-screen gap-4 bg-neutral-900">
     <AdminSidebar />
     <div
-      class="my-2 mr-2 w-full rounded-2xl border-neutral-900 bg-neutral-980 p-4"
+      class="my-2 mr-2 w-full rounded-2xl overflow-scroll no-scrollbar border-neutral-900 bg-neutral-980 p-4"
     >
       <slot />
     </div>

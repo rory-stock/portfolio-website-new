@@ -32,7 +32,7 @@
         <button
           type="submit"
           :disabled="!hasChanges || saving"
-          class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {{ saving ? "Saving..." : "Save Changes" }}
         </button>
@@ -40,7 +40,7 @@
           type="button"
           @click="handleDiscard"
           :disabled="!hasChanges || saving"
-          class="rounded border border-neutral-700 px-4 py-2 text-neutral-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+          class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-neutral-200 hover:bg-neutral-800 disabled:opacity-50"
         >
           Discard Changes
         </button>

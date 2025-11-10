@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
+import { deleteR2Object } from "~~/server/utils/r2";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);
@@ -43,8 +44,7 @@ export default defineEventHandler(async (event) => {
   // If this was the last/only context, delete from R2
   if (relatedRecords.length === 1) {
     try {
-      const { IMAGES } = event.context.cloudflare.env;
-      await IMAGES.delete(r2_path);
+      await deleteR2Object(r2_path);
     } catch (error) {
       console.error("R2 Delete Error:", error);
       // Don't throw - DB record is already deleted

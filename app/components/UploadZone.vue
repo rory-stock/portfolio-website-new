@@ -16,7 +16,7 @@
       <button
         type="button"
         @click="fileInput?.click()"
-        class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
       >
         Select Files
       </button>
@@ -119,20 +119,36 @@ const handleFileSelect = async (event: Event) => {
 };
 
 const uploadFile = async (file: File) => {
-  const formData = new FormData();
-  formData.append("files", file); // Server expects "files" field
-  formData.append("context", props.context);
-
-  const response = await fetch("/api/images", {
+  // Step 1: Get presigned URL
+  const { uploadUrl, r2_path } = await $fetch("/api/images/upload-url", {
     method: "POST",
-    body: formData,
+    body: {
+      filename: file.name,
+      context: props.context,
+    },
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Upload failed");
+  // Step 2: Upload directly to R2 using presigned URL
+  const uploadResponse = await fetch(uploadUrl, {
+    method: "PUT",
+    body: file,
+    headers: {
+      "Content-Type": file.type || "image/jpeg",
+    },
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Upload failed: ${uploadResponse.statusText}`);
   }
 
-  return response.json();
+  // Step 3: Confirm upload and process image
+  await $fetch("/api/images/confirm", {
+    method: "POST",
+    body: {
+      r2_path,
+      context: props.context,
+      alt: "",
+    },
+  });
 };
 </script>

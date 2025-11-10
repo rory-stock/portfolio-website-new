@@ -1,19 +1,20 @@
 <template>
   <div
-    class="group relative cursor-pointer overflow-hidden rounded border border-neutral-700 bg-neutral-800"
+    class="group relative w-full cursor-pointer overflow-hidden rounded border border-neutral-700 bg-neutral-800"
     :class="{ 'ring-2 ring-blue-500': image.is_primary }"
     @click="$emit('click')"
   >
-    <img
-      :src="image.url"
+    <NuxtPicture
+      :src="`${image.r2_path}`"
       :alt="image.alt || 'Image'"
-      class="h-48 w-full object-cover"
+      class="h-1/12 w-full object-cover"
+      format="webp"
       loading="lazy"
     />
 
     <!-- Primary indicator (clickable, shows on hover) -->
     <button
-      class="absolute top-2 right-2 rounded p-1.5 shadow-lg transition-opacity"
+      class="absolute top-2 right-2 cursor-pointer rounded p-1.5 shadow-lg transition-opacity"
       :class="
         image.is_primary
           ? 'bg-blue-600 text-white opacity-100 hover:bg-blue-700'
@@ -59,6 +60,7 @@
 <script setup lang="ts">
 interface Image {
   id: number;
+  r2_path: string;
   url: string;
   alt: string;
   is_primary: boolean;

@@ -1,10 +1,11 @@
 <template>
-  <div class="mx-auto max-w-6xl space-y-8 p-6">
-    <h1 class="text-3xl font-bold">Info Page Admin</h1>
-    <ContentSection table="info" title="Content" :fields="contentFields" />
-
-    <ImageSection context="info" title="Images" />
-
+  <div class="mx-auto mt-6 max-w-6xl space-y-8  p-6">
+    <h1 class="text-3xl font-bold text-white">Info Page Admin</h1>
+    <div>
+      <ContentSection table="info" title="Content" :fields="contentFields" />
+      <hr class="my-4" />
+      <ImageSection context="info" title="Images" />
+    </div>
     <Toast />
   </div>
 </template>
