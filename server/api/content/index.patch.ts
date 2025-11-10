@@ -32,10 +32,6 @@ export default defineEventHandler(async (event) => {
     )
   );
   return {
-    hasCloudflare: !!event.context.cloudflare,
-    hasEnv: !!event.context.cloudflare?.env,
-    hasDB: !!event.context.cloudflare?.env?.DB,
-    hasR2: !!event.context.cloudflare?.env?.BUCKET,
     success: true
   };
 });
