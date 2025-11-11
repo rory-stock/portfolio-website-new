@@ -14,22 +14,24 @@
 
     <div v-else>
       <!-- Gallery Grid -->
-      <div
-        ref="sortableContainer"
+      <draggable
+        v-model="displayOrder"
+        item-key="id"
+        :animation="200"
+        ghost-class="opacity-50"
+        drag-class="cursor-grabbing"
         class="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
       >
-        <div
-          v-for="image in displayOrder"
-          :key="image.id"
-          class="sortable-item cursor-move"
-        >
-          <ImageThumbnail
-            :image="image"
-            @click="openModal(image)"
-            @toggle-primary="handleTogglePrimary(image)"
-          />
-        </div>
-      </div>
+        <template #item="{ element }">
+          <div class="sortable-item">
+            <ImageThumbnail
+              :image="element"
+              @click="openModal(element)"
+              @toggle-primary="handleTogglePrimary(element)"
+            />
+          </div>
+        </template>
+      </draggable>
 
       <p
         v-if="displayOrder.length === 0"
@@ -74,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSortable } from "@vueuse/integrations/useSortable";
+import draggable from "vuedraggable";
 
 interface Image {
   id: number;
@@ -109,17 +111,8 @@ const images = ref<Image[]>([]);
 const originalOrder = ref<number[]>([]);
 const displayOrder = ref<Image[]>([]);
 
-const sortableContainer = ref<HTMLElement | null>(null);
 const modalOpen = ref(false);
 const selectedImage = ref<Image | null>(null);
-
-// Initialize useSortable
-useSortable(sortableContainer, displayOrder, {
-  animation: 150,
-  ghostClass: "opacity-50",
-  handle: ".sortable-item",
-  forceFallback: true,
-});
 
 const currentOrder = computed(() => displayOrder.value.map((img) => img.id));
 
@@ -223,5 +216,9 @@ onMounted(() => {
 <style scoped>
 .sortable-item {
   cursor: move;
+}
+
+.sortable-item:active {
+  cursor: grabbing;
 }
 </style>
