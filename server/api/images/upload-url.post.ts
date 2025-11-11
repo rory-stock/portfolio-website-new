@@ -1,4 +1,3 @@
-// server/api/images/upload-url.post.ts
 import { generatePresignedUploadUrl } from "~~/server/utils/r2";
 
 console.log('Upload URL endpoint hit - using crypto hash');
