@@ -1,6 +1,8 @@
 // server/api/images/upload-url.post.ts
 import { generatePresignedUploadUrl } from "~~/server/utils/r2";
 
+console.log('Upload URL endpoint hit - using crypto hash');
+
 const ALLOWED_CONTEXTS = ["home", "journal", "info"] as const;
 
 function generateHash(length: number = 6): string {
