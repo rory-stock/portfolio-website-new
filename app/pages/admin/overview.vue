@@ -1,6 +1,6 @@
 <template>
-  <div class="mx-auto mt-6 max-w-6xl space-y-8 p-6">
-    <h1 class="text-3xl font-bold text-white">Overview Page Admin</h1>
+  <div class="mx-auto max-w-6xl space-y-4 md:space-y-8 p-6 md:mt-6">
+    <h1 class="text-2xl font-bold text-white md:text-3xl">Overview Page Admin</h1>
     <div>
 <!--      <ContentSection table="journal" title="Journal" :fields="contentFields" />-->
 <!--      <hr class="my-4" />-->

@@ -1,6 +1,6 @@
 <template>
-  <div class="mx-auto mt-6 max-w-6xl space-y-8  p-6">
-    <h1 class="text-3xl font-bold text-white">Footer Admin</h1>
+  <div class="mx-auto max-w-6xl space-y-4 md:space-y-8 p-6 md:mt-6">
+    <h1 class="text-2xl font-bold text-white md:text-3xl">Footer Admin</h1>
     <div>
       <ContentSection table="footer" title="Footer" :fields="contentFields" />
     </div>

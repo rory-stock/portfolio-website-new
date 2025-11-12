@@ -1,6 +1,8 @@
 <template>
   <div class="rounded border border-neutral-800 bg-neutral-900 p-6">
-    <h2 class="mb-6 text-2xl font-bold text-neutral-100">{{ title }}</h2>
+    <h2 class="mb-6 text-xl font-bold text-neutral-100 md:text-2xl">
+      {{ title }}
+    </h2>
 
     <!-- Upload Zone -->
     <UploadZone
@@ -23,7 +25,7 @@
         class="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
       >
         <template #item="{ element }">
-          <div class="sortable-item">
+          <div class="sortable-item mt-auto mb-auto">
             <ImageThumbnail
               :image="element"
               @click="openModal(element)"
@@ -49,7 +51,7 @@
           type="button"
           @click="handleSaveOrder"
           :disabled="!orderChanged || saving"
-          class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          class="cursor-pointer rounded bg-blue-600 px-2 py-2 text-[0.92rem] text-white hover:bg-blue-700 disabled:opacity-50 md:px-4 md:text-base"
         >
           {{ saving ? "Saving Order..." : "Save Order" }}
         </button>
@@ -57,7 +59,7 @@
           type="button"
           @click="handleDiscardOrder"
           :disabled="!orderChanged || saving"
-          class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-neutral-200 hover:bg-neutral-800 disabled:opacity-50"
+          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 hover:bg-neutral-800 disabled:opacity-50 md:px-4 md:text-base"
         >
           Discard Order Changes
         </button>

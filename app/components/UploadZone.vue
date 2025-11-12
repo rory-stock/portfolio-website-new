@@ -12,17 +12,19 @@
     />
 
     <div v-if="!uploading">
-      <p class="mb-4 text-neutral-300">Drop images here or click to browse</p>
+      <p class="mb-4 text-[0.92rem] text-neutral-300 md:text-base">
+        Drop images here or click to browse
+      </p>
       <button
         type="button"
         @click="fileInput?.click()"
-        class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+        class="cursor-pointer rounded bg-blue-600 px-2 py-2 text-[0.92rem] text-white hover:bg-blue-700 disabled:opacity-50 md:px-4 md:text-base"
       >
         Select Files
       </button>
     </div>
 
-    <div v-else class="text-neutral-300">
+    <div v-else class="text-[0.92rem] text-neutral-300 md:text-base">
       <p class="mb-2">Uploading {{ currentFile }} of {{ totalFiles }}...</p>
       <div class="h-2 w-full rounded-full bg-neutral-800">
         <div

@@ -1,13 +1,18 @@
 <template>
   <div class="rounded border border-neutral-800 bg-neutral-900 p-6">
-    <h2 class="mb-6 text-2xl font-bold text-neutral-100">{{ title }}</h2>
+    <h2 class="mb-3 text-xl font-bold text-neutral-100 md:mb-6 md:text-2xl">
+      {{ title }}
+    </h2>
 
     <div v-if="loading" class="text-neutral-400">Loading...</div>
     <div v-else-if="error" class="text-red-400">{{ error }}</div>
 
     <form v-else @submit.prevent="handleSave" class="space-y-4">
       <div v-for="field in fields" :key="field.key" class="space-y-1">
-        <label :for="field.key" class="block font-medium text-neutral-200">
+        <label
+          :for="field.key"
+          class="block text-[0.92rem] font-medium text-neutral-200 md:text-base"
+        >
           {{ field.label }}
         </label>
 
@@ -16,7 +21,7 @@
           :id="field.key"
           v-model="formData[field.key]"
           :rows="field.rows || 5"
-          class="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+          class="w-full rounded border border-neutral-700 bg-neutral-800 px-2 md:px-3 py-2 text-[0.92rem] text-neutral-100 md:text-base"
         />
 
         <input
@@ -24,7 +29,7 @@
           :id="field.key"
           :type="field.type || 'text'"
           v-model="formData[field.key]"
-          class="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+          class="w-full rounded border border-neutral-700 bg-neutral-800 px-2 md:px-3 py-2 text-[0.92rem] text-neutral-100 md:text-base"
         />
       </div>
 
@@ -32,7 +37,7 @@
         <button
           type="submit"
           :disabled="!hasChanges || saving"
-          class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          class="cursor-pointer rounded bg-blue-600 px-2 py-2 text-[0.92rem] text-white hover:bg-blue-700 disabled:opacity-50 md:px-4 md:text-base"
         >
           {{ saving ? "Saving..." : "Save Changes" }}
         </button>
@@ -40,7 +45,7 @@
           type="button"
           @click="handleDiscard"
           :disabled="!hasChanges || saving"
-          class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-neutral-200 hover:bg-neutral-800 disabled:opacity-50"
+          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 hover:bg-neutral-800 disabled:opacity-50 md:px-4 md:text-base"
         >
           Discard Changes
         </button>
