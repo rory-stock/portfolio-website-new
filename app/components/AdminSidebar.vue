@@ -39,6 +39,7 @@ const navItems: Array<{ label: string; path: string; icon: IconName }> = [
 ];
 
 const { loggedIn, clear } = useUserSession();
+const showCleanupModal = ref(false);
 
 async function logout() {
   try {
@@ -52,6 +53,14 @@ async function logout() {
 
 function handleNavClick() {
   // Close sidebar on mobile when navigation item is clicked
+  if (window.innerWidth < 768) {
+    emit("close");
+  }
+}
+
+function openCleanupModal() {
+  showCleanupModal.value = true;
+  // Close sidebar on mobile when cleanup is opened
   if (window.innerWidth < 768) {
     emit("close");
   }
@@ -91,18 +100,27 @@ function handleNavClick() {
           <Icon name="settings" size="23" class="mr-1.5" />
           <p class="mb-0.5">rorystock.com</p>
         </div>
-        <nav class="flex flex-col gap-2">
-          <NuxtLink
-            v-for="item in navItems"
-            :key="item.label"
-            :to="item.path"
-            @click="handleNavClick"
+        <div class="flex flex-col gap-8" :class="{ hidden: !loggedIn }">
+          <nav class="flex flex-col gap-2">
+            <NuxtLink
+              v-for="item in navItems"
+              :key="item.label"
+              :to="item.path"
+              @click="handleNavClick"
+              class="flex w-10/12 cursor-pointer items-center gap-2 rounded-lg bg-neutral-100 px-2 py-1 text-[0.95rem] text-neutral-900 transition-opacity select-none hover:opacity-85 md:w-64"
+            >
+              <Icon :name="item.icon" :size="15" />
+              {{ item.label }}
+            </NuxtLink>
+          </nav>
+          <button
+            @click="openCleanupModal"
             class="flex w-10/12 cursor-pointer items-center gap-2 rounded-lg bg-neutral-100 px-2 py-1 text-[0.95rem] text-neutral-900 transition-opacity select-none hover:opacity-85 md:w-64"
           >
-            <Icon :name="item.icon" :size="15" />
-            {{ item.label }}
-          </NuxtLink>
-        </nav>
+            <Icon name="cleanup" size="19" />
+            Cleanup
+          </button>
+        </div>
       </div>
       <div class="flex flex-col gap-2">
         <button
@@ -122,5 +140,8 @@ function handleNavClick() {
         </button>
       </div>
     </div>
+
+    <!-- Cleanup Modal -->
+    <OrphanedFilesModal v-model="showCleanupModal" />
   </div>
 </template>

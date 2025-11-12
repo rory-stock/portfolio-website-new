@@ -8,6 +8,7 @@
     <g
       v-if="iconData[name].paths"
       :fill="iconData[name].fill"
+      :fill-rule="iconData[name].fillRule"
       :stroke="iconData[name].stroke"
       :stroke-linecap="iconData[name].strokeLinecap"
       :stroke-linejoin="iconData[name].strokeLinejoin"
