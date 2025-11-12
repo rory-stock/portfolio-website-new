@@ -23,6 +23,11 @@ const navItems: Array<{ label: string; path: string; icon: IconName }> = [
     path: "/admin/info",
     icon: "info",
   },
+  {
+    label: "Footer",
+    path: "/admin/footer",
+    icon: "footer",
+  },
 ];
 
 const { loggedIn, clear } = useUserSession();

@@ -25,6 +25,11 @@ const contentFields = [
     type: "text" as const,
   },
   {
+    key: "contactCta",
+    label: "Contact CTA",
+    type: "text" as const,
+  },
+  {
     key: "bio",
     label: "Bio",
     type: "textarea" as const,
@@ -35,6 +40,5 @@ const contentFields = [
     label: "Email",
     type: "email" as const,
   },
-  // Add more fields as needed for your info table
 ];
 </script>

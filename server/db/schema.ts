@@ -2,7 +2,7 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const content = sqliteTable("content", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  table: text("table").notNull(), // 'info', 'journal', 'overview'
+  table: text("table").notNull(), // 'info', 'journal', 'overview', etc
   key: text("key").notNull(), // 'contactHeader', 'bio', etc
   value: text("value").notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(

@@ -1,8 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { content } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
-
-const ALLOWED_TABLES = ["info", "journal", "overview"] as const;
+import { VALID_CONTEXTS, isValidContext } from "~~/server/utils/context";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);
@@ -12,8 +11,11 @@ export default defineEventHandler(async (event) => {
 
   const { table, updates } = await readBody(event);
 
-  if (!table || !ALLOWED_TABLES.includes(table as any)) {
-    throw createError({ statusCode: 400, message: "Invalid table" });
+  if (!table || !isValidContext(table)) {
+    throw createError({
+      statusCode: 400,
+      message: `Invalid table. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
+    });
   }
 
   if (!Array.isArray(updates) || updates.length === 0) {

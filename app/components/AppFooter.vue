@@ -1,7 +1,17 @@
 <script setup lang="ts">
-const { data: footer } = await useAsyncData("footer-data", () =>
-  queryCollection("footer").first()
-);
+const { data: footer } = await useFetch("/api/content", {
+  query: { table: "footer" },
+  transform: (data: any[]) => {
+    if (!Array.isArray(data)) return {};
+    return data.reduce(
+      (acc, item) => {
+        acc[item.key] = item.value;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+  },
+});
 </script>
 
 <template>
@@ -19,7 +29,7 @@ const { data: footer } = await useAsyncData("footer-data", () =>
             target="_blank"
             aria-label="Email link"
             class="lowercase underline transition-opacity duration-100 hover:opacity-80"
-            >{{ footer?.email }}
+          >{{ footer?.email }}
           </NuxtLink>
         </div>
         <!----------------------------------------->
@@ -31,12 +41,12 @@ const { data: footer } = await useAsyncData("footer-data", () =>
         <div class="flex">
           <p>Instagram:&nbsp;</p>
           <NuxtLink
-            to="https://www.instagram.com/rorystockphoto/"
+            :to="`https://www.instagram.com/${footer?.instagram}/`"
             target="_blank"
             aria-label="Instagram profile link"
             class="lowercase underline transition-opacity duration-100 hover:opacity-80"
           >
-            @rorystockphoto
+            @{{ footer?.instagram }}
           </NuxtLink>
         </div>
         <!----------------------------------------->

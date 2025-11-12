@@ -8,17 +8,6 @@ useSeoMeta({
     "https://images.rorystock.com/cdn-cgi/image/w=1200,h=675/meta/info-twitter-image.jpg",
 });
 
-// const url = 'http://localhost:3000/api/images?is_primary=true';
-// const options = {method: 'GET'};
-//
-// try {
-//   const response = await fetch(url, options);
-//   const data = await response.json();
-//   console.log(data);
-// } catch (error) {
-//   console.error(error);
-// }
-
 const { data: imageData } = await useFetch("/api/images", {
   query: { context: "info", is_primary: true },
 });

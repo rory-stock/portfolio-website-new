@@ -2,8 +2,11 @@ import imageSize from "image-size";
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
 import { getR2Object, deleteR2Object } from "~~/server/utils/r2";
-
-const ALLOWED_CONTEXTS = ["home", "journal", "info"] as const;
+import {
+  VALID_CONTEXTS,
+  isValidContext,
+  type Context,
+} from "~~/server/utils/context";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);
@@ -14,7 +17,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const { r2_path, context, alt, additionalContexts } = body as {
     r2_path: string;
-    context: (typeof ALLOWED_CONTEXTS)[number];
+    context: Context;
     alt?: string;
     additionalContexts?: string[];
   };
@@ -26,17 +29,20 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  if (!ALLOWED_CONTEXTS.includes(context)) {
-    throw createError({ statusCode: 400, message: "Invalid context" });
+  if (!isValidContext(context)) {
+    throw createError({
+      statusCode: 400,
+      message: `Invalid context. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
+    });
   }
 
   // Validate additional contexts
   const additionalCtx = additionalContexts || [];
   for (const ctx of additionalCtx) {
-    if (!ALLOWED_CONTEXTS.includes(ctx as any) || ctx === context) {
+    if (!isValidContext(ctx) || ctx === context) {
       throw createError({
         statusCode: 400,
-        message: "Invalid additional context",
+        message: `Invalid additional context. Must be one of: ${VALID_CONTEXTS.join(", ")} and different from primary context`,
       });
     }
   }

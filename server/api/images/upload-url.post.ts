@@ -1,8 +1,11 @@
 import { generatePresignedUploadUrl } from "~~/server/utils/r2";
+import {
+  VALID_CONTEXTS,
+  isValidContext,
+  type Context,
+} from "~~/server/utils/context";
 
-console.log('Upload URL endpoint hit - using crypto hash');
-
-const ALLOWED_CONTEXTS = ["home", "journal", "info"] as const;
+console.log("Upload URL endpoint hit - using crypto hash");
 
 function generateHash(length: number = 6): string {
   const array = new Uint8Array(length);
@@ -21,7 +24,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const { filename, context } = body as {
     filename: string;
-    context: (typeof ALLOWED_CONTEXTS)[number];
+    context: Context;
   };
 
   if (!filename || !context) {
@@ -31,10 +34,10 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  if (!ALLOWED_CONTEXTS.includes(context)) {
+  if (!isValidContext(context)) {
     throw createError({
       statusCode: 400,
-      message: "Invalid context. Must be: home, journal, or info",
+      message: `Invalid context. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
     });
   }
 

@@ -1,8 +1,8 @@
-// server/api/images/[id].patch.ts
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
+import { VALID_CONTEXTS, isValidContext } from "~~/server/utils/context";
 
 export default defineEventHandler(async (event) => {
   // Auth required
@@ -43,11 +43,10 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const validContexts = ["home", "journal", "info"];
-  if (add_contexts?.some((c) => !validContexts.includes(c))) {
+  if (add_contexts?.some((c) => !isValidContext(c))) {
     throw createError({
       statusCode: 400,
-      message: "Invalid context value",
+      message: `Invalid context value. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
     });
   }
 
@@ -108,14 +107,6 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // If last context, delete from R2 and DB
-    if (remainingContexts.length === 0) {
-      const r2 = event.context.cloudflare?.env?.IMAGES;
-      if (r2) {
-        await r2.delete(currentImage.r2_path);
-      }
-    }
-
     // Delete specified context records
     for (const context of remove_contexts) {
       const recordsToDelete = allRecords.filter((r) => r.context === context);
@@ -152,7 +143,6 @@ export default defineEventHandler(async (event) => {
           height: currentImage.height,
           file_size: currentImage.file_size,
           original_filename: currentImage.original_filename,
-          exif_data: currentImage.exif_data,
           is_primary: false,
           uploaded_at: new Date(),
         })
