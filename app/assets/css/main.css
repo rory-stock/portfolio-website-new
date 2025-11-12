@@ -1,12 +1,11 @@
 @import "tailwindcss";
-@layer utilities {
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-    .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
+
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 @theme {
@@ -51,6 +50,18 @@
 
 /********************************************************/
 @layer base {
+  html,
+  body,
+  div {
+    @apply no-scrollbar;
+  }
+  html {
+    @apply bg-black;
+  }
+  body {
+    @apply bg-white;
+  }
+
   @font-face {
     font-family: "Neue Montreal Medium Bold";
     src: url("/fonts/neue-montreal-squeezed-700.woff2") format("woff2");

@@ -17,7 +17,7 @@
         </div>
       </div>
 
-      <div class="h-[0.22rem] w-screen bg-black"></div>
+      <div class="h-[0.22rem] w-full bg-black"></div>
     </div>
     <div id="mobile-menu-teleport" class="md:hidden"></div>
   </header>
