@@ -16,9 +16,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   // Validate body
-  const { alt, is_primary, is_public, add_contexts, remove_contexts } =
+  const { alt, description, is_primary, is_public, add_contexts, remove_contexts } =
     body as {
       alt?: string;
+      description?: string;
       is_primary?: boolean;
       is_public?: boolean;
       add_contexts?: string[];
@@ -65,6 +66,14 @@ export default defineEventHandler(async (event) => {
     await db
       .update(images)
       .set({ alt })
+      .where(eq(images.r2_path, currentImage.r2_path));
+  }
+
+  // Handle description update (applies to all contexts with same r2_path)
+  if (description !== undefined) {
+    await db
+      .update(images)
+      .set({ description })
       .where(eq(images.r2_path, currentImage.r2_path));
   }
 
@@ -139,6 +148,7 @@ export default defineEventHandler(async (event) => {
           r2_path: currentImage.r2_path,
           url: currentImage.url,
           alt: currentImage.alt,
+          description: currentImage.description,
           width: currentImage.width,
           height: currentImage.height,
           file_size: currentImage.file_size,

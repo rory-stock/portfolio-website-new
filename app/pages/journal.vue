@@ -67,6 +67,7 @@ const selectedImage = ref<(typeof images.value)[0] | null>(null);
       :is-open="!!selectedImage"
       :image-path="selectedImage?.r2_path ?? ''"
       :alt="selectedImage?.alt ?? 'Journal Image'"
+      :description="selectedImage?.description ?? ''"
       @close="selectedImage = null"
     />
   </div>

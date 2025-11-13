@@ -74,6 +74,19 @@
                 class="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
                 placeholder="Describe this image"
               />
+              <label
+                for="description"
+                class="mt-2 block font-medium text-neutral-200"
+              >
+                Description
+              </label>
+              <input
+                id="description"
+                v-model="formData.description"
+                type="text"
+                class="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+                placeholder="Add a short description"
+              />
             </div>
 
             <!-- Toggle Switch for is_public -->
@@ -142,6 +155,7 @@ interface Image {
   r2_path: string;
   url: string;
   alt: string;
+  description: string;
   width: number;
   height: number;
   file_size: number;
@@ -169,17 +183,20 @@ const deleting = ref(false);
 
 const originalData = ref({
   alt: "",
+  description: "",
   is_public: false,
 });
 
 const formData = ref({
   alt: "",
+  description: "",
   is_public: false,
 });
 
 const hasChanges = computed(() => {
   return (
     formData.value.alt !== originalData.value.alt ||
+    formData.value.description !== originalData.value.description ||
     formData.value.is_public !== originalData.value.is_public
   );
 });
@@ -190,6 +207,7 @@ watch(
     if (newImage) {
       originalData.value = {
         alt: newImage.alt,
+        description: newImage.description,
         is_public: newImage.is_public,
       };
       formData.value = { ...originalData.value };
@@ -224,6 +242,7 @@ const handleSave = async () => {
       method: "PATCH",
       body: {
         alt: formData.value.alt,
+        description: formData.value.description,
         is_public: formData.value.is_public,
       },
     });

@@ -2,6 +2,7 @@
 const props = defineProps<{
   imagePath: string;
   alt: string;
+  description: string;
   isOpen: boolean;
 }>();
 
@@ -51,19 +52,27 @@ onBeforeUnmount(() => {
         >
           <button
             @click="emit('close')"
-            class="absolute cursor-pointer top-6 right-6 z-50 flex h-10 w-10 items-center justify-center"
+            class="absolute top-6 right-6 z-50 flex h-10 w-10 cursor-pointer items-center justify-center"
             aria-label="Close"
           >
             <Icon name="cross" width="32" height="32" />
           </button>
 
-          <div class="flex max-h-3/4 md:max-w-3/4">
+          <div class="flex flex-col items-center gap-2">
             <NuxtPicture
               :src="imagePath"
               :alt="alt"
-              class="flex justify-center object-contain align-middle"
+              :img-attrs="{
+                class: 'max-h-[75vh] max-w-[75vw] w-auto h-auto object-contain',
+              }"
               @click.stop
             />
+            <p
+              v-if="description"
+              class="font-neue-montreal-medium-semi text-2xl"
+            >
+              {{ description }}
+            </p>
           </div>
         </div>
       </Transition>
