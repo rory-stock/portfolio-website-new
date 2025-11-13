@@ -10,33 +10,35 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const navItems: Array<{ label: string; path: string; icon: IconName }> = [
+const { adminPageItems } = useNavigation();
+
+// Admin-specific items that aren't public pages
+const adminOnlyItems: Array<{
+  label: string;
+  path: string;
+  icon: IconName;
+  isPublic?: boolean;
+}> = [
   {
     label: "Dashboard",
     path: "/admin",
     icon: "dashboard",
   },
-  {
-    label: "Overview",
-    path: "/admin/overview",
-    icon: "overview",
-  },
-  {
-    label: "Journal",
-    path: "/admin/journal",
-    icon: "journal",
-  },
-  {
-    label: "Info",
-    path: "/admin/info",
-    icon: "info",
-  },
-  {
-    label: "Footer",
-    path: "/admin/footer",
-    icon: "footer",
-  },
 ];
+
+const footerItem = {
+  label: "Footer",
+  path: "/admin/footer",
+  icon: "footer" as IconName,
+  isPublic: undefined,
+};
+
+// Combine all nav items: Dashboard, then pages, then Footer
+const navItems = computed(() => [
+  ...adminOnlyItems,
+  ...adminPageItems.value,
+  footerItem,
+]);
 
 const { loggedIn, clear } = useUserSession();
 const showCleanupModal = ref(false);
@@ -108,9 +110,16 @@ function openCleanupModal() {
               :to="item.path"
               @click="handleNavClick"
               class="flex w-10/12 cursor-pointer items-center gap-2 rounded-lg bg-neutral-100 px-2 py-1 text-[0.95rem] text-neutral-900 transition-opacity select-none hover:opacity-85 md:w-64"
+              :class="{ 'opacity-65': item.isPublic === false }"
             >
               <Icon :name="item.icon" :size="15" />
               {{ item.label }}
+              <span
+                v-if="item.isPublic === false"
+                class="ml-auto text-xs text-neutral-500"
+              >
+                Private
+              </span>
             </NuxtLink>
           </nav>
           <button

@@ -63,7 +63,7 @@ onBeforeUnmount(() => {
               :src="imagePath"
               :alt="alt"
               :img-attrs="{
-                class: 'max-h-[75vh] max-w-[75vw] w-auto h-auto object-contain',
+                class: 'max-h-[75vh] max-w-[94vw] w-auto h-auto object-contain',
               }"
               @click.stop
             />

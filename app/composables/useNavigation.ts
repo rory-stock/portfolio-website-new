@@ -1,0 +1,81 @@
+import type { IconName } from "~/components/icons/iconData";
+
+export interface PageConfig {
+  label: string;
+  publicPath: string;
+  publicRouteName: string;
+  adminPath: string;
+  icon: IconName;
+  isPublic: boolean;
+  context: string;
+}
+
+const pages: PageConfig[] = [
+  {
+    label: "Overview",
+    publicPath: "/",
+    publicRouteName: "index",
+    adminPath: "/admin/overview",
+    icon: "overview",
+    isPublic: true,
+    context: "home",
+  },
+  {
+    label: "Events",
+    publicPath: "/events",
+    publicRouteName: "events",
+    adminPath: "/admin/events",
+    icon: "event",
+    isPublic: false,
+    context: "events",
+  },
+  {
+    label: "Journal",
+    publicPath: "/journal",
+    publicRouteName: "journal",
+    adminPath: "/admin/journal",
+    icon: "journal",
+    isPublic: true,
+    context: "journal",
+  },
+  {
+    label: "Info",
+    publicPath: "/info",
+    publicRouteName: "info",
+    adminPath: "/admin/info",
+    icon: "info",
+    isPublic: true,
+    context: "info",
+  },
+];
+
+export const PAGE_CONTEXTS = pages.map((p) => p.context) as string[];
+
+export const useNavigation = () => {
+  // For public header navigation (DesktopNav, MobileMenu)
+  const publicNavItems = computed(() =>
+    pages
+      .filter((p) => p.isPublic)
+      .map((p) => ({
+        to: p.publicPath,
+        name: p.publicRouteName,
+        label: p.label,
+      }))
+  );
+
+  // For admin sidebar page navigation
+  const adminPageItems = computed(() =>
+    pages.map((p) => ({
+      label: p.label,
+      path: p.adminPath,
+      icon: p.icon,
+      isPublic: p.isPublic,
+    }))
+  );
+
+  return {
+    pages,
+    publicNavItems,
+    adminPageItems,
+  };
+};

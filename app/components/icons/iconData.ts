@@ -10,7 +10,8 @@ export type IconName =
   | "footer"
   | "cross"
   | "cleanup"
-  | "file";
+  | "file"
+  | "event";
 
 type fillRule = "nonzero" | "evenodd" | "inherit";
 type strokeLinecap = "round" | "butt" | "square" | "inherit";
@@ -102,5 +103,10 @@ export const iconData: Record<
       "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
       "M14 2v5a1 1 0 0 0 1 1h5M10 9H8m8 4H8m8 4H8",
     ],
+  },
+  event: {
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    path: "M17 12h-5v5h5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1zm3 18H5V8h14z",
   },
 };

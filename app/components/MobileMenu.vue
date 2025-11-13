@@ -3,12 +3,7 @@ defineProps({
   isOpen: Boolean,
 });
 const route = useRoute();
-
-const links = [
-  { to: "/", name: "index", label: "Overview" },
-  { to: "/journal", name: "journal", label: "Journal" },
-  { to: "/info", name: "info", label: "Info" },
-];
+const { publicNavItems } = useNavigation();
 </script>
 
 <template>
@@ -25,7 +20,7 @@ const links = [
             :class="isOpen ? 'flex animate-menu-item-fade flex-col' : 'hidden'"
           >
             <NuxtLink
-              v-for="link in links"
+              v-for="link in publicNavItems"
               :key="link.name"
               :to="link.to"
               :class="
