@@ -7,6 +7,11 @@ import {
   isValidContext,
   type Context,
 } from "~~/server/utils/context";
+import {
+  createImageRecord,
+  type ImageUploadData,
+  type ImageConfirmBody,
+} from "~~/server/utils/imageFields";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);
@@ -14,22 +19,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, message: "Unauthorized" });
   }
 
-  const body = await readBody(event);
-  const { r2_path, context, alt, additionalContexts } = body as {
-    r2_path: string;
-    context: Context;
-    alt?: string;
-    additionalContexts?: string[];
-  };
+  const body = await readBody<ImageConfirmBody>(event);
 
-  if (!r2_path || !context) {
+  if (!body.r2_path || !body.context) {
     throw createError({
       statusCode: 400,
       message: "r2_path and context required",
     });
   }
 
-  if (!isValidContext(context)) {
+  if (!isValidContext(body.context)) {
     throw createError({
       statusCode: 400,
       message: `Invalid context. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
@@ -37,9 +36,9 @@ export default defineEventHandler(async (event) => {
   }
 
   // Validate additional contexts
-  const additionalCtx = additionalContexts || [];
+  const additionalCtx = body.additionalContexts || [];
   for (const ctx of additionalCtx) {
-    if (!isValidContext(ctx) || ctx === context) {
+    if (!isValidContext(ctx) || ctx === body.context) {
       throw createError({
         statusCode: 400,
         message: `Invalid additional context. Must be one of: ${VALID_CONTEXTS.join(", ")} and different from primary context`,
@@ -49,7 +48,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Fetch the uploaded file from R2
-    const r2Object = await getR2Object(r2_path);
+    const r2Object = await getR2Object(body.r2_path);
 
     if (!r2Object) {
       throw createError({
@@ -71,37 +70,27 @@ export default defineEventHandler(async (event) => {
     const fileSize = buffer.length;
 
     const config = useRuntimeConfig();
-    const url = `${config.r2PublicUrl}/${r2_path}`;
-    const filename = r2_path.split("/").pop() || "unknown.jpg";
+    const url = `${config.r2PublicUrl}/${body.r2_path}`;
+    const filename = body.r2_path.split("/").pop() || "unknown.jpg";
 
-    // Insert DB records
+    // Prepare upload data from body and file metadata
+    const uploadData: ImageUploadData = {
+      r2_path: body.r2_path,
+      url,
+      width,
+      height,
+      file_size: fileSize,
+      original_filename: filename,
+      alt: body.alt,
+      description: body.description,
+      is_primary: body.is_primary,
+      is_public: body.is_public,
+    };
+
+    // Create records using centralized helper
     const recordsToInsert = [
-      // Primary context
-      {
-        context,
-        r2_path,
-        url,
-        alt: alt || "",
-        width,
-        height,
-        file_size: fileSize,
-        original_filename: filename,
-        is_primary: false,
-        uploaded_at: new Date(),
-      },
-      // Additional contexts
-      ...additionalCtx.map((ctx: string) => ({
-        context: ctx,
-        r2_path,
-        url,
-        alt: alt || "",
-        width,
-        height,
-        file_size: fileSize,
-        original_filename: filename,
-        is_primary: false,
-        uploaded_at: new Date(),
-      })),
+      createImageRecord(body.context, uploadData),
+      ...additionalCtx.map((ctx: string) => createImageRecord(ctx, uploadData)),
     ];
 
     const db = useDB(event);
@@ -119,7 +108,7 @@ export default defineEventHandler(async (event) => {
 
     // Cleanup: try to delete from R2 on failure
     try {
-      await deleteR2Object(r2_path);
+      await deleteR2Object(body.r2_path);
     } catch (e) {
       console.error("Failed to cleanup R2 file:", e);
     }

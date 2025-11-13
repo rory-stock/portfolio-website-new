@@ -122,3 +122,48 @@ export function createContextRecord(
     uploaded_at: new Date(),
   };
 }
+
+// Helper to create the initial image record from upload data
+export interface ImageUploadData {
+  r2_path: string;
+  url: string;
+  width: number;
+  height: number;
+  file_size: number;
+  original_filename: string;
+  alt?: string;
+  description?: string;
+  is_primary?: boolean;
+  is_public?: boolean;
+}
+
+// Confirm the endpoint body
+export interface ImageConfirmBody {
+  r2_path: string;
+  context: string;
+  alt?: string;
+  description?: string;
+  is_primary?: boolean;
+  is_public?: boolean;
+  additionalContexts?: string[];
+}
+
+export function createImageRecord(
+  context: string,
+  uploadData: ImageUploadData
+) {
+  return {
+    context,
+    r2_path: uploadData.r2_path,
+    url: uploadData.url,
+    alt: uploadData.alt || "",
+    description: uploadData.description || "",
+    width: uploadData.width,
+    height: uploadData.height,
+    file_size: uploadData.file_size,
+    original_filename: uploadData.original_filename,
+    is_primary: uploadData.is_primary ?? false,
+    is_public: uploadData.is_public ?? false,
+    uploaded_at: new Date(),
+  };
+}
