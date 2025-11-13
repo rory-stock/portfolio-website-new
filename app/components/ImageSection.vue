@@ -70,6 +70,7 @@
     <ImageDetailModal
       :open="modalOpen"
       :image="selectedImage"
+      :fields="fields"
       @close="modalOpen = false"
       @updated="handleImageUpdated"
       @deleted="handleImageDeleted"
@@ -97,9 +98,18 @@ interface Image {
   uploaded_at: string;
 }
 
+interface Field {
+  key: string;
+  label: string;
+  type?: "text" | "textarea" | "email" | "url";
+  rows?: number;
+  placeholder?: string;
+}
+
 interface Props {
   context: string;
   title: string;
+  fields: Field[];
 }
 
 const props = defineProps<Props>();

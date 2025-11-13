@@ -15,7 +15,7 @@
           <h3 class="text-xl font-bold text-neutral-100">Image Details</h3>
           <button
             @click="$emit('close')"
-            class="text-2xl text-neutral-400 hover:text-neutral-200"
+            class="cursor-pointer text-2xl text-neutral-400 hover:text-neutral-200"
           >
             ×
           </button>
@@ -63,29 +63,30 @@
 
           <!-- Editable fields -->
           <form @submit.prevent="handleSave" class="space-y-4">
-            <div>
-              <label for="alt" class="mb-1 block font-medium text-neutral-200">
-                Alt Text
-              </label>
-              <input
-                id="alt"
-                v-model="formData.alt"
-                type="text"
-                class="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-                placeholder="Describe this image"
-              />
+            <div v-for="field in fields" :key="field.key" class="space-y-1">
               <label
-                for="description"
-                class="mt-2 block font-medium text-neutral-200"
+                :for="field.key"
+                class="block font-medium text-neutral-200"
               >
-                Description
+                {{ field.label }}
               </label>
-              <input
-                id="description"
-                v-model="formData.description"
-                type="text"
+
+              <textarea
+                v-if="field.type === 'textarea'"
+                :id="field.key"
+                v-model="formData[field.key]"
+                :rows="field.rows || 5"
+                :placeholder="field.placeholder"
                 class="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
-                placeholder="Add a short description"
+              />
+
+              <input
+                v-else
+                :id="field.key"
+                :type="field.type || 'text'"
+                v-model="formData[field.key]"
+                :placeholder="field.placeholder"
+                class="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
               />
             </div>
 
@@ -150,6 +151,14 @@
 </template>
 
 <script setup lang="ts">
+interface Field {
+  key: string;
+  label: string;
+  type?: "text" | "textarea" | "email" | "url";
+  rows?: number;
+  placeholder?: string;
+}
+
 interface Image {
   id: number;
   r2_path: string;
@@ -167,6 +176,7 @@ interface Image {
 interface Props {
   open: boolean;
   image: Image | null;
+  fields: Field[];
 }
 
 const props = defineProps<Props>();
@@ -181,36 +191,42 @@ const { success, error: showError } = useToast();
 const saving = ref(false);
 const deleting = ref(false);
 
-const originalData = ref({
-  alt: "",
-  description: "",
+const originalData = ref<Record<string, any>>({
   is_public: false,
 });
 
-const formData = ref({
-  alt: "",
-  description: "",
+const formData = ref<Record<string, any>>({
   is_public: false,
 });
 
 const hasChanges = computed(() => {
-  return (
-    formData.value.alt !== originalData.value.alt ||
-    formData.value.description !== originalData.value.description ||
-    formData.value.is_public !== originalData.value.is_public
+  // Check field-based changes
+  const fieldChanged = props.fields.some(
+    (field) => formData.value[field.key] !== originalData.value[field.key]
   );
+
+  // Check is_public change
+  const publicChanged =
+    formData.value.is_public !== originalData.value.is_public;
+
+  return fieldChanged || publicChanged;
 });
 
 watch(
   () => props.image,
   (newImage) => {
     if (newImage) {
-      originalData.value = {
-        alt: newImage.alt,
-        description: newImage.description,
+      // Initialize with field values
+      const data: Record<string, any> = {
         is_public: newImage.is_public,
       };
-      formData.value = { ...originalData.value };
+
+      for (const field of props.fields) {
+        data[field.key] = (newImage as any)[field.key] || "";
+      }
+
+      originalData.value = { ...data };
+      formData.value = { ...data };
     }
   },
   { immediate: true }
@@ -238,13 +254,18 @@ const handleSave = async () => {
   saving.value = true;
 
   try {
+    // Build update body with all fields
+    const body: Record<string, any> = {
+      is_public: formData.value.is_public,
+    };
+
+    for (const field of props.fields) {
+      body[field.key] = formData.value[field.key];
+    }
+
     await $fetch(`/api/images/${props.image.id}`, {
       method: "PATCH",
-      body: {
-        alt: formData.value.alt,
-        description: formData.value.description,
-        is_public: formData.value.is_public,
-      },
+      body,
     });
 
     originalData.value = { ...formData.value };

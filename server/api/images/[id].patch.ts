@@ -3,6 +3,13 @@ import { eq } from "drizzle-orm";
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { VALID_CONTEXTS, isValidContext } from "~~/server/utils/context";
+import {
+  validateImageUpdate,
+  IMAGE_FIELD_CONFIGS,
+  isUpdatableField,
+  createContextRecord,
+  type ImageUpdateBody,
+} from "~~/server/utils/imageFields";
 
 export default defineEventHandler(async (event) => {
   // Auth required
@@ -13,38 +20,16 @@ export default defineEventHandler(async (event) => {
 
   const db = useDB(event);
   const id = Number(getRouterParam(event, "id"));
-  const body = await readBody(event);
+  const body = await readBody<ImageUpdateBody>(event);
 
-  // Validate body
-  const { alt, description, is_primary, is_public, add_contexts, remove_contexts } =
-    body as {
-      alt?: string;
-      description?: string;
-      is_primary?: boolean;
-      is_public?: boolean;
-      add_contexts?: string[];
-      remove_contexts?: string[];
-    };
-
-  // Validation
-  if (add_contexts && remove_contexts) {
-    const overlap = add_contexts.filter((c) => remove_contexts.includes(c));
-    if (overlap.length > 0) {
-      throw createError({
-        statusCode: 400,
-        message: "Cannot add and remove same context",
-      });
-    }
+  // Centralized validation
+  const validation = validateImageUpdate(body);
+  if (!validation.valid) {
+    throw createError({ statusCode: 400, message: validation.error });
   }
 
-  if (alt && alt.length > 500) {
-    throw createError({
-      statusCode: 400,
-      message: "Alt text max 500 characters",
-    });
-  }
-
-  if (add_contexts?.some((c) => !isValidContext(c))) {
+  // Validate contexts if provided
+  if (body.add_contexts?.some((c) => !isValidContext(c))) {
     throw createError({
       statusCode: 400,
       message: `Invalid context value. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
@@ -61,43 +46,61 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: "Image not found" });
   }
 
-  // Handle alt text update (applies to all contexts with same r2_path)
-  if (alt !== undefined) {
-    await db
-      .update(images)
-      .set({ alt })
-      .where(eq(images.r2_path, currentImage.r2_path));
-  }
-
-  // Handle description update (applies to all contexts with same r2_path)
-  if (description !== undefined) {
-    await db
-      .update(images)
-      .set({ description })
-      .where(eq(images.r2_path, currentImage.r2_path));
-  }
-
-  // Handle is_primary toggle
-  if (is_primary !== undefined) {
-    if (is_primary) {
-      // Unset all other primaries in this context
-      await db
-        .update(images)
-        .set({ is_primary: false })
-        .where(eq(images.context, currentImage.context));
+  // Apply field updates based on centralized scope configuration
+  for (const [field, value] of Object.entries(body)) {
+    // Skip undefined values and context operations
+    if (
+      value === undefined ||
+      field === "add_contexts" ||
+      field === "remove_contexts"
+    ) {
+      continue;
     }
 
-    // Set this image's primary status
-    await db.update(images).set({ is_primary }).where(eq(images.id, id));
-  }
+    // Skip non-updatable fields
+    if (!isUpdatableField(field)) {
+      continue;
+    }
 
-  // Handle is_public toggle
-  if (is_public !== undefined) {
-    await db.update(images).set({ is_public }).where(eq(images.id, id));
+    const config = IMAGE_FIELD_CONFIGS[field];
+
+    switch (config.scope) {
+      case "all_r2_path":
+        // Update all records with same r2_path (e.g., alt, description)
+        await db
+          .update(images)
+          .set({ [field]: value })
+          .where(eq(images.r2_path, currentImage.r2_path));
+        break;
+
+      case "context_scoped":
+        // Special handling for is_primary
+        if (field === "is_primary" && value === true) {
+          // Unset all other primaries in this context
+          await db
+            .update(images)
+            .set({ is_primary: false })
+            .where(eq(images.context, currentImage.context));
+        }
+        // Update the specific record
+        await db
+          .update(images)
+          .set({ [field]: value })
+          .where(eq(images.id, id));
+        break;
+
+      case "single_record":
+        // Update only this specific record (e.g., is_public)
+        await db
+          .update(images)
+          .set({ [field]: value })
+          .where(eq(images.id, id));
+        break;
+    }
   }
 
   // Handle remove_contexts
-  if (remove_contexts && remove_contexts.length > 0) {
+  if (body.remove_contexts && body.remove_contexts.length > 0) {
     // Get all records with same r2_path
     const allRecords = await db
       .select()
@@ -106,7 +109,7 @@ export default defineEventHandler(async (event) => {
 
     // Check if removing all contexts
     const remainingContexts = allRecords.filter(
-      (r) => !remove_contexts.includes(r.context)
+      (r) => !body.remove_contexts!.includes(r.context)
     );
 
     if (remainingContexts.length === 0) {
@@ -117,7 +120,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Delete specified context records
-    for (const context of remove_contexts) {
+    for (const context of body.remove_contexts) {
       const recordsToDelete = allRecords.filter((r) => r.context === context);
       for (const record of recordsToDelete) {
         await db.delete(images).where(eq(images.id, record.id));
@@ -126,8 +129,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Handle add_contexts
-  let addedRecords = [];
-  if (add_contexts && add_contexts.length > 0) {
+  if (body.add_contexts && body.add_contexts.length > 0) {
     // Check which contexts already exist
     const existingRecords = await db
       .select()
@@ -135,30 +137,16 @@ export default defineEventHandler(async (event) => {
       .where(eq(images.r2_path, currentImage.r2_path));
 
     const existingContexts = existingRecords.map((r) => r.context);
-    const newContexts = add_contexts.filter(
+    const newContexts = body.add_contexts.filter(
       (c) => !existingContexts.includes(c)
     );
 
-    // Create new records for each new context
+    // Create new records for each new context using helper
     for (const context of newContexts) {
-      const [newRecord] = await db
+      await db
         .insert(images)
-        .values({
-          context,
-          r2_path: currentImage.r2_path,
-          url: currentImage.url,
-          alt: currentImage.alt,
-          description: currentImage.description,
-          width: currentImage.width,
-          height: currentImage.height,
-          file_size: currentImage.file_size,
-          original_filename: currentImage.original_filename,
-          is_primary: false,
-          uploaded_at: new Date(),
-        })
+        .values(createContextRecord(currentImage, context))
         .returning();
-
-      addedRecords.push(newRecord);
     }
   }
 
@@ -170,7 +158,7 @@ export default defineEventHandler(async (event) => {
 
   // Get all contexts if contexts were modified
   let allContexts = undefined;
-  if (add_contexts || remove_contexts) {
+  if (body.add_contexts || body.remove_contexts) {
     allContexts = await db
       .select()
       .from(images)

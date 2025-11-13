@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
   const db = useDB(event);
 
-  return await db
+  return db
     .select()
     .from(content)
     .where(eq(content.table, table as string));
