@@ -1,6 +1,6 @@
-import type { Context } from "./context";
 import type { InferSelectModel } from "drizzle-orm";
 import type { images } from "~~/server/db/schema";
+import imageSize from "image-size";
 
 // Type derived from schema
 export type ImageRecord = InferSelectModel<typeof images>;
@@ -123,20 +123,6 @@ export function createContextRecord(
   };
 }
 
-// Helper to create the initial image record from upload data
-export interface ImageUploadData {
-  r2_path: string;
-  url: string;
-  width: number;
-  height: number;
-  file_size: number;
-  original_filename: string;
-  alt?: string;
-  description?: string;
-  is_primary?: boolean;
-  is_public?: boolean;
-}
-
 // Confirm the endpoint body
 export interface ImageConfirmBody {
   r2_path: string;
@@ -150,20 +136,26 @@ export interface ImageConfirmBody {
 
 export function createImageRecord(
   context: string,
-  uploadData: ImageUploadData
+  body: ImageConfirmBody,
+  buffer: Buffer,
+  r2PublicUrl: string
 ) {
+  const dimensions = imageSize(buffer);
+  const url = `${r2PublicUrl}/${body.r2_path}`;
+  const filename = body.r2_path.split("/").pop() || "unknown.jpg";
+
   return {
     context,
-    r2_path: uploadData.r2_path,
-    url: uploadData.url,
-    alt: uploadData.alt || "",
-    description: uploadData.description || "",
-    width: uploadData.width,
-    height: uploadData.height,
-    file_size: uploadData.file_size,
-    original_filename: uploadData.original_filename,
-    is_primary: uploadData.is_primary ?? false,
-    is_public: uploadData.is_public ?? false,
+    r2_path: body.r2_path,
+    url,
+    alt: body.alt || "",
+    description: body.description || "",
+    width: dimensions.width || 0,
+    height: dimensions.height || 0,
+    file_size: buffer.length,
+    original_filename: filename,
+    is_primary: body.is_primary ?? false,
+    is_public: body.is_public ?? false,
     uploaded_at: new Date(),
   };
 }

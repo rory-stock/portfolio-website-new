@@ -11,7 +11,7 @@ const updateTime = () => {
   });
 };
 
-let intervalId: number;
+let intervalId: NodeJS.Timeout;
 
 onMounted(() => {
   updateTime();

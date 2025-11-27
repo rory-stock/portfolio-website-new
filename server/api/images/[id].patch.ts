@@ -66,7 +66,7 @@ export default defineEventHandler(async (event) => {
 
     switch (config.scope) {
       case "all_r2_path":
-        // Update all records with same r2_path (e.g., alt, description)
+        // Update all records with the same r2_path (e.g., alt, description)
         await db
           .update(images)
           .set({ [field]: value })
@@ -101,7 +101,7 @@ export default defineEventHandler(async (event) => {
 
   // Handle remove_contexts
   if (body.remove_contexts && body.remove_contexts.length > 0) {
-    // Get all records with same r2_path
+    // Get all records with the same r2_path
     const allRecords = await db
       .select()
       .from(images)

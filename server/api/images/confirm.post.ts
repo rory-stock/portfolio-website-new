@@ -1,15 +1,12 @@
-import imageSize from "image-size";
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
 import { getR2Object, deleteR2Object } from "~~/server/utils/r2";
 import {
   VALID_CONTEXTS,
   isValidContext,
-  type Context,
 } from "~~/server/utils/context";
 import {
   createImageRecord,
-  type ImageUploadData,
   type ImageConfirmBody,
 } from "~~/server/utils/imageFields";
 
@@ -64,33 +61,14 @@ export default defineEventHandler(async (event) => {
     }
     const buffer = Buffer.concat(chunks);
 
-    const dimensions = imageSize(buffer);
-    const width = dimensions.width || 0;
-    const height = dimensions.height || 0;
-    const fileSize = buffer.length;
-
     const config = useRuntimeConfig();
-    const url = `${config.r2PublicUrl}/${body.r2_path}`;
-    const filename = body.r2_path.split("/").pop() || "unknown.jpg";
 
-    // Prepare upload data from body and file metadata
-    const uploadData: ImageUploadData = {
-      r2_path: body.r2_path,
-      url,
-      width,
-      height,
-      file_size: fileSize,
-      original_filename: filename,
-      alt: body.alt,
-      description: body.description,
-      is_primary: body.is_primary,
-      is_public: body.is_public,
-    };
-
-    // Create records using centralized helper
+    // Create records using a centralized helper
     const recordsToInsert = [
-      createImageRecord(body.context, uploadData),
-      ...additionalCtx.map((ctx: string) => createImageRecord(ctx, uploadData)),
+      createImageRecord(body.context, body, buffer, config.r2PublicUrl),
+      ...additionalCtx.map((ctx: string) =>
+        createImageRecord(ctx, body, buffer, config.r2PublicUrl)
+      ),
     ];
 
     const db = useDB(event);

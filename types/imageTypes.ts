@@ -21,7 +21,7 @@ export interface ImageWithContext extends ImageBase {
 }
 
 // Field definition for UI forms
-export interface ImageFieldDefinition {
+export interface ImageField {
   key: keyof ImageBase;
   label: string;
   type?: "text" | "textarea" | "email" | "url";
@@ -29,22 +29,3 @@ export interface ImageFieldDefinition {
   placeholder?: string;
   editable?: boolean;
 }
-
-// Standard editable fields configuration
-export const EDITABLE_IMAGE_FIELDS: ImageFieldDefinition[] = [
-  {
-    key: "alt",
-    label: "Alt Text",
-    type: "text",
-    placeholder: "Describe the image for accessibility",
-    editable: true,
-  },
-  {
-    key: "description",
-    label: "Description",
-    type: "textarea",
-    rows: 3,
-    placeholder: "Optional detailed description",
-    editable: true,
-  },
-] as const;

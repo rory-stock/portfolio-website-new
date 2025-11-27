@@ -151,32 +151,12 @@
 </template>
 
 <script setup lang="ts">
-interface Field {
-  key: string;
-  label: string;
-  type?: "text" | "textarea" | "email" | "url";
-  rows?: number;
-  placeholder?: string;
-}
-
-interface Image {
-  id: number;
-  r2_path: string;
-  url: string;
-  alt: string;
-  description: string;
-  width: number;
-  height: number;
-  file_size: number;
-  original_filename: string;
-  uploaded_at: string | Date;
-  is_public: boolean;
-}
+import type { ImageBase, ImageField } from "~~/types/imageTypes";
 
 interface Props {
   open: boolean;
-  image: Image | null;
-  fields: Field[];
+  image: ImageBase | null;
+  fields: ImageField[];
 }
 
 const props = defineProps<Props>();
