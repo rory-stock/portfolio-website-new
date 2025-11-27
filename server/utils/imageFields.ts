@@ -9,6 +9,9 @@ export type ImageRecord = InferSelectModel<typeof images>;
 export interface ImageUpdateBody {
   alt?: string;
   description?: string;
+  event_name?: string;
+  event_date?: string;
+  event_location?: string;
   is_primary?: boolean;
   is_public?: boolean;
   add_contexts?: string[];
@@ -43,6 +46,18 @@ export const IMAGE_FIELD_CONFIGS: Record<
     scope: "all_r2_path",
     description:
       "Description applies to all contexts sharing the same image file",
+  },
+  event_name: {
+    scope: "single_record",
+    description: "Event name applies only to the specific context",
+  },
+  event_date: {
+    scope: "single_record",
+    description: "Event date applies only to the specific context",
+  },
+  event_location: {
+    scope: "single_record",
+    description: "Event location applies only to the specific context",
   },
   is_primary: {
     scope: "context_scoped",
@@ -113,6 +128,9 @@ export function createContextRecord(
     url: currentImage.url,
     alt: currentImage.alt,
     description: currentImage.description,
+    event_name: currentImage.event_name,
+    event_date: currentImage.event_date,
+    event_location: currentImage.event_location,
     width: currentImage.width,
     height: currentImage.height,
     file_size: currentImage.file_size,
@@ -129,6 +147,9 @@ export interface ImageConfirmBody {
   context: string;
   alt?: string;
   description?: string;
+  event_name?: string;
+  event_date?: string;
+  event_location?: string;
   is_primary?: boolean;
   is_public?: boolean;
   additionalContexts?: string[];
@@ -150,6 +171,9 @@ export function createImageRecord(
     url,
     alt: body.alt || "",
     description: body.description || "",
+    event_name: body.event_name || "",
+    event_date: body.event_date || "",
+    event_location: body.event_location || "",
     width: dimensions.width || 0,
     height: dimensions.height || 0,
     file_size: buffer.length,

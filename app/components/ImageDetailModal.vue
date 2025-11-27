@@ -15,7 +15,7 @@
           <h3 class="text-xl font-bold text-neutral-100">Image Details</h3>
           <button
             @click="$emit('close')"
-            class="cursor-pointer text-2xl text-neutral-400 hover:text-neutral-200"
+            class="cursor-pointer text-2xl text-neutral-400 transition-colors duration-200 hover:text-neutral-200"
           >
             ×
           </button>
@@ -62,11 +62,14 @@
           </div>
 
           <!-- Editable fields -->
-          <form @submit.prevent="handleSave" class="space-y-4">
+          <form
+            @submit.prevent="handleSave"
+            class="no-scrollbar space-y-4 overflow-y-auto px-1"
+          >
             <div v-for="field in fields" :key="field.key" class="space-y-1">
               <label
                 :for="field.key"
-                class="block font-medium text-neutral-200"
+                class="block font-medium text-neutral-100"
               >
                 {{ field.label }}
               </label>
@@ -77,7 +80,7 @@
                 v-model="formData[field.key]"
                 :rows="field.rows || 5"
                 :placeholder="field.placeholder"
-                class="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+                class="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:bg-neutral-700 focus:outline-0"
               />
 
               <input
@@ -86,14 +89,14 @@
                 :type="field.type || 'text'"
                 v-model="formData[field.key]"
                 :placeholder="field.placeholder"
-                class="w-full rounded border border-neutral-700 bg-neutral-800 px-3 py-2 text-neutral-100"
+                class="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:bg-neutral-700 focus:outline-0"
               />
             </div>
 
             <!-- Toggle Switch for is_public -->
             <div class="flex items-center justify-between">
               <div>
-                <label for="is_public" class="font-medium text-neutral-200">
+                <label for="is_public" class="font-medium text-neutral-100">
                   Public Visibility
                 </label>
                 <p class="text-sm text-neutral-400">
@@ -109,7 +112,7 @@
                 :class="formData.is_public ? 'bg-blue-600' : 'bg-neutral-700'"
               >
                 <span
-                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                  class="inline-block h-4 w-4 transform rounded-full bg-neutral-100 transition-transform"
                   :class="
                     formData.is_public ? 'translate-x-6' : 'translate-x-1'
                   "
@@ -117,12 +120,69 @@
               </button>
             </div>
 
+            <!-- Context selection dropdown -->
+            <div class="relative mb-4">
+              <label class="mb-1 block font-medium text-neutral-100">
+                Contexts
+              </label>
+
+              <div v-if="isLoadingContexts" class="text-sm text-neutral-500">
+                Loading...
+              </div>
+
+              <div v-else ref="contextDropdownRef">
+                <!-- Dropdown trigger -->
+                <button
+                  type="button"
+                  @click="isContextDropdownOpen = !isContextDropdownOpen"
+                  class="flex w-full items-center justify-between rounded-lg border border-neutral-600 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:ring-0"
+                >
+                  <span>Select Contexts</span>
+                  <Icon
+                    name="chevron"
+                    width="21"
+                    height="21"
+                    class="transition-transform duration-200"
+                    :class="{ 'rotate-180': isContextDropdownOpen }"
+                  />
+                </button>
+
+                <!-- Dropdown menu -->
+                <div
+                  v-if="isContextDropdownOpen"
+                  class="absolute z-50 mt-1 mb-4 w-full rounded-lg border-1 border-neutral-700 bg-neutral-800 py-1"
+                >
+                  <label
+                    v-for="ctx in availableContexts"
+                    :key="ctx"
+                    class="mx-2 flex cursor-pointer items-center rounded-lg px-3 py-2 hover:bg-neutral-700"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="ctx"
+                      v-model="allImageContexts"
+                      :disabled="
+                        allImageContexts.length === 1 &&
+                        allImageContexts.includes(ctx)
+                      "
+                      class="mr-2 rounded border-neutral-600 bg-neutral-700 text-blue-600 focus:ring-0 focus:ring-offset-neutral-800 disabled:opacity-50"
+                    />
+                    <span class="text-sm text-neutral-100 capitalize">{{
+                      ctx
+                    }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <!-- Action buttons -->
-            <div class="flex gap-3 border-t border-neutral-800 pt-4">
+            <div
+              class="flex flex-col gap-2 border-t border-neutral-800 pt-4 md:flex-row md:gap-3"
+            >
               <button
                 type="submit"
                 :disabled="!hasChanges || saving"
-                class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+                class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-sm text-white transition-all duration-200 hover:bg-blue-700 disabled:opacity-50 md:text-base"
               >
                 {{ saving ? "Saving..." : "Save Changes" }}
               </button>
@@ -130,7 +190,7 @@
                 type="button"
                 @click="handleDiscard"
                 :disabled="!hasChanges || saving"
-                class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-neutral-200 hover:bg-neutral-800 disabled:opacity-50"
+                class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:opacity-50 md:text-base"
               >
                 Discard Changes
               </button>
@@ -138,7 +198,7 @@
                 type="button"
                 @click="handleDelete"
                 :disabled="deleting"
-                class="ml-auto cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50"
+                class="mt-6 cursor-pointer rounded bg-red-600 px-4 py-2 text-sm text-white transition-all duration-200 hover:bg-red-700 disabled:opacity-50 md:mt-0 md:ml-auto md:text-base"
               >
                 {{ deleting ? "Deleting..." : "Delete Image" }}
               </button>
@@ -152,6 +212,7 @@
 
 <script setup lang="ts">
 import type { ImageBase, ImageField } from "~~/types/imageTypes";
+import { onClickOutside } from "@vueuse/core";
 
 interface Props {
   open: boolean;
@@ -164,9 +225,13 @@ const emit = defineEmits<{
   close: [];
   updated: [];
   deleted: [];
+  refresh: [];
 }>();
 
 const { success, error: showError } = useToast();
+
+const isContextDropdownOpen = ref(false);
+const contextDropdownRef = ref(null);
 
 const saving = ref(false);
 const deleting = ref(false);
@@ -179,6 +244,40 @@ const formData = ref<Record<string, any>>({
   is_public: false,
 });
 
+const allImageContexts = ref<string[]>(
+  props.image ? [props.image.context] : []
+);
+const originalContexts = ref<string[]>(
+  props.image ? [props.image.context] : []
+);
+const availableContexts = ref<string[]>([]);
+const isLoadingContexts = ref(true);
+
+onClickOutside(contextDropdownRef, () => {
+  isContextDropdownOpen.value = false;
+});
+
+const loadContextData = async () => {
+  if (!props.image) return;
+
+  const r2_path = props.image.r2_path;
+
+  try {
+    const [contextsRes, imagesRes] = await Promise.all([
+      $fetch<{ contexts: string[] }>("/api/admin/context"),
+      $fetch<{ images: Array<{ context: string }> }>(
+        `/api/images?r2_path=${r2_path}`
+      ),
+    ]);
+
+    availableContexts.value = contextsRes.contexts;
+    allImageContexts.value = imagesRes.images.map((img: any) => img.context);
+    originalContexts.value = [...allImageContexts.value];
+  } finally {
+    isLoadingContexts.value = false;
+  }
+};
+
 const hasChanges = computed(() => {
   // Check field-based changes
   const fieldChanged = props.fields.some(
@@ -189,13 +288,19 @@ const hasChanges = computed(() => {
   const publicChanged =
     formData.value.is_public !== originalData.value.is_public;
 
-  return fieldChanged || publicChanged;
+  const contextsChanged =
+    JSON.stringify([...allImageContexts.value].sort()) !==
+    JSON.stringify([...originalContexts.value].sort());
+
+  return fieldChanged || publicChanged || contextsChanged;
 });
 
 watch(
   () => props.image,
   (newImage) => {
     if (newImage) {
+      isLoadingContexts.value = true;
+
       // Initialize with field values
       const data: Record<string, any> = {
         is_public: newImage.is_public,
@@ -207,6 +312,8 @@ watch(
 
       originalData.value = { ...data };
       formData.value = { ...data };
+
+      loadContextData();
     }
   },
   { immediate: true }
@@ -243,16 +350,35 @@ const handleSave = async () => {
       body[field.key] = formData.value[field.key];
     }
 
+    // Add context changes
+    const currentSet = new Set(allImageContexts.value);
+    const originalSet = new Set(originalContexts.value);
+
+    const toAdd = [...currentSet].filter((c) => !originalSet.has(c));
+    const toRemove = [...originalSet].filter((c) => !currentSet.has(c));
+
+    if (toAdd.length > 0) body.add_contexts = toAdd;
+    if (toRemove.length > 0) body.remove_contexts = toRemove;
+
+    const removedCurrentContext = toRemove.includes(props.image.context);
+
     await $fetch(`/api/images/${props.image.id}`, {
       method: "PATCH",
       body,
     });
 
     originalData.value = { ...formData.value };
+    originalContexts.value = [...allImageContexts.value];
     success("Image updated successfully");
-    emit("updated");
+    if (removedCurrentContext) {
+      emit("close");
+      emit("refresh");
+    } else {
+      emit("updated");
+    }
   } catch (e: any) {
     showError(e.message || "Failed to update image");
+    allImageContexts.value = [...originalContexts.value];
   } finally {
     saving.value = false;
   }
@@ -260,6 +386,7 @@ const handleSave = async () => {
 
 const handleDiscard = () => {
   formData.value = { ...originalData.value };
+  allImageContexts.value = [...originalContexts.value];
   success("Changes discarded");
 };
 

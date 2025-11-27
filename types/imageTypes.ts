@@ -2,16 +2,21 @@
 
 export interface ImageBase {
   id: number;
+  context: string;
   r2_path: string;
   url: string;
   alt: string;
   description: string;
+  event_name: string;
+  event_date: string;
+  event_location: string;
   width: number;
   height: number;
   file_size: number;
   original_filename: string;
   uploaded_at: string | Date;
   is_public: boolean;
+  is_primary: boolean;
 }
 
 // Extended interface for records that include context

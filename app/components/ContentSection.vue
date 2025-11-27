@@ -21,7 +21,7 @@
           :id="field.key"
           v-model="formData[field.key]"
           :rows="field.rows || 5"
-          class="w-full rounded border border-neutral-700 bg-neutral-800 px-2 md:px-3 py-2 text-[0.92rem] text-neutral-100 md:text-base"
+          class="w-full rounded border border-neutral-700 bg-neutral-800 px-2 py-2 text-[0.92rem] text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:bg-neutral-700 focus:outline-0 md:px-3 md:text-base"
         />
 
         <input
@@ -29,15 +29,17 @@
           :id="field.key"
           :type="field.type || 'text'"
           v-model="formData[field.key]"
-          class="w-full rounded border border-neutral-700 bg-neutral-800 px-2 md:px-3 py-2 text-[0.92rem] text-neutral-100 md:text-base"
+          class="w-full rounded border border-neutral-700 bg-neutral-800 px-2 py-2 text-[0.92rem] text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:bg-neutral-700 focus:outline-0 md:px-3 md:text-base"
         />
       </div>
 
-      <div class="flex gap-3 pt-4">
+      <div
+        class="flex flex-col gap-2 border-t border-neutral-800 pt-4 md:flex-row md:gap-3"
+      >
         <button
           type="submit"
           :disabled="!hasChanges || saving"
-          class="cursor-pointer rounded bg-blue-600 px-2 py-2 text-[0.92rem] text-white hover:bg-blue-700 disabled:opacity-50 md:px-4 md:text-base"
+          class="cursor-pointer rounded bg-blue-600 px-2 py-2 text-[0.92rem] text-white transition-all duration-200 hover:bg-blue-700 disabled:opacity-50 md:px-4 md:text-base"
         >
           {{ saving ? "Saving..." : "Save Changes" }}
         </button>
@@ -45,7 +47,7 @@
           type="button"
           @click="handleDiscard"
           :disabled="!hasChanges || saving"
-          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 hover:bg-neutral-800 disabled:opacity-50 md:px-4 md:text-base"
+          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:opacity-50 md:px-4 md:text-base"
         >
           Discard Changes
         </button>

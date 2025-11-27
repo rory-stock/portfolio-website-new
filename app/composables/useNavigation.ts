@@ -18,7 +18,7 @@ const pages: PageConfig[] = [
     adminPath: "/admin/overview",
     icon: "overview",
     isPublic: true,
-    context: "home",
+    context: "overview",
   },
   {
     label: "Events",
@@ -26,7 +26,7 @@ const pages: PageConfig[] = [
     publicRouteName: "events",
     adminPath: "/admin/events",
     icon: "event",
-    isPublic: false,
+    isPublic: true,
     context: "events",
   },
   {

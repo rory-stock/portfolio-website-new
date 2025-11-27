@@ -22,19 +22,19 @@ useHead({ title: "Admin" });
             placeholder: 'Image Alt Text',
           },
           {
-            key: 'eventName',
+            key: 'event_name',
             label: 'Event Name',
             type: 'text' as const,
             placeholder: 'Event Name',
           },
           {
-            key: 'eventDate',
+            key: 'event_date',
             label: 'Event Date',
             type: 'text' as const,
             placeholder: 'Event Date',
           },
           {
-            key: 'eventLocation',
+            key: 'event_location',
             label: 'Event Location',
             type: 'text' as const,
             placeholder: 'Event Location',

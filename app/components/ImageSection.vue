@@ -45,13 +45,13 @@
       <!-- Save/Discard buttons for order -->
       <div
         v-if="displayOrder.length > 0"
-        class="flex gap-3 border-t border-neutral-800 pt-4"
+        class="flex flex-col gap-2 border-t border-neutral-800 pt-4 md:flex-row md:gap-3"
       >
         <button
           type="button"
           @click="handleSaveOrder"
           :disabled="!orderChanged || saving"
-          class="cursor-pointer rounded bg-blue-600 px-2 py-2 text-[0.92rem] text-white hover:bg-blue-700 disabled:opacity-50 md:px-4 md:text-base"
+          class="cursor-pointer rounded bg-blue-600 px-2 py-2 text-[0.92rem] text-white transition-all duration-200 hover:bg-blue-700 disabled:opacity-50 md:px-4 md:text-base"
         >
           {{ saving ? "Saving Order..." : "Save Order" }}
         </button>
@@ -59,7 +59,7 @@
           type="button"
           @click="handleDiscardOrder"
           :disabled="!orderChanged || saving"
-          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 hover:bg-neutral-800 disabled:opacity-50 md:px-4 md:text-base"
+          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:opacity-50 md:px-4 md:text-base"
         >
           Discard Order Changes
         </button>
@@ -74,42 +74,19 @@
       @close="modalOpen = false"
       @updated="handleImageUpdated"
       @deleted="handleImageDeleted"
+      @refresh="fetchImages"
     />
   </div>
 </template>
 
 <script setup lang="ts">
 import draggable from "vuedraggable";
-
-interface Image {
-  id: number;
-  context: string;
-  r2_path: string;
-  url: string;
-  alt: string;
-  width: number;
-  height: number;
-  file_size: number;
-  original_filename: string;
-  exif_data: string | null;
-  is_primary: boolean;
-  is_public: boolean;
-  order: number | null;
-  uploaded_at: string;
-}
-
-interface Field {
-  key: string;
-  label: string;
-  type?: "text" | "textarea" | "email" | "url";
-  rows?: number;
-  placeholder?: string;
-}
+import type { ImageBase, ImageField } from "~~/types/imageTypes";
 
 interface Props {
   context: string;
   title: string;
-  fields: Field[];
+  fields: ImageField[];
 }
 
 const props = defineProps<Props>();
@@ -119,12 +96,12 @@ const loading = ref(true);
 const error = ref("");
 const saving = ref(false);
 
-const images = ref<Image[]>([]);
+const images = ref<ImageBase[]>([]);
 const originalOrder = ref<number[]>([]);
-const displayOrder = ref<Image[]>([]);
+const displayOrder = ref<ImageBase[]>([]);
 
 const modalOpen = ref(false);
-const selectedImage = ref<Image | null>(null);
+const selectedImage = ref<ImageBase | null>(null);
 
 const currentOrder = computed(() => displayOrder.value.map((img) => img.id));
 
@@ -140,7 +117,7 @@ const fetchImages = async () => {
   error.value = "";
 
   try {
-    const response = await $fetch<{ images: Image[]; total: number }>(
+    const response = await $fetch<{ images: ImageBase[]; total: number }>(
       `/api/images?context=${props.context}`
     );
     images.value = response.images;
@@ -191,7 +168,7 @@ const handleUploadComplete = () => {
   fetchImages();
 };
 
-const openModal = (image: Image) => {
+const openModal = (image: ImageBase) => {
   selectedImage.value = image;
   modalOpen.value = true;
 };
@@ -204,7 +181,7 @@ const handleImageDeleted = () => {
   fetchImages();
 };
 
-const handleTogglePrimary = async (image: Image) => {
+const handleTogglePrimary = async (image: ImageBase) => {
   try {
     await $fetch(`/api/images/${image.id}`, {
       method: "PATCH",

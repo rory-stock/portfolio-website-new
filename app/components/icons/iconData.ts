@@ -11,7 +11,9 @@ export type IconName =
   | "cross"
   | "cleanup"
   | "file"
-  | "event";
+  | "event"
+  | "chevron"
+  | "star";
 
 type fillRule = "nonzero" | "evenodd" | "inherit";
 type strokeLinecap = "round" | "butt" | "square" | "inherit";
@@ -108,5 +110,15 @@ export const iconData: Record<
     viewBox: "0 0 24 24",
     fill: "currentColor",
     path: "M17 12h-5v5h5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1zm3 18H5V8h14z",
+  },
+  chevron: {
+    viewBox: "0 0 15 15",
+    fill: "currentColor",
+    path: "M11.158 6.135a.5.5 0 0 1 .684.73l-4 3.75a.5.5 0 0 1-.684 0l-4-3.75l-.066-.077a.5.5 0 0 1 .67-.715l.08.062L7.5 9.564z",
+  },
+  star: {
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    path: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2L9.19 8.62L2 9.24l5.45 4.73L5.82 21z",
   },
 };

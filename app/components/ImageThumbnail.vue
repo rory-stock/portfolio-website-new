@@ -23,7 +23,7 @@
       :title="image.is_primary ? 'Remove as primary' : 'Set as primary'"
       @click.stop="$emit('togglePrimary')"
     >
-      ★
+      <Icon name="star" width="18" height="18" />
     </button>
 
     <!-- Privacy indicator -->
