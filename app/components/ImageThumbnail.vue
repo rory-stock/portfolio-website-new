@@ -1,7 +1,7 @@
 <template>
   <div
     class="group relative w-full cursor-pointer overflow-hidden rounded border border-neutral-700 bg-neutral-800"
-    :class="{ 'ring-2 ring-blue-500': image.is_primary }"
+    :class="{ 'ring-2 ring-neutral-300': image.is_primary }"
     @click="$emit('click')"
   >
     <NuxtPicture
@@ -14,11 +14,11 @@
 
     <!-- Primary indicator (clickable, shows on hover) -->
     <button
-      class="absolute top-2 right-2 cursor-pointer rounded p-1.5 shadow-lg transition-opacity"
+      class="absolute top-2 right-2 cursor-pointer rounded p-1.5 shadow-lg transition-all duration-200"
       :class="
         image.is_primary
-          ? 'bg-blue-600 text-white opacity-100 hover:bg-blue-700'
-          : 'bg-neutral-900/80 text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-blue-500'
+          ? 'bg-neutral-900 text-neutral-100 opacity-100 hover:opacity-80'
+          : 'bg-neutral-900/80 text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-neutral-100'
       "
       :title="image.is_primary ? 'Remove as primary' : 'Set as primary'"
       @click.stop="$emit('togglePrimary')"

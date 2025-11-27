@@ -39,7 +39,7 @@
         <button
           type="submit"
           :disabled="!hasChanges || saving"
-          class="cursor-pointer rounded bg-blue-600 px-2 py-2 text-[0.92rem] text-white transition-all duration-200 hover:bg-blue-700 disabled:opacity-50 md:px-4 md:text-base"
+          class="cursor-pointer rounded bg-neutral-100 px-2 py-2 text-[0.92rem] text-neutral-980 transition-all duration-200 hover:bg-neutral-300 disabled:opacity-50 md:px-4 md:text-base"
         >
           {{ saving ? "Saving..." : "Save Changes" }}
         </button>

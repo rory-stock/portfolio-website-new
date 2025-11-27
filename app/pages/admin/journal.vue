@@ -6,30 +6,15 @@
     <div>
       <ContentSection table="journal" title="Journal" :fields="contentFields" />
       <hr class="my-4" />
-      <ImageSection
-        context="journal"
-        title="Journal"
-        :fields="[
-          {
-            key: 'alt',
-            label: 'Alt Text',
-            type: 'text' as const,
-            placeholder: 'Image Alt Text',
-          },
-          {
-            key: 'description',
-            label: 'Description',
-            type: 'text' as const,
-            placeholder: 'Image Description',
-          },
-        ]"
-      />
+      <ImageSection context="journal" title="Journal" :fields="imageFields" />
     </div>
     <Toast />
   </div>
 </template>
 
 <script setup lang="ts">
+import type { ImageField } from "~~/types/imageTypes";
+
 definePageMeta({
   middleware: "authenticated",
   layout: "admin",
@@ -42,6 +27,21 @@ const contentFields = [
     key: "subtitle",
     label: "Subtitle",
     type: "text" as const,
+  },
+];
+
+const imageFields: ImageField[] = [
+  {
+    key: "alt",
+    label: "Alt Text",
+    type: "text" as const,
+    placeholder: "Image Alt Text",
+  },
+  {
+    key: "description",
+    label: "Description",
+    type: "text" as const,
+    placeholder: "Image Description",
   },
 ];
 </script>

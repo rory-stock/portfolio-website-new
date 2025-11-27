@@ -128,7 +128,7 @@ function closeModal() {
             </div>
             <button
               @click="closeModal"
-              class="cursor-pointer rounded-lg bg-neutral-300 p-2 transition-colors duration-200 hover:bg-neutral-400"
+              class="cursor-pointer rounded-lg bg-neutral-400 p-2 transition-colors duration-200 hover:bg-neutral-500"
               :disabled="isDeleting"
             >
               <Icon name="cross" class="h-5 w-5" />
@@ -143,9 +143,9 @@ function closeModal() {
               class="flex flex-col items-center justify-center gap-3 py-12"
             >
               <div
-                class="h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-blue-600"
+                class="h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-980"
               ></div>
-              <p class="text-gray-600">Loading orphaned files...</p>
+              <p class="text-neutral-600">Loading orphaned files...</p>
             </div>
 
             <!-- Error State -->
@@ -158,7 +158,7 @@ function closeModal() {
               </p>
               <button
                 @click="fetchOrphanedFiles"
-                class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-[0.92rem] text-white transition-colors hover:bg-blue-700 md:text-base"
+                class="cursor-pointer rounded-lg bg-neutral-980 px-4 py-2 text-[0.92rem] text-neutral-100 transition-colors hover:bg-neutral-800 md:text-base"
               >
                 Try Again
               </button>
@@ -211,7 +211,7 @@ function closeModal() {
                   </p>
                   <div class="flex items-center gap-3 text-sm text-neutral-600">
                     <span>{{ formatFileSize(file.size) }}</span>
-                    <span class="text-gray-400">•</span>
+                    <span class="text-neutral-400">•</span>
                     <span>{{ formatDate(file.lastModified) }}</span>
                   </div>
                 </div>
@@ -231,7 +231,7 @@ function closeModal() {
                 <strong>{{ orphanedFiles.length }}</strong>
                 orphaned {{ orphanedFiles.length === 1 ? "file" : "files" }}?
               </p>
-              <p class="text-center text-sm text-red-600">
+              <p class="text-center text-sm text-red-700">
                 This action cannot be undone.
               </p>
               <div class="flex gap-3">
@@ -244,7 +244,7 @@ function closeModal() {
                 </button>
                 <button
                   @click="handleDeleteAll"
-                  class="flex-1 cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  class="flex-1 cursor-pointer rounded-lg bg-red-800 px-4 py-2 text-neutral-100 transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50"
                   :disabled="isDeleting"
                 >
                   <span v-if="isDeleting">Deleting...</span>
@@ -257,7 +257,7 @@ function closeModal() {
             <button
               v-else
               @click="showConfirmation = true"
-              class="w-full cursor-pointer rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              class="w-full cursor-pointer rounded-lg bg-red-800 px-4 py-2 text-neutral-100 transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50"
               :disabled="isDeleting"
             >
               Delete All Orphaned Files ({{ orphanedFiles.length }})

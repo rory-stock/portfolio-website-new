@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div
       v-if="open && image"
-      class="bg-opacity-75 fixed inset-0 z-50 flex items-center justify-center bg-black"
+      class="bg-opacity-75 fixed inset-0 z-50 flex items-center justify-center bg-neutral-980"
       @click.self="$emit('close')"
     >
       <div
@@ -108,11 +108,11 @@
                 role="switch"
                 :aria-checked="formData.is_public"
                 @click="formData.is_public = !formData.is_public"
-                class="relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors"
-                :class="formData.is_public ? 'bg-blue-600' : 'bg-neutral-700'"
+                class="relative inline-flex h-6 w-12 cursor-pointer items-center rounded-full transition-colors"
+                :class="formData.is_public ? 'bg-neutral-100' : 'bg-neutral-700'"
               >
                 <span
-                  class="inline-block h-4 w-4 transform rounded-full bg-neutral-100 transition-transform"
+                  class="inline-block h-5 w-5 transform rounded-full bg-neutral-980 transition-transform"
                   :class="
                     formData.is_public ? 'translate-x-6' : 'translate-x-1'
                   "
@@ -165,7 +165,7 @@
                         allImageContexts.length === 1 &&
                         allImageContexts.includes(ctx)
                       "
-                      class="mr-2 rounded border-neutral-600 bg-neutral-700 text-blue-600 focus:ring-0 focus:ring-offset-neutral-800 disabled:opacity-50"
+                      class="mr-2 rounded border-neutral-600 bg-neutral-700 text-neutral-900 focus:ring-0 focus:ring-offset-neutral-800 disabled:opacity-50"
                     />
                     <span class="text-sm text-neutral-100 capitalize">{{
                       ctx
@@ -182,7 +182,7 @@
               <button
                 type="submit"
                 :disabled="!hasChanges || saving"
-                class="cursor-pointer rounded bg-blue-600 px-4 py-2 text-sm text-white transition-all duration-200 hover:bg-blue-700 disabled:opacity-50 md:text-base"
+                class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-980 transition-all duration-200 hover:bg-neutral-300 disabled:opacity-50 md:text-base"
               >
                 {{ saving ? "Saving..." : "Save Changes" }}
               </button>
@@ -198,7 +198,7 @@
                 type="button"
                 @click="handleDelete"
                 :disabled="deleting"
-                class="mt-6 cursor-pointer rounded bg-red-600 px-4 py-2 text-sm text-white transition-all duration-200 hover:bg-red-700 disabled:opacity-50 md:mt-0 md:ml-auto md:text-base"
+                class="mt-6 cursor-pointer rounded bg-red-800 px-4 py-2 text-sm text-white transition-all duration-200 hover:bg-red-900 disabled:opacity-50 md:mt-0 md:ml-auto md:text-base"
               >
                 {{ deleting ? "Deleting..." : "Delete Image" }}
               </button>
