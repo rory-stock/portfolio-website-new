@@ -30,6 +30,13 @@ const { data: event } = await useFetch("/api/content", {
 });
 
 const images = computed(() => imageData.value?.images || []);
+
+const eventURL = (eventName: string | null) => {
+  if (!eventName) return "/#";
+  return `/events/${encodeURIComponent(
+    eventName.toLowerCase().replace(/\s+/g, "-")
+  )}`;
+};
 </script>
 
 <template>
@@ -40,24 +47,26 @@ const images = computed(() => imageData.value?.images || []);
       {{ event?.subheader }}
     </h1>
 
-    <!-- Mobile: Single column -->
-    <div class="flex flex-col gap-4 p-4 md:hidden">
-      <ImageGridItem
-        v-for="image in images"
-        :key="image.id"
-        :image="image"
-      />
-    </div>
-
-    <!-- Desktop: grid layout -->
     <div
-      class="hidden grid-cols-3 gap-12 px-12 pt-4 md:grid lg:gap-6 lg:px-28 lg:pt-8 lg:pb-28 xl:grid-cols-2"
+      class="flex flex-col pt-2 pb-4 px-8 gap-8 md:px-20 md:gap-12 md:pb-12 lg:grid lg:grid-cols-2 lg:gap-x-24 lg:gap-y-12 lg:px-28"
     >
-      <ImageGridItem
+      <NuxtLink
         v-for="image in images"
+        :to="eventURL(image.event_name)"
         :key="image.id"
-        :image="image"
-      />
+        class="group flex flex-col"
+      >
+        <ImageGridItem
+          :key="image.id"
+          :image="image"
+          class="peer cursor-pointer"
+        />
+        <div
+          class="mt-1 lg:mt-2 flex font-ghost text-base md:text-xl group-hover:font-ghost-italic"
+        >
+          <p>{{ image.event_name }}</p>
+        </div>
+      </NuxtLink>
     </div>
   </div>
 </template>

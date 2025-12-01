@@ -3,16 +3,14 @@
     <h1 class="text-2xl font-bold text-white md:text-3xl">
       Overview Page Admin
     </h1>
-    <div>
-      <!--      <ContentSection table="overview" title="Overview" :fields="contentFields" />-->
-      <!--      <hr class="my-4" />-->
-      <ImageSection context="overview" title="Overview" />
-    </div>
+    <ImageSection context="overview" title="Overview" :fields="imageFields" />
     <Toast />
   </div>
 </template>
 
 <script setup lang="ts">
+import type { ImageField } from "~~/types/imageTypes";
+
 definePageMeta({
   middleware: "authenticated",
   layout: "admin",
@@ -20,11 +18,12 @@ definePageMeta({
 
 useHead({ title: "Admin" });
 
-// const contentFields = [
-//   {
-//     key: "subtitle",
-//     label: "Subtitle",
-//     type: "text" as const,
-//   },
-// ];
+const imageFields: ImageField[] = [
+  {
+    key: "alt",
+    label: "Alt Text",
+    type: "text" as const,
+    placeholder: "Image Alt Text",
+  }
+]
 </script>

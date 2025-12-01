@@ -11,7 +11,7 @@ const emit = defineEmits<{
 <template>
   <div
     @click="emit('click', image)"
-    class="group mt-auto mb-auto cursor-pointer bg-gray-100"
+    class="group mt-auto mb-auto bg-gray-100"
   >
     <NuxtPicture
       :src="image.r2_path"

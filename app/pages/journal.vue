@@ -40,25 +40,15 @@ const selectedImage = ref<(typeof images.value)[0] | null>(null);
       {{ journal?.subtitle }}
     </h1>
 
-    <!-- Mobile: Single column -->
-    <div class="flex flex-col gap-4 p-4 md:hidden">
-      <ImageGridItem
-        v-for="image in images"
-        :key="image.id"
-        :image="image"
-        @click="selectedImage = image"
-      />
-    </div>
-
-    <!-- Desktop: grid layout -->
     <div
-      class="hidden grid-cols-3 gap-12 px-12 pt-4 md:grid lg:gap-14 lg:px-28 lg:pt-8 lg:pb-28 xl:grid-cols-4"
+      class="flex flex-col gap-4 p-4 md:grid md:grid-cols-3 md:gap-12 md:px-12 md:pt-4 md:pb-0 lg:gap-14 lg:px-28 lg:pt-8 lg:pb-28 xl:grid-cols-4"
     >
       <ImageGridItem
         v-for="image in images"
         :key="image.id"
         :image="image"
         @click="selectedImage = image"
+        class="cursor-pointer"
       />
     </div>
 
