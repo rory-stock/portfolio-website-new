@@ -1,11 +1,13 @@
 <template>
   <div class="rounded border border-neutral-800 bg-neutral-900 p-6">
     <h2 class="mb-3 text-xl font-bold text-neutral-100 md:mb-6 md:text-2xl">
-      {{ title }}
+      {{ title }} Content
     </h2>
 
-    <div v-if="loading" class="text-neutral-400">Loading...</div>
-    <div v-else-if="error" class="text-red-400">{{ error }}</div>
+    <div v-if="isLoading" class="text-neutral-400">Loading...</div>
+    <div v-else-if="fetchError" class="text-red-400" role="alert">
+      {{ fetchError }}
+    </div>
 
     <form v-else @submit.prevent="handleSave" class="space-y-4">
       <div v-for="field in fields" :key="field.key" class="space-y-1">
@@ -39,7 +41,7 @@
         <button
           type="submit"
           :disabled="!hasChanges || saving"
-          class="cursor-pointer rounded bg-neutral-100 px-2 py-2 text-[0.92rem] text-neutral-980 transition-all duration-200 hover:bg-neutral-300 disabled:opacity-50 md:px-4 md:text-base"
+          class="cursor-pointer rounded bg-neutral-100 px-2 py-2 text-[0.92rem] text-neutral-980 transition-all duration-200 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:px-4 md:text-base"
         >
           {{ saving ? "Saving..." : "Save Changes" }}
         </button>
@@ -47,7 +49,7 @@
           type="button"
           @click="handleDiscard"
           :disabled="!hasChanges || saving"
-          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:opacity-50 md:px-4 md:text-base"
+          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 md:px-4 md:text-base"
         >
           Discard Changes
         </button>
@@ -57,6 +59,8 @@
 </template>
 
 <script setup lang="ts">
+import { useAsyncState, useCloned, onKeyStroke } from "@vueuse/core";
+
 interface Field {
   key: string;
   label: string;
@@ -70,50 +74,61 @@ interface Props {
   title: string;
 }
 
+interface ContentItem {
+  key: string;
+  value: string;
+}
+
+type FormData = Record<string, string>;
+
 const props = defineProps<Props>();
 const { success, error: showError } = useToast();
 
-const loading = ref(true);
-const error = ref("");
 const saving = ref(false);
 
-const originalData = ref<Record<string, string>>({});
-const formData = ref<Record<string, string>>({});
+const {
+  state: contentData,
+  isLoading,
+  error: fetchError,
+  execute: fetchContent,
+} = useAsyncState(
+  async () => {
+    const response = await $fetch<ContentItem[]>(
+      `/api/content?table=${props.table}`
+    );
 
-const hasChanges = computed(() => {
-  return props.fields.some(
-    (field) => formData.value[field.key] !== originalData.value[field.key]
-  );
-});
-
-const fetchContent = async () => {
-  loading.value = true;
-  error.value = "";
-
-  try {
-    const response = await $fetch(`/api/content?table=${props.table}`);
-
-    // Convert array of {key, value} to object
-    const data: Record<string, string> = {};
-    for (const item of response as any[]) {
+    // Convert the array of {key, value} to an object
+    const data: FormData = {};
+    for (const item of response) {
       data[item.key] = item.value || "";
     }
 
     // Initialize form with field keys (even if not in DB yet)
-    const initialized: Record<string, string> = {};
+    const initialized: FormData = {};
     for (const field of props.fields) {
       initialized[field.key] = data[field.key] || "";
     }
 
-    originalData.value = { ...initialized };
-    formData.value = { ...initialized };
-  } catch (e: any) {
-    error.value = e.message || "Failed to load content";
-    showError(error.value);
-  } finally {
-    loading.value = false;
+    return initialized;
+  },
+  {} as FormData,
+  {
+    immediate: true,
+    onError: (e) => {
+      const message = e instanceof Error ? e.message : "Failed to load content";
+      showError(message);
+    },
   }
-};
+);
+
+const { cloned: formData, sync } = useCloned(contentData);
+
+// Check if form has changes
+const hasChanges = computed(() => {
+  return props.fields.some(
+    (field) => formData.value[field.key] !== contentData.value[field.key]
+  );
+});
 
 const handleSave = async () => {
   saving.value = true;
@@ -121,7 +136,7 @@ const handleSave = async () => {
   try {
     const updates = props.fields
       .filter(
-        (field) => formData.value[field.key] !== originalData.value[field.key]
+        (field) => formData.value[field.key] !== contentData.value[field.key]
       )
       .map((field) => ({
         key: field.key,
@@ -141,21 +156,41 @@ const handleSave = async () => {
       },
     });
 
-    originalData.value = { ...formData.value };
+    // Refetch from the server to get the latest state
+    await fetchContent();
+    sync();
+
     success("Content saved successfully");
-  } catch (e: any) {
-    showError(e.message || "Failed to save content");
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to save content";
+    showError(message);
   } finally {
     saving.value = false;
   }
 };
 
 const handleDiscard = () => {
-  formData.value = { ...originalData.value };
+  sync(); // Reset to original
   success("Changes discarded");
 };
 
-onMounted(() => {
-  fetchContent();
+// Keyboard shortcut: Ctrl/Cmd + S to save
+onKeyStroke(
+  "s",
+  (e) => {
+    if ((e.ctrlKey || e.metaKey) && hasChanges.value && !saving.value) {
+      e.preventDefault();
+      handleSave();
+    }
+  },
+  { dedupe: true }
+);
+
+// Revert changes on Ctrl/Cmd + Z
+onKeyStroke("z", (e) => {
+  if ((e.ctrlKey || e.metaKey) && hasChanges.value && !saving.value) {
+    e.preventDefault();
+    handleDiscard();
+  }
 });
 </script>

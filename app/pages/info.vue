@@ -37,7 +37,7 @@ const { data: info } = await useFetch("/api/content", {
 </script>
 
 <template>
-  <div class="md:flex md:flex-1 md:grow md:justify-start">
+  <div class="md:flex md:flex-1 md:grow md:justify-start md:mt-20 md:ml-10">
     <!-- Profile Image -->
     <div
       class="mx-3 w-full flex-1 pt-3 grayscale md:max-w-80 lg:mx-0 lg:max-w-80 lg:pt-4 lg:pl-4 xl:max-w-[20rem]"

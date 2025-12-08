@@ -1,10 +1,7 @@
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
 import { getR2Object, deleteR2Object } from "~~/server/utils/r2";
-import {
-  VALID_CONTEXTS,
-  isValidContext,
-} from "~~/server/utils/context";
+import { VALID_CONTEXTS, isValidContext } from "~~/server/utils/context";
 import {
   createImageRecord,
   type ImageConfirmBody,
@@ -60,6 +57,17 @@ export default defineEventHandler(async (event) => {
       chunks.push(chunk);
     }
     const buffer = Buffer.concat(chunks);
+
+    // Validate file size
+    const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60MB
+    if (buffer.length > MAX_FILE_SIZE) {
+      // Cleanup: delete from R2
+      await deleteR2Object(body.r2_path);
+      throw createError({
+        statusCode: 400,
+        message: "File too large. Maximum size is 60MB",
+      });
+    }
 
     const config = useRuntimeConfig();
 

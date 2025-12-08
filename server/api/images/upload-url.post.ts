@@ -22,15 +22,24 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event);
-  const { filename, context } = body as {
+  const { filename, context, fileSize } = body as {
     filename: string;
     context: Context;
+    fileSize?: number;
   };
 
   if (!filename || !context) {
     throw createError({
       statusCode: 400,
       message: "filename and context required",
+    });
+  }
+
+  const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60MB
+  if (fileSize && fileSize > MAX_FILE_SIZE) {
+    throw createError({
+      statusCode: 400,
+      message: "File too large. Maximum size is 60MB",
     });
   }
 

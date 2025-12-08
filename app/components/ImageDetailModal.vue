@@ -1,218 +1,269 @@
 <template>
   <Teleport to="body">
-    <div
-      v-if="open && image"
-      class="bg-opacity-75 fixed inset-0 z-50 flex items-center justify-center bg-neutral-980"
-      @click.self="$emit('close')"
+    <Transition
+      enter-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
     >
       <div
-        class="m-4 max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-900"
+        v-if="open && image"
+        class="bg-opacity-75 fixed inset-0 z-50 flex items-center justify-center bg-neutral-980"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        @click.self="handleClose"
       >
-        <!-- Header -->
         <div
-          class="flex items-center justify-between border-b border-neutral-800 p-6"
+          ref="modalRef"
+          class="m-4 max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-900"
         >
-          <h3 class="text-xl font-bold text-neutral-100">Image Details</h3>
-          <button
-            @click="$emit('close')"
-            class="cursor-pointer text-2xl text-neutral-400 transition-colors duration-200 hover:text-neutral-200"
+          <!-- Header -->
+          <div
+            class="flex items-center justify-between border-b border-neutral-800 p-6"
           >
-            ×
-          </button>
-        </div>
-
-        <!-- Content -->
-        <div class="space-y-6 p-6">
-          <!-- Image preview -->
-          <div class="flex justify-center rounded bg-neutral-950 p-4">
-            <NuxtPicture
-              :src="`${image.r2_path}`"
-              :alt="image.alt"
-              format="webp"
-              class="max-h-1/12 object-contain"
-            />
+            <h3 id="modal-title" class="text-xl font-bold text-neutral-100">
+              Image Details
+            </h3>
+            <button
+              @click="handleClose"
+              class="cursor-pointer text-2xl text-neutral-400 transition-colors duration-200 hover:text-neutral-200 focus:outline-0"
+              aria-label="Close modal"
+            >
+              <Icon name="cross" width="20" height="20" />
+            </button>
           </div>
 
-          <!-- Metadata -->
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span class="text-neutral-400">Dimensions:</span>
-              <span class="ml-2 text-neutral-100"
-                >{{ image.width }} × {{ image.height }}</span
-              >
-            </div>
-            <div>
-              <span class="text-neutral-400">File Size:</span>
-              <span class="ml-2 text-neutral-100">{{
-                formatFileSize(image.file_size)
-              }}</span>
-            </div>
-            <div>
-              <span class="text-neutral-400">Filename:</span>
-              <span class="ml-2 text-neutral-100">{{
-                image.original_filename
-              }}</span>
-            </div>
-            <div>
-              <span class="text-neutral-400">Uploaded:</span>
-              <span class="ml-2 text-neutral-100">{{
-                formatDate(image.uploaded_at)
-              }}</span>
-            </div>
-          </div>
-
-          <!-- Editable fields -->
-          <form
-            @submit.prevent="handleSave"
-            class="no-scrollbar space-y-4 overflow-y-auto px-1"
-          >
-            <div v-for="field in fields" :key="field.key" class="space-y-1">
-              <label
-                :for="field.key"
-                class="block font-medium text-neutral-100"
-              >
-                {{ field.label }}
-              </label>
-
-              <textarea
-                v-if="field.type === 'textarea'"
-                :id="field.key"
-                v-model="formData[field.key]"
-                :rows="field.rows || 5"
-                :placeholder="field.placeholder"
-                class="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:bg-neutral-700 focus:outline-0"
-              />
-
-              <input
-                v-else
-                :id="field.key"
-                :type="field.type || 'text'"
-                v-model="formData[field.key]"
-                :placeholder="field.placeholder"
-                class="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:bg-neutral-700 focus:outline-0"
+          <!-- Content -->
+          <div class="space-y-6 p-6">
+            <!-- Image preview -->
+            <div class="flex justify-center">
+              <NuxtPicture
+                :src="image.r2_path"
+                :alt="image.alt"
+                format="webp"
+                class="max-h-1/12 object-contain transition-all duration-300"
+                :class="{ 'blur-sm': !imageLoaded }"
+                @load="imageLoaded = true"
               />
             </div>
 
-            <!-- Toggle Switch for is_public -->
-            <div class="flex items-center justify-between">
+            <!-- Metadata -->
+            <div class="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <label for="is_public" class="font-medium text-neutral-100">
-                  Public Visibility
-                </label>
-                <p class="text-sm text-neutral-400">
-                  Allow viewing without authentication
-                </p>
+                <span class="text-neutral-400">Dimensions:</span>
+                <span class="ml-2 text-neutral-100"
+                  >{{ image.width }} × {{ image.height }}</span
+                >
               </div>
-              <button
-                type="button"
-                role="switch"
-                :aria-checked="formData.is_public"
-                @click="formData.is_public = !formData.is_public"
-                class="relative inline-flex h-6 w-12 cursor-pointer items-center rounded-full transition-colors"
-                :class="formData.is_public ? 'bg-neutral-100' : 'bg-neutral-700'"
-              >
-                <span
-                  class="inline-block h-5 w-5 transform rounded-full bg-neutral-980 transition-transform"
-                  :class="
-                    formData.is_public ? 'translate-x-6' : 'translate-x-1'
-                  "
-                />
-              </button>
+              <div>
+                <span class="text-neutral-400">File Size:</span>
+                <span class="ml-2 text-neutral-100">{{
+                  formatFileSize(image.file_size)
+                }}</span>
+              </div>
+              <div>
+                <span class="text-neutral-400">Filename:</span>
+                <span class="ml-2 text-neutral-100">{{
+                  image.original_filename
+                }}</span>
+              </div>
+              <div>
+                <span class="text-neutral-400">Uploaded:</span>
+                <span class="ml-2 text-neutral-100">{{
+                  formatDate(image.uploaded_at)
+                }}</span>
+              </div>
             </div>
 
-            <!-- Context selection dropdown -->
-            <div class="relative mb-4">
-              <label class="mb-1 block font-medium text-neutral-100">
-                Contexts
-              </label>
+            <!-- Editable fields -->
+            <form
+              @submit.prevent="handleSave"
+              class="no-scrollbar space-y-4 overflow-y-auto px-1"
+            >
+              <div v-for="field in fields" :key="field.key" class="space-y-1">
+                <label
+                  :for="field.key"
+                  class="block font-medium text-neutral-100"
+                >
+                  {{ field.label }}
+                </label>
 
-              <div v-if="isLoadingContexts" class="text-sm text-neutral-500">
-                Loading...
+                <textarea
+                  v-if="field.type === 'textarea'"
+                  :id="field.key"
+                  v-model="formData[field.key]"
+                  :rows="field.rows || 5"
+                  :placeholder="field.placeholder"
+                  class="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:bg-neutral-700 focus:outline-0"
+                />
+
+                <input
+                  v-else
+                  :id="field.key"
+                  :type="field.type || 'text'"
+                  v-model="formData[field.key]"
+                  :placeholder="field.placeholder"
+                  class="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:bg-neutral-700 focus:outline-0"
+                />
               </div>
 
-              <div v-else ref="contextDropdownRef">
-                <!-- Dropdown trigger -->
+              <!-- Toggle Switch for is_public -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <label for="is_public" class="font-medium text-neutral-100">
+                    Public Visibility
+                  </label>
+                  <p class="text-sm text-neutral-400">
+                    Allow viewing without authentication
+                  </p>
+                </div>
                 <button
+                  id="is_public"
                   type="button"
-                  @click="isContextDropdownOpen = !isContextDropdownOpen"
-                  class="flex w-full items-center justify-between rounded-lg border border-neutral-600 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:ring-0"
+                  role="switch"
+                  :aria-checked="formData.is_public"
+                  @click="togglePublic"
+                  @keydown.space.prevent="togglePublic"
+                  @keydown.enter.prevent="togglePublic"
+                  class="relative inline-flex h-6 w-12 cursor-pointer items-center rounded-full transition-colors focus:outline-0"
+                  :class="
+                    formData.is_public ? 'bg-neutral-100' : 'bg-neutral-700'
+                  "
                 >
-                  <span>Select Contexts</span>
-                  <Icon
-                    name="chevron"
-                    width="21"
-                    height="21"
-                    class="transition-transform duration-200"
-                    :class="{ 'rotate-180': isContextDropdownOpen }"
+                  <span
+                    class="inline-block h-5 w-5 transform rounded-full bg-neutral-980 transition-transform"
+                    :class="
+                      formData.is_public ? 'translate-x-6' : 'translate-x-1'
+                    "
                   />
                 </button>
+              </div>
 
-                <!-- Dropdown menu -->
-                <div
-                  v-if="isContextDropdownOpen"
-                  class="absolute z-50 mt-1 mb-4 w-full rounded-lg border-1 border-neutral-700 bg-neutral-800 py-1"
-                >
-                  <label
-                    v-for="ctx in availableContexts"
-                    :key="ctx"
-                    class="mx-2 flex cursor-pointer items-center rounded-lg px-3 py-2 hover:bg-neutral-700"
+              <!-- Context selection dropdown -->
+              <div class="relative mb-4">
+                <label class="mb-1 block font-medium text-neutral-100">
+                  Contexts
+                </label>
+
+                <div v-if="isLoadingContexts" class="text-sm text-neutral-500">
+                  Loading...
+                </div>
+
+                <div v-else ref="contextDropdownRef" class="relative">
+                  <!-- Dropdown trigger -->
+                  <button
+                    type="button"
+                    @click="toggleDropdown"
+                    class="flex w-full items-center justify-between rounded-lg border border-neutral-600 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 transition-colors duration-200 hover:bg-neutral-700 focus:outline-0"
+                    :aria-expanded="isContextDropdownOpen"
+                    aria-haspopup="listbox"
                   >
-                    <input
-                      type="checkbox"
-                      :value="ctx"
-                      v-model="allImageContexts"
-                      :disabled="
-                        allImageContexts.length === 1 &&
-                        allImageContexts.includes(ctx)
-                      "
-                      class="mr-2 rounded border-neutral-600 bg-neutral-700 text-neutral-900 focus:ring-0 focus:ring-offset-neutral-800 disabled:opacity-50"
+                    <span>Select Contexts</span>
+                    <Icon
+                      name="chevron"
+                      width="21"
+                      height="21"
+                      class="transition-transform duration-200"
+                      :class="{ 'rotate-180': isContextDropdownOpen }"
+                      aria-hidden="true"
                     />
-                    <span class="text-sm text-neutral-100 capitalize">{{
-                      ctx
-                    }}</span>
-                  </label>
+                  </button>
+
+                  <!-- Dropdown menu -->
+                  <Transition
+                    enter-active-class="transition-all duration-200"
+                    enter-from-class="opacity-0 scale-95"
+                    enter-to-class="opacity-100 scale-100"
+                    leave-active-class="transition-all duration-150"
+                    leave-from-class="opacity-100 scale-100"
+                    leave-to-class="opacity-0 scale-95"
+                  >
+                    <div
+                      v-if="isContextDropdownOpen"
+                      class="absolute z-50 mt-1 mb-4 w-full rounded-lg border border-neutral-700 bg-neutral-800 py-1 shadow-xl"
+                      role="listbox"
+                      aria-label="Context options"
+                    >
+                      <label
+                        v-for="ctx in availableContexts"
+                        :key="ctx"
+                        class="mx-2 flex cursor-pointer items-center rounded-lg px-3 py-2 hover:bg-neutral-700"
+                        role="option"
+                        :aria-selected="allImageContexts.includes(ctx)"
+                      >
+                        <span
+                          class="relative mr-3 flex h-5 w-5 flex-shrink-0 items-center justify-center"
+                        >
+                          <input
+                            type="checkbox"
+                            :value="ctx"
+                            v-model="allImageContexts"
+                            :disabled="
+                              allImageContexts.length === 1 &&
+                              allImageContexts.includes(ctx)
+                            "
+                            class="peer absolute h-5 w-5 cursor-pointer appearance-none rounded border-2 border-neutral-600 bg-neutral-800 transition-all duration-200 checked:border-neutral-100 checked:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                          <Icon
+                            name="check"
+                            :size="20"
+                            stroke="black"
+                            :strokeWidth="1"
+                            class="pointer-events-none absolute text-neutral-900 opacity-0 transition-opacity duration-200 peer-checked:opacity-100"
+                          />
+                        </span>
+                        <span class="text-sm text-neutral-100 capitalize">{{
+                          ctx
+                        }}</span>
+                      </label>
+                    </div>
+                  </Transition>
                 </div>
               </div>
-            </div>
 
-            <!-- Action buttons -->
-            <div
-              class="flex flex-col gap-2 border-t border-neutral-800 pt-4 md:flex-row md:gap-3"
-            >
-              <button
-                type="submit"
-                :disabled="!hasChanges || saving"
-                class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-980 transition-all duration-200 hover:bg-neutral-300 disabled:opacity-50 md:text-base"
+              <!-- Action buttons -->
+              <div
+                class="flex flex-col gap-2 border-t border-neutral-800 pt-4 md:flex-row md:gap-3"
               >
-                {{ saving ? "Saving..." : "Save Changes" }}
-              </button>
-              <button
-                type="button"
-                @click="handleDiscard"
-                :disabled="!hasChanges || saving"
-                class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:opacity-50 md:text-base"
-              >
-                Discard Changes
-              </button>
-              <button
-                type="button"
-                @click="handleDelete"
-                :disabled="deleting"
-                class="mt-6 cursor-pointer rounded bg-red-800 px-4 py-2 text-sm text-white transition-all duration-200 hover:bg-red-900 disabled:opacity-50 md:mt-0 md:ml-auto md:text-base"
-              >
-                {{ deleting ? "Deleting..." : "Delete Image" }}
-              </button>
-            </div>
-          </form>
+                <button
+                  type="submit"
+                  :disabled="!hasChanges || saving"
+                  class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-980 transition-all duration-200 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+                >
+                  {{ saving ? "Saving..." : "Save Changes" }}
+                </button>
+                <button
+                  type="button"
+                  @click="handleDiscard"
+                  :disabled="!hasChanges || saving"
+                  class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+                >
+                  Discard Changes
+                </button>
+                <button
+                  type="button"
+                  @click="handleDelete"
+                  :disabled="deleting"
+                  class="mt-6 cursor-pointer rounded bg-red-800 px-4 py-2 text-sm text-white transition-all duration-200 hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50 md:mt-0 md:ml-auto md:text-base"
+                >
+                  {{ deleting ? "Deleting..." : "Delete Image" }}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>
 
 <script setup lang="ts">
 import type { ImageBase, ImageField } from "~~/types/imageTypes";
-import { onClickOutside } from "@vueuse/core";
+import { onClickOutside, onKeyStroke } from "@vueuse/core";
+import { formatFileSize } from "~~/server/utils/formatFileSize";
 
 interface Props {
   open: boolean;
@@ -231,10 +282,27 @@ const emit = defineEmits<{
 const { success, error: showError } = useToast();
 
 const isContextDropdownOpen = ref(false);
+
+const toggleDropdown = () => {
+  isContextDropdownOpen.value = !isContextDropdownOpen.value;
+};
 const contextDropdownRef = ref(null);
+const modalRef = ref<HTMLElement>();
+
+const modalState = useModalState();
+if (modalState) {
+  watch(
+    () => props.open,
+    (value) => {
+      modalState.isDetailModalOpen.value = value;
+    }
+  );
+}
 
 const saving = ref(false);
 const deleting = ref(false);
+
+const imageLoaded = ref(false);
 
 const originalData = ref<Record<string, any>>({
   is_public: false,
@@ -253,8 +321,47 @@ const originalContexts = ref<string[]>(
 const availableContexts = ref<string[]>([]);
 const isLoadingContexts = ref(true);
 
+// Close dropdown when clicking outside
 onClickOutside(contextDropdownRef, () => {
   isContextDropdownOpen.value = false;
+});
+
+// Close modal on Escape key
+onKeyStroke("Escape", (e) => {
+  if (props.open && !isContextDropdownOpen.value) {
+    e.preventDefault();
+    handleClose();
+  }
+});
+
+// Save on Ctrl/Cmd + S
+onKeyStroke(
+  "s",
+  (e) => {
+    if (
+      props.open &&
+      (e.ctrlKey || e.metaKey) &&
+      hasChanges.value &&
+      !saving.value
+    ) {
+      e.preventDefault();
+      handleSave();
+    }
+  },
+  { dedupe: true }
+);
+
+// Revert changes on Ctrl/Cmd + Z
+onKeyStroke("z", (e) => {
+  if (
+    props.open &&
+    (e.ctrlKey || e.metaKey) &&
+    hasChanges.value &&
+    !saving.value
+  ) {
+    e.preventDefault();
+    handleDiscard();
+  }
 });
 
 const loadContextData = async () => {
@@ -319,12 +426,6 @@ watch(
   { immediate: true }
 );
 
-const formatFileSize = (bytes: number) => {
-  if (bytes < 1024) return bytes + " B";
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-};
-
 const formatDate = (date: string | Date) => {
   return new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
@@ -333,6 +434,20 @@ const formatDate = (date: string | Date) => {
     hour: "2-digit",
     minute: "2-digit",
   });
+};
+
+const togglePublic = () => {
+  formData.value.is_public = !formData.value.is_public;
+};
+
+const handleClose = () => {
+  if (hasChanges.value) {
+    if (confirm("You have unsaved changes. Are you sure you want to close?")) {
+      emit("close");
+    }
+  } else {
+    emit("close");
+  }
 };
 
 const handleSave = async () => {

@@ -15,7 +15,7 @@ const pages: PageConfig[] = [
     label: "Overview",
     publicPath: "/",
     publicRouteName: "index",
-    adminPath: "/admin/overview",
+    adminPath: "/admin",
     icon: "overview",
     isPublic: true,
     context: "overview",
@@ -43,13 +43,15 @@ const pages: PageConfig[] = [
     publicPath: "/info",
     publicRouteName: "info",
     adminPath: "/admin/info",
-    icon: "info",
+    icon: "globe",
     isPublic: true,
     context: "info",
   },
 ];
 
 export const PAGE_CONTEXTS = pages.map((p) => p.context) as string[];
+
+export const headerTransparentRoutes = ["index"];
 
 export const useNavigation = () => {
   // For public header navigation (DesktopNav, MobileMenu)

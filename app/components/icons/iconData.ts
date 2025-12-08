@@ -1,38 +1,48 @@
-export type IconName =
-  | "settings"
-  | "dashboard"
-  | "overview"
-  | "journal"
-  | "info"
-  | "logout"
-  | "back"
-  | "smile"
-  | "footer"
-  | "cross"
-  | "cleanup"
-  | "file"
-  | "event"
-  | "chevron"
-  | "star";
+export const iconNames = [
+  "settings",
+  "dashboard",
+  "overview",
+  "journal",
+  "globe",
+  "logout",
+  "back",
+  "smile",
+  "footer",
+  "cross",
+  "cleanup",
+  "file",
+  "event",
+  "chevron",
+  "star",
+  "check",
+  "info",
+] as const;
 
-type fillRule = "nonzero" | "evenodd" | "inherit";
-type strokeLinecap = "round" | "butt" | "square" | "inherit";
-type strokeLinejoin = "round" | "inherit" | "bevel" | "miter";
+export type IconName = (typeof iconNames)[number];
 
-export const iconData: Record<
-  IconName,
-  {
-    viewBox: string;
-    path?: string;
-    paths?: string[];
-    fill?: string;
-    fillRule?: fillRule;
-    stroke?: string;
-    strokeLinecap?: strokeLinecap;
-    strokeLinejoin?: strokeLinejoin;
-    strokeWidth?: string;
-  }
-> = {
+interface BaseIconData {
+  viewBox: string;
+  fill?: string;
+  fillRule?: "nonzero" | "evenodd" | "inherit";
+  stroke?: string;
+  strokeLinecap?: "round" | "butt" | "square" | "inherit";
+  strokeLinejoin?: "round" | "inherit" | "bevel" | "miter";
+  strokeWidth?: string;
+}
+
+interface SinglePathIcon extends BaseIconData {
+  path: string;
+  paths?: never;
+}
+
+interface MultiPathIcon extends BaseIconData {
+  paths: string[];
+  path?: never;
+}
+
+type IconData = SinglePathIcon | MultiPathIcon;
+
+export const iconData: Record<IconName, IconData> = {
   settings: {
     viewBox: "0 0 24 24",
     path: "M10.825 22q-.675 0-1.162-.45t-.588-1.1L8.85 18.8q-.325-.125-.612-.3t-.563-.375l-1.55.65q-.625.275-1.25.05t-.975-.8l-1.175-2.05q-.35-.575-.2-1.225t.675-1.075l1.325-1Q4.5 12.5 4.5 12.337v-.675q0-.162.025-.337l-1.325-1Q2.675 9.9 2.525 9.25t.2-1.225L3.9 5.975q.35-.575.975-.8t1.25.05l1.55.65q.275-.2.575-.375t.6-.3l.225-1.65q.1-.65.588-1.1T10.825 2h2.35q.675 0 1.163.45t.587 1.1l.225 1.65q.325.125.613.3t.562.375l1.55-.65q.625-.275 1.25-.05t.975.8l1.175 2.05q.35.575.2 1.225t-.675 1.075l-1.325 1q.025.175.025.338v.674q0 .163-.05.338l1.325 1q.525.425.675 1.075t-.2 1.225l-1.2 2.05q-.35.575-.975.8t-1.25-.05l-1.5-.65q-.275.2-.575.375t-.6.3l-.225 1.65q-.1.65-.587 1.1t-1.163.45zM11 20h1.975l.35-2.65q.775-.2 1.438-.587t1.212-.938l2.475 1.025l.975-1.7l-2.15-1.625q.125-.35.175-.737T17.5 12t-.05-.787t-.175-.738l2.15-1.625l-.975-1.7l-2.475 1.05q-.55-.575-1.212-.962t-1.438-.588L13 4h-1.975l-.35 2.65q-.775.2-1.437.588t-1.213.937L5.55 7.15l-.975 1.7l2.15 1.6q-.125.375-.175.75t-.05.8q0 .4.05.775t.175.75l-2.15 1.625l.975 1.7l2.475-1.05q.55.575 1.213.963t1.437.587zm1.05-4.5q1.45 0 2.475-1.025T15.55 12t-1.025-2.475T12.05 8.5q-1.475 0-2.487 1.025T8.55 12t1.013 2.475T12.05 15.5M12 12",
@@ -49,7 +59,7 @@ export const iconData: Record<
     viewBox: "0 0 15 15",
     path: "M9 0a1 1 0 0 1 1 1v1h4a1 1 0 0 1 1 1v3a3 3 0 0 1-1 2.234V11.5a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 1 11.5V8.233A3 3 0 0 1 0 6V3a1 1 0 0 1 1-1h4V1a1 1 0 0 1 1-1zm4 8.827c-.313.11-.65.173-1 .173H8v.5a.5.5 0 0 1-1 0V9H3c-.35 0-.687-.062-1-.173V11.5a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5zM1 6c0 .654.313 1.235.8 1.6l.13.09c.31.196.676.31 1.07.31h4v-.5a.5.5 0 0 1 1 0V8h4c.45 0 .866-.148 1.2-.4l.174-.147C13.76 7.088 14 6.573 14 6V3H1zm5-4h3V1H6z",
   },
-  info: {
+  globe: {
     viewBox: "0 0 15 15",
     path: "M7.5.9a6.6 6.6 0 1 1-.002 13.201A6.6 6.6 0 0 1 7.5.901m-2.216 9.805a7 7 0 0 0 1.575 2.458q.12.013.24.02v-2.338a17 17 0 0 1-1.815-.14m4.489-.006c-.611.083-1.242.131-1.873.145v2.34q.122-.008.242-.021A7 7 0 0 0 9.773 10.7m-7.415-.737a5.72 5.72 0 0 0 3.355 2.95a8.2 8.2 0 0 1-1.217-2.333a11 11 0 0 1-2.138-.617m10.283 0a11 11 0 0 1-2.072.605a8 8 0 0 1-1.253 2.335a5.7 5.7 0 0 0 3.325-2.94M4.71 7.9c.03.703.139 1.398.327 2.063c.661.104 1.358.165 2.063.182V7.9zm3.19 2.245a16 16 0 0 0 2.13-.192a8.8 8.8 0 0 0 .337-2.053H7.9zM1.816 7.9q.041.579.191 1.12c.628.345 1.407.612 2.27.8a10 10 0 0 1-.268-1.92zm9.252 0a9.5 9.5 0 0 1-.274 1.905c.735-.164 1.408-.386 1.975-.666l.224-.118q.15-.541.192-1.121zm-6.74-2.925c-.854.183-1.625.443-2.253.777q-.208.645-.258 1.347h2.192a9.8 9.8 0 0 1 .319-2.124M7.1 4.662a16 16 0 0 0-2.003.173a9 9 0 0 0-.388 2.264H7.1zm.8 2.437h2.467a8.7 8.7 0 0 0-.399-2.255A16 16 0 0 0 7.9 4.662zm2.84-2.11c.188.686.298 1.397.328 2.11h2.117a5.7 5.7 0 0 0-.26-1.348l-.156-.082c-.58-.287-1.272-.514-2.028-.68M5.714 2.087a5.72 5.72 0 0 0-3.231 2.707a11 11 0 0 1 2.086-.58a8 8 0 0 1 1.145-2.127m3.603.01c.5.642.892 1.362 1.178 2.128c.724.136 1.41.325 2.021.568a5.7 5.7 0 0 0-3.2-2.696M7.9 3.963a17 17 0 0 1 1.788.135a7 7 0 0 0-1.545-2.261a6 6 0 0 0-.243-.022zm-.8-2.148q-.122.009-.242.022A7 7 0 0 0 5.367 4.09c.567-.072 1.15-.115 1.732-.128z",
   },
@@ -121,4 +131,14 @@ export const iconData: Record<
     fill: "currentColor",
     path: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2L9.19 8.62L2 9.24l5.45 4.73L5.82 21z",
   },
-};
+  check: {
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    path: "M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z",
+  },
+  info: {
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    path: "M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8",
+  },
+} as const;

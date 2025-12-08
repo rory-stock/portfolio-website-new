@@ -1,7 +1,8 @@
-<script setup lang="ts"></script>
-
 <template>
-  <header>
+  <header
+    class="bg-white md:fixed md:top-0 md:right-0 md:left-0 md:z-30 md:transition-colors md:duration-500 md:ease-in-out"
+    :class="headerClass"
+  >
     <div class="flex flex-col align-middle">
       <div
         class="md:pt2.5 flex items-center justify-between pt-1.5 pb-1.5 select-none md:pb-2.5"
@@ -16,11 +17,20 @@
           <DesktopNav />
         </div>
       </div>
-
-      <div class="h-[0.22rem] w-full bg-black"></div>
+      <div class="h-[0.22rem] w-full bg-black md:hidden"></div>
     </div>
     <div id="mobile-menu-teleport" class="md:hidden"></div>
   </header>
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+import { headerTransparentRoutes } from "~/composables/useNavigation";
+
+const route = useRoute();
+
+const headerClass = computed(() =>
+  headerTransparentRoutes.includes(route.name as string)
+    ? "md:bg-transparent"
+    : ""
+);
+</script>

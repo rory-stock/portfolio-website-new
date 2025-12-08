@@ -1,6 +1,23 @@
+<template>
+  <div class="md:hidden">
+    <button
+      type="button"
+      @click="toggle()"
+      class="pr-3 pb-3"
+      aria-label="Toggle mobile menu"
+    >
+      <Hamburger :isOpen="isOpen" />
+    </button>
+    <MobileMenu :isOpen="isOpen" />
+  </div>
+</template>
+
 <script setup lang="ts">
-const isOpen = ref(false);
+import { useScrollLock, syncRefs, useToggle } from "@vueuse/core";
+
 const route = useRoute();
+
+const [isOpen, toggle] = useToggle(false);
 
 watch(
   () => route.path,
@@ -9,18 +26,6 @@ watch(
   }
 );
 
-//--------- STOP SCROLLING BODY WHEN MENU IS OPEN ---------//
-watch(isOpen, (open) => {
-  document.body.style.overflow = open ? "hidden" : "auto";
-});
-//-------------------------------------------------------//
+const isLocked = useScrollLock(() => document?.body);
+syncRefs(isOpen, isLocked);
 </script>
-
-<template>
-  <div class="md:hidden">
-    <div @click="isOpen = !isOpen" class="pr-3">
-      <Hamburger :isOpen="isOpen" />
-    </div>
-    <MobileMenu :isOpen="isOpen" />
-  </div>
-</template>

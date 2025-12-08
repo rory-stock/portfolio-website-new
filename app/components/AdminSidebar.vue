@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useMediaQuery, onKeyStroke } from "@vueuse/core";
 import Icon from "~/components/Icon.vue";
 import type { IconName } from "~/components/icons/iconData";
 
@@ -12,25 +13,20 @@ const emit = defineEmits<{
 
 const { adminPageItems } = useNavigation();
 
-// Admin-specific items that aren't public pages
-const adminOnlyItems: Array<{
+interface NavItem {
   label: string;
   path: string;
   icon: IconName;
   isPublic?: boolean;
-}> = [
-  {
-    label: "Dashboard",
-    path: "/admin",
-    icon: "dashboard",
-  },
-];
+}
 
-const footerItem = {
+// Admin-specific items that aren't public pages
+const adminOnlyItems: NavItem[] = [];
+
+const footerItem: NavItem = {
   label: "Footer",
   path: "/admin/footer",
-  icon: "footer" as IconName,
-  isPublic: undefined,
+  icon: "footer",
 };
 
 // Combine all nav items: Dashboard, then pages, then Footer
@@ -41,7 +37,22 @@ const navItems = computed(() => [
 ]);
 
 const { loggedIn, clear } = useUserSession();
+
 const showCleanupModal = ref(false);
+
+// Simplified modal state - just use provide
+provide("isCleanupModalOpen", showCleanupModal);
+
+// Media query for mobile detection
+const isMobile = useMediaQuery("(max-width: 767px)");
+
+// Close on escape key (mobile only)
+onKeyStroke("Escape", (e) => {
+  if (isMobile.value && props.isOpen) {
+    e.preventDefault();
+    emit("close");
+  }
+});
 
 async function logout() {
   try {
@@ -55,7 +66,7 @@ async function logout() {
 
 function handleNavClick() {
   // Close sidebar on mobile when navigation item is clicked
-  if (window.innerWidth < 768) {
+  if (isMobile.value) {
     emit("close");
   }
 }
@@ -63,54 +74,76 @@ function handleNavClick() {
 function openCleanupModal() {
   showCleanupModal.value = true;
   // Close sidebar on mobile when cleanup is opened
-  if (window.innerWidth < 768) {
+  if (isMobile.value) {
     emit("close");
   }
 }
+
+const route = useRoute();
+const isCurrentRoute = (path: string) => route.path === path;
+
+// Base classes for all interactive elements
+const baseClasses =
+  "flex w-10/12 cursor-pointer items-center gap-2 rounded-lg px-2 py-1 text-[0.95rem] select-none md:w-64";
+
+// Computed classes for nav items
+const getNavItemClass = (item: NavItem) => [
+  baseClasses,
+  "hover:bg-neutral-800 text-neutral-100 transition-colors duration-200",
+  { "opacity-65": item.isPublic === false },
+  { "bg-neutral-800": isCurrentRoute(item.path) },
+];
+
+// Classes for buttons and links
+const actionClass = [
+  baseClasses,
+  "hover:bg-neutral-300 bg-neutral-100 text-neutral-900 transition-colors duration-300",
+].join(" ");
 </script>
 
 <template>
   <div>
     <!-- Overlay for mobile -->
-    <ClientOnly>
-      <Transition
-        enter-active-class="transition-opacity duration-300"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-300"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-      >
-        <div
-          v-if="isOpen"
-          @click="emit('close')"
-          class="fixed inset-0 z-30 bg-black/50 md:hidden"
-          aria-hidden="true"
-        />
-      </Transition>
-    </ClientOnly>
+    <Transition
+      enter-active-class="transition-opacity duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-300"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="isOpen && isMobile"
+        @click="emit('close')"
+        class="fixed inset-0 z-30 bg-black/50 md:hidden"
+        aria-hidden="true"
+      />
+    </Transition>
 
     <!-- Sidebar -->
-    <div
+    <aside
       class="fixed inset-0 z-40 flex w-full flex-col justify-between bg-neutral-900 p-4 font-geist text-neutral-100 transition-transform duration-300 ease-in-out md:relative md:inset-auto md:my-4 md:ml-4 md:h-auto md:min-h-[calc(100vh-2rem)] md:w-fit md:translate-x-0 md:p-0"
       :class="isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+      role="navigation"
+      :aria-label="isMobile ? 'Mobile navigation menu' : 'Admin navigation'"
     >
       <div>
         <div
           class="mb-4 hidden cursor-pointer items-center rounded-lg py-1 pl-2 text-lg transition-colors select-none hover:bg-neutral-700 md:flex"
         >
-          <Icon name="settings" size="23" class="mr-1.5" />
+          <Icon name="settings" :size="23" class="mr-1.5" />
           <p class="mb-0.5">rorystock.com</p>
         </div>
-        <div class="flex flex-col gap-8" :class="{ hidden: !loggedIn }">
+
+        <!-- Navigation and Cleanup -->
+        <div v-if="loggedIn" class="flex flex-col gap-8">
           <nav class="flex flex-col gap-2">
             <NuxtLink
               v-for="item in navItems"
-              :key="item.label"
+              :key="item.path"
               :to="item.path"
               @click="handleNavClick"
-              class="flex w-10/12 cursor-pointer items-center gap-2 rounded-lg bg-neutral-100 px-2 py-1 text-[0.95rem] text-neutral-900 transition-opacity select-none hover:opacity-85 md:w-64"
-              :class="{ 'opacity-65': item.isPublic === false }"
+              :class="getNavItemClass(item)"
             >
               <Icon :name="item.icon" :size="15" />
               {{ item.label }}
@@ -122,33 +155,26 @@ function openCleanupModal() {
               </span>
             </NuxtLink>
           </nav>
-          <button
-            @click="openCleanupModal"
-            class="flex w-10/12 cursor-pointer items-center gap-2 rounded-lg bg-neutral-100 px-2 py-1 text-[0.95rem] text-neutral-900 transition-opacity select-none hover:opacity-85 md:w-64"
-          >
-            <Icon name="cleanup" size="19" />
+
+          <button @click="openCleanupModal" :class="actionClass">
+            <Icon name="cleanup" :size="19" />
             Cleanup
           </button>
         </div>
       </div>
+
       <div class="flex flex-col gap-2">
-        <button
-          v-if="loggedIn"
-          @click="logout"
-          class="flex w-10/12 cursor-pointer items-center rounded-lg bg-neutral-100 px-2 py-1 text-[0.95rem] text-neutral-900 transition-opacity select-none hover:opacity-85 md:w-64"
-        >
-          <Icon name="logout" size="19" class="mr-1" />
+        <button v-if="loggedIn" @click="logout" :class="actionClass">
+          <Icon name="logout" :size="19" />
           Logout
         </button>
-        <button
-          class="mb-2 flex w-10/12 cursor-pointer items-center rounded-lg bg-neutral-100 px-2 py-1 text-[0.95rem] text-neutral-900 transition-opacity select-none hover:opacity-85 md:w-64"
-          @click="navigateTo('/')"
-        >
-          <Icon name="back" size="18" class="mr-1" />
+
+        <NuxtLink to="/" :class="actionClass" class="mb-2">
+          <Icon name="back" :size="18" />
           Home
-        </button>
+        </NuxtLink>
       </div>
-    </div>
+    </aside>
 
     <!-- Cleanup Modal -->
     <OrphanedFilesModal v-model="showCleanupModal" />

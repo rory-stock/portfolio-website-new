@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  useAsyncState,
+  useToggle,
+  onKeyStroke,
+  useScrollLock,
+} from "@vueuse/core";
+
 interface OrphanedFile {
   key: string;
   size: number;
@@ -11,17 +18,45 @@ interface OrphanedResponse {
 }
 
 const isOpen = defineModel<boolean>({ required: true });
+const { success, error: showError } = useToast();
 
-const isLoading = ref(false);
+const modalState = useModalState();
+if (modalState) {
+  watch(isOpen, (value) => {
+    modalState.isCleanupModalOpen.value = value;
+  });
+}
+
+const [showConfirmation, toggleConfirmation] = useToggle(false);
 const isDeleting = ref(false);
-const showConfirmation = ref(false);
-const orphanedFiles = ref<OrphanedFile[]>([]);
-const error = ref<string | null>(null);
 
-// Fetch orphaned files when modal opens
-watch(isOpen, async (open) => {
+// Fetch orphaned files
+const {
+  state: orphanedFiles,
+  isLoading,
+  error,
+  execute: fetchOrphanedFiles,
+} = useAsyncState(
+  async () => {
+    const data = await $fetch<OrphanedResponse>("/api/orphaned");
+    return data.orphaned;
+  },
+  [] as OrphanedFile[],
+  {
+    immediate: false,
+    onError: (e) => {
+      console.error("Failed to fetch orphaned files:", e);
+      showError("Failed to load orphaned files. Please try again.");
+    },
+  }
+);
+
+// Lock body scroll when modal is open
+const isLocked = useScrollLock(document?.body);
+watch(isOpen, (open) => {
+  isLocked.value = open;
   if (open) {
-    await fetchOrphanedFiles();
+    fetchOrphanedFiles();
   } else {
     // Reset state when modal closes
     showConfirmation.value = false;
@@ -29,20 +64,18 @@ watch(isOpen, async (open) => {
   }
 });
 
-async function fetchOrphanedFiles() {
-  isLoading.value = true;
-  error.value = null;
-
-  try {
-    const data = await $fetch<OrphanedResponse>("/api/orphaned");
-    orphanedFiles.value = data.orphaned;
-  } catch (e) {
-    console.error("Failed to fetch orphaned files:", e);
-    error.value = "Failed to load orphaned files. Please try again.";
-  } finally {
-    isLoading.value = false;
+// Close on Escape key
+onKeyStroke("Escape", () => {
+  if (isOpen.value) {
+    if (showConfirmation.value) {
+      // Cancel confirmation first
+      toggleConfirmation(false);
+    } else {
+      // Close modal
+      closeModal();
+    }
   }
-}
+});
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -79,16 +112,17 @@ async function handleDeleteAll() {
   if (orphanedFiles.value.length === 0) return;
 
   isDeleting.value = true;
-  error.value = null;
 
   try {
-    const result = await $fetch("/api/cleanup", {
+    await $fetch("/api/cleanup", {
       method: "DELETE",
     });
 
+    success("Orphaned files deleted successfully");
+
     // Refresh the list after successful deletion
     await fetchOrphanedFiles();
-    showConfirmation.value = false;
+    toggleConfirmation(false);
 
     // Close modal if all files were deleted successfully
     if (orphanedFiles.value.length === 0) {
@@ -96,7 +130,7 @@ async function handleDeleteAll() {
     }
   } catch (e) {
     console.error("Failed to delete orphaned files:", e);
-    error.value = "Failed to delete files. Please try again.";
+    showError("Failed to delete files. Please try again.");
   } finally {
     isDeleting.value = false;
   }
@@ -105,6 +139,14 @@ async function handleDeleteAll() {
 function closeModal() {
   isOpen.value = false;
 }
+
+// Shared button classes
+const primaryButtonClass =
+  "cursor-pointer rounded-lg bg-neutral-980 px-4 py-2 text-[0.92rem] text-neutral-100 transition-colors hover:bg-neutral-800 md:text-base";
+const secondaryButtonClass =
+  "cursor-pointer rounded-lg bg-neutral-300 px-4 py-2 text-neutral-900 transition-colors hover:bg-neutral-400 disabled:cursor-not-allowed disabled:opacity-50";
+const dangerButtonClass =
+  "cursor-pointer rounded-lg bg-red-800 px-4 py-2 text-neutral-100 transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50";
 </script>
 
 <template>
@@ -128,8 +170,9 @@ function closeModal() {
             </div>
             <button
               @click="closeModal"
-              class="cursor-pointer rounded-lg bg-neutral-400 p-2 transition-colors duration-200 hover:bg-neutral-500"
+              class="cursor-pointer rounded-lg bg-neutral-400 p-2 transition-colors duration-200 hover:bg-neutral-500 disabled:cursor-not-allowed disabled:opacity-50"
               :disabled="isDeleting"
+              aria-label="Close modal"
             >
               <Icon name="cross" class="h-5 w-5" />
             </button>
@@ -154,13 +197,14 @@ function closeModal() {
               class="flex flex-col items-center justify-center gap-3 pt-12 pb-2"
             >
               <p class="text-[0.92rem] text-red-600 md:text-base">
-                {{ error }}
+                {{ String(error) || "Failed to load orphaned files" }}
               </p>
               <button
-                @click="fetchOrphanedFiles"
-                class="cursor-pointer rounded-lg bg-neutral-980 px-4 py-2 text-[0.92rem] text-neutral-100 transition-colors hover:bg-neutral-800 md:text-base"
+                @click="() => fetchOrphanedFiles()"
+                :class="primaryButtonClass"
+                :disabled="isLoading"
               >
-                Try Again
+                {{ isLoading ? "Loading..." : "Try Again" }}
               </button>
             </div>
 
@@ -181,7 +225,7 @@ function closeModal() {
               <div
                 v-for="file in orphanedFiles"
                 :key="file.key"
-                class="flex items-center gap-4 rounded-lg border-1 border-neutral-900 bg-neutral-50 p-3 transition-colors hover:bg-neutral-100"
+                class="flex items-center gap-4 rounded-lg border border-neutral-900 bg-neutral-50 p-3 transition-colors hover:bg-neutral-100"
               >
                 <!-- Thumbnail -->
                 <div
@@ -225,43 +269,53 @@ function closeModal() {
             class="sticky bottom-0 rounded-b-lg border-t bg-neutral-100 px-6 py-4"
           >
             <!-- Confirmation View -->
-            <div v-if="showConfirmation" class="space-y-3">
-              <p class="text-center text-neutral-900">
-                Are you sure you want to delete
-                <strong>{{ orphanedFiles.length }}</strong>
-                orphaned {{ orphanedFiles.length === 1 ? "file" : "files" }}?
-              </p>
-              <p class="text-center text-sm text-red-700">
-                This action cannot be undone.
-              </p>
-              <div class="flex gap-3">
-                <button
-                  @click="showConfirmation = false"
-                  class="flex-1 cursor-pointer rounded-lg bg-neutral-300 px-4 py-2 text-neutral-900 transition-colors hover:bg-neutral-400"
-                  :disabled="isDeleting"
-                >
-                  Cancel
-                </button>
-                <button
-                  @click="handleDeleteAll"
-                  class="flex-1 cursor-pointer rounded-lg bg-red-800 px-4 py-2 text-neutral-100 transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="isDeleting"
-                >
-                  <span v-if="isDeleting">Deleting...</span>
-                  <span v-else>Delete All</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Delete Button -->
-            <button
-              v-else
-              @click="showConfirmation = true"
-              class="w-full cursor-pointer rounded-lg bg-red-800 px-4 py-2 text-neutral-100 transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="isDeleting"
+            <Transition
+              enter-active-class="transition-all duration-200"
+              enter-from-class="opacity-0 scale-95"
+              enter-to-class="opacity-100 scale-100"
+              leave-active-class="transition-all duration-150"
+              leave-from-class="opacity-100 scale-100"
+              leave-to-class="opacity-0 scale-95"
+              mode="out-in"
             >
-              Delete All Orphaned Files ({{ orphanedFiles.length }})
-            </button>
+              <div v-if="showConfirmation" class="space-y-3">
+                <p class="text-center text-neutral-900">
+                  Are you sure you want to delete
+                  <strong>{{ orphanedFiles.length }}</strong>
+                  orphaned {{ orphanedFiles.length === 1 ? "file" : "files" }}?
+                </p>
+                <p class="text-center text-sm text-red-700">
+                  This action cannot be undone.
+                </p>
+                <div class="flex gap-3">
+                  <button
+                    @click="toggleConfirmation(false)"
+                    :class="[secondaryButtonClass, 'flex-1']"
+                    :disabled="isDeleting"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    @click="handleDeleteAll"
+                    :class="[dangerButtonClass, 'flex-1']"
+                    :disabled="isDeleting"
+                  >
+                    <span v-if="isDeleting">Deleting...</span>
+                    <span v-else>Delete All</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Delete Button -->
+              <button
+                v-else
+                @click="toggleConfirmation(true)"
+                :class="[dangerButtonClass, 'w-full']"
+                :disabled="isDeleting"
+              >
+                Delete All Orphaned Files ({{ orphanedFiles.length }})
+              </button>
+            </Transition>
           </div>
         </div>
       </div>

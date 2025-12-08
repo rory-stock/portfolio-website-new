@@ -34,3 +34,18 @@ export interface ImageField {
   placeholder?: string;
   editable?: boolean;
 }
+
+export interface SnapImage {
+  id: string | number;
+  url: string;
+  alt: string | null;
+  r2_path?: string;
+  description?: string | null;
+  layout_type: string | null;
+  [key: string]: any;
+}
+
+export interface SnapSection {
+  layoutType: string | null;
+  images: SnapImage[];
+}

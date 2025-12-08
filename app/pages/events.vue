@@ -40,7 +40,7 @@ const eventURL = (eventName: string | null) => {
 </script>
 
 <template>
-  <div>
+  <div class="md:mt-20">
     <h1
       class="mx-4 my-2 flex justify-center font-ghost text-base text-neutral-500 selection:bg-black selection:text-neutral-100 md:mt-3 md:text-lg lg:mt-4 lg:text-xl"
     >

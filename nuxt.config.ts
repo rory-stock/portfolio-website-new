@@ -51,7 +51,7 @@ export default defineNuxtConfig({
   image: {
     provider: "cloudflare",
     cloudflare: {
-      baseURL: "https://images.rorystock.com"
+      baseURL: "https://images.rorystock.com",
     },
     domains: ["images.rorystock.com"],
     quality: 80,
@@ -80,6 +80,7 @@ export default defineNuxtConfig({
     },
   },
   sourcemap: {
+    server: true,
     client: "hidden",
   },
   // ******************************************* //

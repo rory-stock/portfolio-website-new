@@ -2,9 +2,9 @@
   <div class="mx-auto max-w-6xl space-y-4 p-6 md:mt-6 md:space-y-8">
     <h1 class="text-2xl font-bold text-white md:text-3xl">Info Page Admin</h1>
     <div>
-      <ContentSection table="info" title="Content" :fields="contentFields" />
+      <ContentSection table="info" title="Info" :fields="contentFields" />
       <hr class="my-4" />
-      <ImageSection context="info" title="Images" :fields="imageFields" />
+      <ImageSection context="info" title="Info" :fields="imageFields" />
     </div>
     <Toast />
   </div>

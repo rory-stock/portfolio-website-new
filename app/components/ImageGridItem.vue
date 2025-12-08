@@ -9,14 +9,16 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div
+  <button
+    type="button"
     @click="emit('click', image)"
-    class="group mt-auto mb-auto bg-gray-100"
+    class="group my-auto w-full bg-gray-100"
+    aria-label="View Image"
   >
     <NuxtPicture
       :src="image.r2_path"
-      :alt="image.alt ?? 'Journal Image'"
+      :alt="image.alt ?? ''"
       :img-attrs="{ class: 'w-full h-auto object-cover' }"
     />
-  </div>
+  </button>
 </template>

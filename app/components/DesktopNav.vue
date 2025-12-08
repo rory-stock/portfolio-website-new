@@ -1,14 +1,3 @@
-<script setup lang="ts">
-const route = useRoute();
-const { publicNavItems } = useNavigation();
-
-const getLinkClass = (name: string) => {
-  return route.name === name
-    ? "font-ghost-italic italic"
-    : "font-ghost hover:font-ghost-italic hover:italic";
-};
-</script>
-
 <template>
   <nav>
     <ul
@@ -22,3 +11,14 @@ const getLinkClass = (name: string) => {
     </ul>
   </nav>
 </template>
+
+<script setup lang="ts">
+const route = useRoute();
+const { publicNavItems } = useNavigation();
+
+const getLinkClass = computed(() => (name: string) => {
+  return route.name === name
+    ? "font-ghost-italic italic"
+    : "font-ghost hover:font-ghost-italic hover:italic";
+});
+</script>
