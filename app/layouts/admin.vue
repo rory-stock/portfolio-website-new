@@ -8,7 +8,7 @@ const isSidebarOpen = ref(false);
 const modalState = useProvideModalState()!;
 const { isAnyModalOpen } = modalState;
 
-const isDesktop = useMediaQuery("(min-width: 768px)");
+const isDesktop = import.meta.client ? useMediaQuery("(min-width: 768px)") : ref(true);
 
 // Close sidebar when switching to desktop
 watch(isDesktop, (isDesktop) => {
