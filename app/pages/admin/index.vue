@@ -15,7 +15,7 @@ const { fetch: refreshSession } = useUserSession();
 
 onMounted(async () => {
   await refreshSession();
-})
+});
 
 definePageMeta({
   middleware: "authenticated",
@@ -30,6 +30,6 @@ const imageFields: ImageField[] = [
     label: "Alt Text",
     type: "text" as const,
     placeholder: "Image Alt Text",
-  }
-]
+  },
+];
 </script>
