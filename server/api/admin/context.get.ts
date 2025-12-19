@@ -1,4 +1,4 @@
-import { VALID_CONTEXTS } from "~~/server/utils/context";
+import { VALID_CONTEXTS } from "~/utils/context";
 
 export default defineEventHandler(async (event) => {
   const { user } = await requireUserSession(event);

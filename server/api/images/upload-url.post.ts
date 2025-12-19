@@ -1,9 +1,9 @@
-import { generatePresignedUploadUrl } from "~~/server/utils/r2";
+import { generatePresignedUploadUrl } from "~/utils/r2";
 import {
   VALID_CONTEXTS,
   isValidContext,
   type Context,
-} from "~~/server/utils/context";
+} from "~/utils/context";
 
 console.log("Upload URL endpoint hit - using crypto hash");
 

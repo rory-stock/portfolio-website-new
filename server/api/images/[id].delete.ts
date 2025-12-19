@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
-import { deleteR2Object } from "~~/server/utils/r2";
+import { deleteR2Object } from "~/utils/r2";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);

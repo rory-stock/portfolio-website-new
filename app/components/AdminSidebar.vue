@@ -40,23 +40,18 @@ const { loggedIn, clear } = useUserSession();
 
 const showCleanupModal = ref(false);
 
-// Simplified modal state - just use provide
 provide("isCleanupModalOpen", showCleanupModal);
 
 // Media query for mobile detection
-const isMobile = import.meta.client
-  ? useMediaQuery("(max-width: 767px)")
-  : ref(false);
+const isMobile = useMediaQuery("(max-width: 767px)");
 
 // Close on the escape key (mobile only)
-if (import.meta.client) {
-  onKeyStroke("Escape", (e) => {
-    if (isMobile.value && props.isOpen) {
-      e.preventDefault();
-      emit("close");
-    }
-  });
-}
+onKeyStroke("Escape", (e) => {
+  if (isMobile.value && props.isOpen) {
+    e.preventDefault();
+    emit("close");
+  }
+});
 
 async function logout() {
   try {

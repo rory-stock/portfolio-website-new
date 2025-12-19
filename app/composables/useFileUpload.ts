@@ -1,5 +1,5 @@
 import { computed, reactive, ref } from "vue";
-import { formatFileSize } from "~~/server/utils/formatFileSize";
+import { formatFileSize } from "~/utils/formatFileSize";
 
 // Constants
 const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60MB hard limit

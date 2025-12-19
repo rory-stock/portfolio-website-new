@@ -1,4 +1,4 @@
-import type { SnapSection } from "~~/types/imageTypes";
+import type { SnapSection, SnapImage } from "~~/types/imageTypes";
 
 export interface LayoutType {
   id: string;
@@ -49,15 +49,33 @@ export const LAYOUT_TYPES: Record<string, LayoutType> = {
 export type LayoutTypeId = keyof typeof LAYOUT_TYPES;
 
 // Helper to group consecutive images by layout type
-export function groupImagesByLayout(
-  images: Array<{ layout_type: string | null; [key: string]: any }>
-): SnapSection[] {
+export function groupImagesByLayout(images: SnapImage[]): SnapSection[] {
   const sections: SnapSection[] = [];
-  let currentGroup: any[] = [];
+  let currentGroup: SnapImage[] = [];
   let currentLayoutType: string | null = null;
 
   for (const image of images) {
-    if (image.layout_type !== currentLayoutType) {
+    // Normalize empty string to null
+    const layoutType = image.layout_type === "" ? null : image.layout_type;
+
+    // If layout_type is null, create individual sections (don't group)
+    if (layoutType === null) {
+      // Push any existing group first
+      if (currentGroup.length > 0) {
+        sections.push({
+          layoutType: currentLayoutType,
+          images: currentGroup,
+        });
+        currentGroup = [];
+      }
+      // Add this null-layout image as its own section
+      sections.push({
+        layoutType: null,
+        images: [image],
+      });
+      currentLayoutType = null;
+    } else if (layoutType !== currentLayoutType) {
+      // Layout type changed - push existing group and start new one
       if (currentGroup.length > 0) {
         sections.push({
           layoutType: currentLayoutType,
@@ -65,12 +83,14 @@ export function groupImagesByLayout(
         });
       }
       currentGroup = [image];
-      currentLayoutType = image.layout_type;
+      currentLayoutType = layoutType;
     } else {
+      // Same layout type - add to the current group
       currentGroup.push(image);
     }
   }
 
+  // Push any remaining group
   if (currentGroup.length > 0) {
     sections.push({
       layoutType: currentLayoutType,

@@ -1,6 +1,6 @@
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
-import { listR2Objects } from "~~/server/utils/r2";
+import { listR2Objects } from "~/utils/r2";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);

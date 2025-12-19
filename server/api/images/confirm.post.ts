@@ -1,11 +1,11 @@
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
-import { getR2Object, deleteR2Object } from "~~/server/utils/r2";
-import { VALID_CONTEXTS, isValidContext } from "~~/server/utils/context";
+import { getR2Object, deleteR2Object } from "~/utils/r2";
+import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
 import {
   createImageRecord,
   type ImageConfirmBody,
-} from "~~/server/utils/imageFields";
+} from "~/utils/imageFields";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);

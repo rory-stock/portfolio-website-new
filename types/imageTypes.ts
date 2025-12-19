@@ -17,6 +17,10 @@ export interface ImageBase {
   uploaded_at: string | Date;
   is_public: boolean;
   is_primary: boolean;
+  order: number | null;
+  layout_type: string | null;
+  layout_group_id: number | null;
+  group_display_order: number | null;
 }
 
 // Extended interface for records that include context
@@ -48,4 +52,12 @@ export interface SnapImage {
 export interface SnapSection {
   layoutType: string | null;
   images: SnapImage[];
+}
+
+// Helper type for grouped images in the admin UI
+export interface ImageGroup {
+  group_id: number;
+  layout_type: string;
+  images: ImageBase[];
+  display_order: number;
 }

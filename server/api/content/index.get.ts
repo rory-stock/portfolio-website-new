@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { content } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
-import { isValidContext, VALID_CONTEXTS } from "~~/server/utils/context";
+import { isValidContext, VALID_CONTEXTS } from "~/utils/context";
 
 export default defineEventHandler(async (event) => {
   const { table } = getQuery(event);

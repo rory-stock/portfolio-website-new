@@ -1,9 +1,11 @@
 <template>
-  <section v-if="layoutType && images.length > 0" :class="sectionClasses">
-    <!-- Fullscreen Hero -->
+  <!-- Fullscreen Hero -->
+  <section
+    v-if="layoutType === 'fullscreen-hero' && images[0]"
+    class="h-screen snap-start"
+  >
     <NuxtPicture
-      v-if="layoutType === 'fullscreen-hero' && images[0]"
-      :src="images[0].url"
+      :src="images[0].r2_path"
       :alt="images[0].alt || ''"
       format="webp"
       densities="x1 x2"
@@ -12,13 +14,20 @@
         onClick: () => handleImageClick(images[0]!),
       }"
     />
+  </section>
 
-    <!-- All other layouts -->
-    <div v-else :class="containerClasses">
-      <!-- Single Hero -->
+  <!-- All other layouts -->
+  <section
+    v-else-if="images.length > 0"
+    class="flex h-screen snap-start items-center justify-center"
+  >
+    <!-- Single Hero or Null Layout -->
+    <div
+      v-if="(layoutType === 'single-hero' || layoutType === null) && images[0]"
+      class="w-full max-w-5xl px-4"
+    >
       <NuxtPicture
-        v-if="layoutType === 'single-hero' && images[0]"
-        :src="images[0].url"
+        :src="images[0].r2_path"
         :alt="images[0].alt || ''"
         format="webp"
         densities="x1 x2"
@@ -28,56 +37,112 @@
           onClick: () => handleImageClick(images[0]!),
         }"
       />
+    </div>
 
-      <!-- Dual/Triple -->
+    <!-- Dual Horizontal -->
+    <div
+      v-else-if="layoutType === 'dual-horizontal'"
+      class="grid w-full max-w-7xl grid-cols-2 items-center gap-6 px-4"
+    >
       <NuxtPicture
-        v-else-if="isDualOrTriple"
         v-for="image in images"
         :key="image.id"
-        :src="image.url"
+        :src="image.r2_path"
         :alt="image.alt || ''"
         format="webp"
         densities="x1 x2"
-        :sizes="
-          layoutType === 'dual-horizontal'
-            ? 'xs:100vw md:50vw'
-            : 'xs:100vw md:33vw'
-        "
+        sizes="xs:100vw md:50vw"
         :img-attrs="{
-          class: getImageClasses(layoutType),
+          class: 'h-auto max-h-[70vh] w-full cursor-pointer object-contain',
           onClick: () => handleImageClick(image),
         }"
       />
+    </div>
 
-      <!-- Asymmetric Layouts -->
-      <template v-else-if="images[0] && images[1]">
-        <div :class="getAsymmetricWrapperClasses(0)">
-          <NuxtPicture
-            :src="images[0].url"
-            :alt="images[0].alt || ''"
-            format="webp"
-            densities="x1 x2"
-            :sizes="isAsymmetricLeft ? 'xs:100vw md:66vw' : 'xs:100vw md:33vw'"
-            :img-attrs="{
-              class: getAsymmetricImageClasses(0),
-              onClick: () => handleImageClick(images[0]!),
-            }"
-          />
-        </div>
-        <div :class="getAsymmetricWrapperClasses(1)">
-          <NuxtPicture
-            :src="images[1].url"
-            :alt="images[1].alt || ''"
-            format="webp"
-            densities="x1 x2"
-            :sizes="isAsymmetricLeft ? 'xs:100vw md:33vw' : 'xs:100vw md:66vw'"
-            :img-attrs="{
-              class: getAsymmetricImageClasses(1),
-              onClick: () => handleImageClick(images[1]!),
-            }"
-          />
-        </div>
-      </template>
+    <!-- Triple Row -->
+    <div
+      v-else-if="layoutType === 'triple-row'"
+      class="grid w-full max-w-7xl grid-cols-3 items-center gap-4 px-4"
+    >
+      <NuxtPicture
+        v-for="image in images"
+        :key="image.id"
+        :src="image.r2_path"
+        :alt="image.alt || ''"
+        format="webp"
+        densities="x1 x2"
+        sizes="xs:100vw md:33vw"
+        :img-attrs="{
+          class: 'h-auto max-h-[60vh] w-full cursor-pointer object-contain',
+          onClick: () => handleImageClick(image),
+        }"
+      />
+    </div>
+
+    <!-- Asymmetric Left -->
+    <div
+      v-else-if="layoutType === 'asymmetric-left' && images[0] && images[1]"
+      class="grid w-full max-w-7xl grid-cols-3 gap-6 px-4"
+    >
+      <div class="col-span-2">
+        <NuxtPicture
+          :src="images[0].r2_path"
+          :alt="images[0].alt || ''"
+          format="webp"
+          densities="x1 x2"
+          sizes="xs:100vw md:66vw"
+          :img-attrs="{
+            class: 'h-auto max-h-[75vh] w-full cursor-pointer object-contain',
+            onClick: () => handleImageClick(images[0]!),
+          }"
+        />
+      </div>
+      <div class="col-span-1 flex items-center">
+        <NuxtPicture
+          :src="images[1].r2_path"
+          :alt="images[1].alt || ''"
+          format="webp"
+          densities="x1 x2"
+          sizes="xs:100vw md:33vw"
+          :img-attrs="{
+            class: 'h-auto max-h-[60vh] w-full cursor-pointer object-contain',
+            onClick: () => handleImageClick(images[1]!),
+          }"
+        />
+      </div>
+    </div>
+
+    <!-- Asymmetric Right -->
+    <div
+      v-else-if="layoutType === 'asymmetric-right' && images[0] && images[1]"
+      class="grid w-full max-w-7xl grid-cols-3 gap-6 px-4"
+    >
+      <div class="col-span-1 flex items-center">
+        <NuxtPicture
+          :src="images[0].r2_path"
+          :alt="images[0].alt || ''"
+          format="webp"
+          densities="x1 x2"
+          sizes="xs:100vw md:33vw"
+          :img-attrs="{
+            class: 'h-auto max-h-[60vh] w-full cursor-pointer object-contain',
+            onClick: () => handleImageClick(images[0]!),
+          }"
+        />
+      </div>
+      <div class="col-span-2">
+        <NuxtPicture
+          :src="images[1].r2_path"
+          :alt="images[1].alt || ''"
+          format="webp"
+          densities="x1 x2"
+          sizes="xs:100vw md:66vw"
+          :img-attrs="{
+            class: 'h-auto max-h-[75vh] w-full cursor-pointer object-contain',
+            onClick: () => handleImageClick(images[1]!),
+          }"
+        />
+      </div>
     </div>
   </section>
 </template>
@@ -91,77 +156,11 @@ interface Props {
   images: SnapImage[];
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   "select-image": [image: SnapImage];
 }>();
-
-const isAsymmetricLeft = computed(() => props.layoutType === "asymmetric-left");
-
-const isDualOrTriple = computed(
-  () =>
-    props.layoutType === "dual-horizontal" || props.layoutType === "triple-row"
-);
-
-const sectionClasses = computed(() => [
-  "snap-start",
-  props.layoutType === "fullscreen-hero"
-    ? "h-screen"
-    : "flex h-screen items-center justify-center",
-]);
-
-const containerClasses = computed(() => {
-  const classes = ["w-full px-4"];
-
-  switch (props.layoutType) {
-    case "single-hero":
-      classes.push("max-w-5xl");
-      break;
-    case "dual-horizontal":
-      classes.push("max-w-7xl grid grid-cols-2 items-center gap-6");
-      break;
-    case "triple-row":
-      classes.push("max-w-7xl grid grid-cols-3 items-center gap-4");
-      break;
-    case "asymmetric-left":
-    case "asymmetric-right":
-      classes.push("max-w-7xl grid grid-cols-3 gap-6");
-      break;
-  }
-
-  return classes;
-});
-
-function getImageClasses(layoutType: LayoutTypeId | null): string {
-  const baseClasses = "h-auto w-full cursor-pointer object-contain";
-  const maxHeight =
-    layoutType === "dual-horizontal" ? "max-h-[70vh]" : "max-h-[60vh]";
-  return `${baseClasses} ${maxHeight}`;
-}
-
-function getAsymmetricWrapperClasses(index: number): string {
-  if (index === 0) {
-    return isAsymmetricLeft.value
-      ? "col-span-2"
-      : "col-span-1 flex items-center";
-  }
-  return isAsymmetricLeft.value ? "col-span-1 flex items-center" : "col-span-2";
-}
-
-function getAsymmetricImageClasses(index: number): string {
-  const baseClasses = "h-auto w-full cursor-pointer object-contain";
-  let maxHeight = "max-h-[60vh]";
-
-  if (
-    (index === 0 && isAsymmetricLeft.value) ||
-    (index === 1 && !isAsymmetricLeft.value)
-  ) {
-    maxHeight = "max-h-[75vh]";
-  }
-
-  return `${baseClasses} ${maxHeight}`;
-}
 
 function handleImageClick(image: SnapImage) {
   emit("select-image", image);

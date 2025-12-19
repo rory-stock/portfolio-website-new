@@ -16,6 +16,7 @@ export interface ImageUpdateBody {
   is_public?: boolean;
   add_contexts?: string[];
   remove_contexts?: string[];
+  remove_layout?: boolean;
 }
 
 // Field update scope types
@@ -67,6 +68,10 @@ export const IMAGE_FIELD_CONFIGS: Record<
   is_public: {
     scope: "single_record",
     description: "Public visibility is specific to each context",
+  },
+  remove_layout: {
+    scope: "single_record",
+    description: "Removes the layout from the specific context",
   },
 };
 

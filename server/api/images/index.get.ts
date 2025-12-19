@@ -1,4 +1,4 @@
-import { eq, and, desc, sql, asc } from "drizzle-orm";
+import { eq, and, desc, sql, asc, count } from "drizzle-orm";
 
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
@@ -17,6 +17,7 @@ export default defineEventHandler(async (event) => {
         ? false
         : undefined;
   const r2Path = query.r2_path as string | undefined;
+  const includeLayouts = query.include_layouts === "true"; // NEW: opt-in for layout sorting
 
   // Build where conditions
   const conditions = [];
@@ -35,21 +36,30 @@ export default defineEventHandler(async (event) => {
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
+  // Choose sorting strategy based on includeLayouts flag
+  const orderBy = includeLayouts
+    ? [
+        asc(images.group_display_order), // Groups first
+        asc(images.order), // Then individual order
+        desc(images.uploaded_at), // Then upload date
+      ]
+    : [
+        asc(images.order), // Individual order
+        desc(images.uploaded_at), // Then upload date
+      ];
+
   // Query with conditions
-  const [imageResults, countResult] = await Promise.all([
+  const [imageResults, [countResult]] = await Promise.all([
     db
       .select()
       .from(images)
       .where(whereClause)
-      .orderBy(asc(images.order), desc(images.uploaded_at)),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(images)
-      .where(whereClause),
+      .orderBy(...orderBy),
+    db.select({ count: count() }).from(images).where(whereClause),
   ]);
 
   return {
     images: imageResults,
-    total: Number(countResult[0].count),
+    total: countResult.count,
   };
 });

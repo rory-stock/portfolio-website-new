@@ -8,8 +8,8 @@
         v-if="!isLoading && !fetchError"
         class="text-sm text-neutral-400 md:text-base"
       >
-        {{ displayOrder.length }}
-        {{ displayOrder.length === 1 ? "image" : "images" }}
+        {{ images.length }}
+        {{ images.length === 1 ? "image" : "images" }}
       </span>
     </div>
 
@@ -26,36 +26,91 @@
     </div>
 
     <div v-else>
-      <!-- Gallery Grid -->
-      <draggable
-        v-model="displayOrder"
-        item-key="id"
-        :animation="200"
-        ghost-class="opacity-50"
-        drag-class="cursor-grabbing"
-        class="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4"
-      >
-        <template #item="{ element }">
-          <div>
+      <!-- Gallery Grid (native drag-and-drop for outer, vuedraggable for groups) -->
+      <div class="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <template
+          v-for="item in organizedItems"
+          :key="isGroup(item) ? `group-${item.group_id}` : item.id"
+        >
+          <!-- Group Wrapper -->
+          <div
+            v-if="isGroup(item)"
+            class="relative col-span-full rounded-lg border-2 border-neutral-100 p-3"
+            draggable="true"
+            @dragstart="handleDragStart($event, item)"
+            @dragover.prevent="handleDragOver($event)"
+            @drop="handleDrop($event, item)"
+            @dragend="handleDragEnd"
+            :class="{ 'opacity-50': draggedItem === item }"
+          >
+            <!-- Group Badge -->
+            <div
+              class="absolute -top-3 left-3 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-400"
+            >
+              {{ getLayoutLabel(item.layout_type) }}
+            </div>
+
+            <!-- Drag Handle for Group -->
+            <div
+              class="absolute -top-3 right-3 cursor-grab rounded bg-neutral-900 p-1 hover:bg-neutral-800"
+            >
+              <Icon name="dashboard" class="text-neutral-400" :size="16" />
+            </div>
+
+            <!-- Images within group (vuedraggable for internal reorder) -->
+            <draggable
+              v-model="item.images"
+              item-key="id"
+              :animation="200"
+              ghost-class="opacity-50"
+              :group="{
+                name: `group-${item.group_id}`,
+                pull: false,
+                put: false,
+              }"
+              tag="div"
+              class="grid gap-3"
+              :class="getGroupGridClass(item.layout_type)"
+            >
+              <template #item="{ element: image }">
+                <div class="cursor-move">
+                  <ImageAdminThumbnail
+                    :image="image"
+                    @click="openModal(image)"
+                    @toggle-primary="handleTogglePrimary(image)"
+                  />
+                </div>
+              </template>
+            </draggable>
+          </div>
+
+          <!-- Individual Image -->
+          <div
+            v-else
+            draggable="true"
+            @dragstart="handleDragStart($event, item)"
+            @dragover.prevent="handleDragOver($event)"
+            @drop="handleDrop($event, item)"
+            @dragend="handleDragEnd"
+            :class="{ 'opacity-50': draggedItem === item }"
+            class="my-auto` h-fit w-fit cursor-move"
+          >
             <ImageAdminThumbnail
-              :image="element"
-              @click="openModal(element)"
-              @toggle-primary="handleTogglePrimary(element)"
+              :image="item"
+              @click="openModal(item)"
+              @toggle-primary="handleTogglePrimary(item)"
             />
           </div>
         </template>
-      </draggable>
+      </div>
 
-      <p
-        v-if="displayOrder.length === 0"
-        class="py-8 text-center text-neutral-400"
-      >
+      <p v-if="images.length === 0" class="py-8 text-center text-neutral-400">
         No images yet. Upload some to get started.
       </p>
 
       <!-- Save/Discard buttons for order -->
       <div
-        v-if="displayOrder.length > 0"
+        v-if="images.length > 0"
         class="flex flex-col gap-2 border-t border-neutral-800 pt-4 md:flex-row md:gap-3"
       >
         <button
@@ -81,6 +136,7 @@
     <ImageDetailModal
       :open="modalOpen"
       :image="selectedImage"
+      :all-images="images"
       :fields="fields"
       @close="modalOpen = false"
       @updated="handleImageUpdated"
@@ -92,8 +148,14 @@
 
 <script setup lang="ts">
 import draggable from "vuedraggable";
-import { useAsyncState, useCloned, onKeyStroke } from "@vueuse/core";
-import type { ImageBase, ImageField } from "~~/types/imageTypes";
+import { useAsyncState, onKeyStroke } from "@vueuse/core";
+import type { ImageBase, ImageField, ImageGroup } from "~~/types/imageTypes";
+import { LAYOUT_TYPES } from "~~/types/layoutTypes";
+import {
+  organizeImagesForAdmin,
+  isImageGroup,
+  flattenImagesForApi,
+} from "~/utils/imageGroups";
 
 interface Props {
   context: string;
@@ -131,10 +193,23 @@ const {
   }
 );
 
-const { cloned: displayOrder, sync: syncOrder } = useCloned(images);
+// Organize images into groups for display
+const organizedItems = ref<(ImageBase | ImageGroup)[]>([]);
+watch(
+  () => images.value,
+  (newImages) => {
+    organizedItems.value = organizeImagesForAdmin(newImages);
+  },
+  { immediate: true }
+);
 
-const originalOrder = computed(() => images.value.map((img) => img.id));
-const currentOrder = computed(() => displayOrder.value.map((img) => img.id));
+// Track the original order for change detection
+const originalOrder = computed(() =>
+  flattenImagesForApi(organizeImagesForAdmin(images.value))
+);
+
+// Current order after dragging
+const currentOrder = computed(() => flattenImagesForApi(organizedItems.value));
 
 const orderChanged = computed(() => {
   if (currentOrder.value.length !== originalOrder.value.length) return true;
@@ -142,6 +217,70 @@ const orderChanged = computed(() => {
     (id, index) => id !== originalOrder.value[index]
   );
 });
+
+// Native drag-and-drop state
+const draggedItem = ref<ImageBase | ImageGroup | null>(null);
+
+function handleDragStart(event: DragEvent, item: ImageBase | ImageGroup) {
+  draggedItem.value = item;
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+  }
+}
+
+function handleDragOver(event: DragEvent) {
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = "move";
+  }
+}
+
+function handleDrop(event: DragEvent, targetItem: ImageBase | ImageGroup) {
+  event.preventDefault();
+
+  if (!draggedItem.value || draggedItem.value === targetItem) {
+    return;
+  }
+
+  const items = [...organizedItems.value];
+  const dragged = draggedItem.value; // Store in const for type narrowing
+
+  // Find indices
+  const draggedIndex = items.findIndex((i) => {
+    if (isGroup(i) && isGroup(dragged)) {
+      return i.group_id === dragged.group_id;
+    }
+    if (!isGroup(i) && !isGroup(dragged)) {
+      return i.id === dragged.id;
+    }
+    return false;
+  });
+
+  const targetIndex = items.findIndex((i) => {
+    if (isGroup(i) && isGroup(targetItem)) {
+      return i.group_id === targetItem.group_id;
+    }
+    if (!isGroup(i) && !isGroup(targetItem)) {
+      return i.id === targetItem.id;
+    }
+    return false;
+  });
+
+  if (draggedIndex === -1 || targetIndex === -1) {
+    return;
+  }
+
+  // Reorder
+  const [removed] = items.splice(draggedIndex, 1);
+  if (removed) {
+    // Type guard
+    items.splice(targetIndex, 0, removed);
+    organizedItems.value = items;
+  }
+}
+
+function handleDragEnd() {
+  draggedItem.value = null;
+}
 
 const handleSaveOrder = async () => {
   saving.value = true;
@@ -157,7 +296,6 @@ const handleSaveOrder = async () => {
 
     // Refetch to get server's version of truth
     await fetchImages();
-    syncOrder();
 
     success("Image order saved");
   } catch (e) {
@@ -168,8 +306,8 @@ const handleSaveOrder = async () => {
   }
 };
 
-const handleDiscardOrder = () => {
-  syncOrder(); // Reset to original
+const handleDiscardOrder = async () => {
+  await fetchImages();
   success("Order changes discarded");
 };
 
@@ -182,8 +320,17 @@ const openModal = (image: ImageBase) => {
   modalOpen.value = true;
 };
 
-const handleImageUpdated = () => {
-  fetchImages();
+const handleImageUpdated = async () => {
+  await fetchImages();
+
+  if (selectedImage.value) {
+    const updated = images.value.find(
+      (img) => img.id === selectedImage.value!.id
+    );
+    if (updated) {
+      selectedImage.value = updated;
+    }
+  }
 };
 
 const handleImageDeleted = () => {
@@ -205,6 +352,25 @@ const handleTogglePrimary = async (image: ImageBase) => {
     showError(e.message || "Failed to update primary status");
   }
 };
+
+// Helper functions
+function isGroup(item: ImageBase | ImageGroup): item is ImageGroup {
+  return isImageGroup(item);
+}
+
+function getLayoutLabel(layoutType: string): string {
+  return LAYOUT_TYPES[layoutType]?.label || layoutType;
+}
+
+function getGroupGridClass(layoutType: string): string {
+  const count = LAYOUT_TYPES[layoutType]?.imageCount || 1;
+  return (
+    {
+      2: "grid-cols-2",
+      3: "grid-cols-3",
+    }[count] || "grid-cols-1"
+  );
+}
 
 // Keyboard shortcut: Ctrl/Cmd + S to save order
 onKeyStroke(

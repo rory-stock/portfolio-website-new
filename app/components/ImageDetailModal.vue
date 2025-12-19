@@ -183,7 +183,7 @@
                   >
                     <div
                       v-if="isContextDropdownOpen"
-                      class="absolute z-50 mt-1 mb-4 w-full rounded-lg border border-neutral-700 bg-neutral-800 py-1 shadow-xl"
+                      class="absolute z-50 mt-1 mb-4 w-full rounded-lg border border-neutral-700 bg-neutral-800 py-1"
                       role="listbox"
                       aria-label="Context options"
                     >
@@ -195,7 +195,7 @@
                         :aria-selected="allImageContexts.includes(ctx)"
                       >
                         <span
-                          class="relative mr-3 flex h-5 w-5 flex-shrink-0 items-center justify-center"
+                          class="relative mr-3 flex h-5 w-5 shrink-0 items-center justify-center"
                         >
                           <input
                             type="checkbox"
@@ -223,6 +223,15 @@
                   </Transition>
                 </div>
               </div>
+
+              <!-- Layout Configuration -->
+              <LayoutWizard
+                v-if="props.image"
+                :current-image="props.image"
+                :all-images="props.allImages"
+                @layout-assigned="emit('refresh')"
+                @layout-removed="emit('refresh')"
+              />
 
               <!-- Action buttons -->
               <div
@@ -263,12 +272,13 @@
 <script setup lang="ts">
 import type { ImageBase, ImageField } from "~~/types/imageTypes";
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
-import { formatFileSize } from "~~/server/utils/formatFileSize";
+import { formatFileSize } from "~/utils/formatFileSize";
 
 interface Props {
   open: boolean;
   image: ImageBase | null;
   fields: ImageField[];
+  allImages: ImageBase[];
 }
 
 const props = defineProps<Props>();

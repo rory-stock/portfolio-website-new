@@ -2,14 +2,14 @@ import { eq } from "drizzle-orm";
 
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
-import { VALID_CONTEXTS, isValidContext } from "~~/server/utils/context";
+import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
 import {
   validateImageUpdate,
   IMAGE_FIELD_CONFIGS,
   isUpdatableField,
   createContextRecord,
   type ImageUpdateBody,
-} from "~~/server/utils/imageFields";
+} from "~/utils/imageFields";
 
 export default defineEventHandler(async (event) => {
   // Auth required
@@ -34,6 +34,56 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       message: `Invalid context value. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
     });
+  }
+
+  // Handle layout removal (before other field updates)
+  if (body.remove_layout === true) {
+    // Get the current image to check group status
+    const [currentImage] = await db
+      .select()
+      .from(images)
+      .where(eq(images.id, id));
+
+    if (!currentImage) {
+      throw createError({ statusCode: 404, message: "Image not found" });
+    }
+
+    const wasGrouped = currentImage.layout_group_id !== null;
+
+    // If the image is in a group, remove the layout from the entire group
+    if (wasGrouped && currentImage.layout_group_id !== null && currentImage.layout_type !== null) {
+      await db
+        .update(images)
+        .set({
+          layout_type: null,
+          layout_group_id: null,
+          group_display_order: null,
+        })
+        .where(eq(images.layout_group_id, currentImage.layout_group_id));
+    } else {
+      // Single image layout, just clear its layout
+      await db
+        .update(images)
+        .set({
+          layout_type: null,
+          layout_group_id: null,
+          group_display_order: null,
+        })
+        .where(eq(images.id, id));
+    }
+
+    // Return early after layout removal
+    const [updatedImage] = await db
+      .select()
+      .from(images)
+      .where(eq(images.id, id));
+
+    return {
+      success: true,
+      image: updatedImage,
+      layout_removed: true,
+      group_was_removed: wasGrouped, // Frontend uses this to trigger refetching
+    };
   }
 
   // Get current image

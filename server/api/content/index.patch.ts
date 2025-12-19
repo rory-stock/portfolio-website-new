@@ -1,7 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { content } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
-import { VALID_CONTEXTS, isValidContext } from "~~/server/utils/context";
+import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);

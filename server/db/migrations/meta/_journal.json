@@ -57,6 +57,13 @@
       "when": 1764234222941,
       "tag": "0007_groovy_grandmaster",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1765626036175,
+      "tag": "0008_cool_lucky_pierre",
+      "breakpoints": true
     }
   ]
 }
