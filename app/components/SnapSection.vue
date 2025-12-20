@@ -2,7 +2,7 @@
   <!-- Fullscreen Hero -->
   <section
     v-if="layoutType === 'fullscreen-hero' && images[0]"
-    class="h-screen snap-start"
+    class="snap-section fullscreen-hero-section h-screen snap-start"
   >
     <NuxtPicture
       :src="images[0].r2_path"
@@ -19,7 +19,7 @@
   <!-- All other layouts -->
   <section
     v-else-if="images.length > 0"
-    class="flex h-screen snap-start items-center justify-center"
+    class="snap-section flex h-screen snap-start items-center justify-center"
   >
     <!-- Single Hero or Null Layout -->
     <div
@@ -31,7 +31,6 @@
         :alt="images[0].alt || ''"
         format="webp"
         densities="x1 x2"
-        sizes="xs:100vw sm:90vw md:80vw lg:1024px"
         :img-attrs="{
           class: 'h-auto max-h-[80vh] w-full cursor-pointer object-contain',
           onClick: () => handleImageClick(images[0]!),
@@ -51,7 +50,6 @@
         :alt="image.alt || ''"
         format="webp"
         densities="x1 x2"
-        sizes="xs:100vw md:50vw"
         :img-attrs="{
           class: 'h-auto max-h-[70vh] w-full cursor-pointer object-contain',
           onClick: () => handleImageClick(image),
@@ -62,16 +60,15 @@
     <!-- Triple Row -->
     <div
       v-else-if="layoutType === 'triple-row'"
-      class="grid w-full max-w-7xl grid-cols-3 items-center gap-4 px-4"
+      class="grid w-full max-w-fit grid-cols-3 items-center gap-4 px-4"
     >
       <NuxtPicture
         v-for="image in images"
         :key="image.id"
         :src="image.r2_path"
         :alt="image.alt || ''"
-        format="webp"
         densities="x1 x2"
-        sizes="xs:100vw md:33vw"
+        format="webp"
         :img-attrs="{
           class: 'h-auto max-h-[60vh] w-full cursor-pointer object-contain',
           onClick: () => handleImageClick(image),
@@ -90,7 +87,6 @@
           :alt="images[0].alt || ''"
           format="webp"
           densities="x1 x2"
-          sizes="xs:100vw md:66vw"
           :img-attrs="{
             class: 'h-auto max-h-[75vh] w-full cursor-pointer object-contain',
             onClick: () => handleImageClick(images[0]!),
@@ -103,7 +99,6 @@
           :alt="images[1].alt || ''"
           format="webp"
           densities="x1 x2"
-          sizes="xs:100vw md:33vw"
           :img-attrs="{
             class: 'h-auto max-h-[60vh] w-full cursor-pointer object-contain',
             onClick: () => handleImageClick(images[1]!),
@@ -123,7 +118,6 @@
           :alt="images[0].alt || ''"
           format="webp"
           densities="x1 x2"
-          sizes="xs:100vw md:33vw"
           :img-attrs="{
             class: 'h-auto max-h-[60vh] w-full cursor-pointer object-contain',
             onClick: () => handleImageClick(images[0]!),
@@ -136,7 +130,6 @@
           :alt="images[1].alt || ''"
           format="webp"
           densities="x1 x2"
-          sizes="xs:100vw md:66vw"
           :img-attrs="{
             class: 'h-auto max-h-[75vh] w-full cursor-pointer object-contain',
             onClick: () => handleImageClick(images[1]!),

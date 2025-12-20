@@ -18,9 +18,15 @@ const { data: imagesData } = await useFetch<{ images: SnapImage[] }>(
 const images = computed(() => imagesData.value?.images ?? []);
 const selectedImage = ref<SnapImage | null>(null);
 
-// Group images by layout type
 const sections = computed(() => {
   return groupImagesByLayout(images.value);
+});
+
+const { observeHeroSections } = useHeaderTextColour();
+
+onMounted(() => {
+  const cleanup = observeHeroSections();
+  onUnmounted(cleanup);
 });
 </script>
 
