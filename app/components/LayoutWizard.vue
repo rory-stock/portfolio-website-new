@@ -180,7 +180,6 @@
               <NuxtPicture
                 :src="image.r2_path"
                 :alt="image.alt || 'Image'"
-                loading="lazy"
                 class="h-fit w-fit object-cover"
               />
 
@@ -206,6 +205,24 @@
                 class="pointer-events-none absolute inset-0 border-2 border-neutral-100"
               ></div>
             </button>
+          </div>
+
+          <!-- Scrollbar -->
+          <div
+            v-if="showScrollbar"
+            class="relative h-2 w-full rounded-full border border-neutral-700 bg-neutral-800"
+            @mousedown="handleScrollbarMouseDown"
+          >
+            <div
+              class="absolute top-0 h-full cursor-grab rounded-full bg-neutral-600 transition-colors hover:bg-neutral-500"
+              :class="{ 'cursor-grabbing': isDraggingScrollbar }"
+              :style="{
+                width: `${scrollbarWidth}%`,
+                left: `${scrollbarPosition}%`,
+              }"
+              @mousedown="handleScrollbarThumbMouseDown"
+              ref="scrollbarThumb"
+            ></div>
           </div>
 
           <!-- Validation message -->
@@ -281,8 +298,37 @@ const removingLayout = ref(false);
 
 // Scroll container for image selection
 const scrollContainer = ref<HTMLElement | null>(null);
-const { x: scrollX } = useScroll(scrollContainer, {
+const { x: scrollX, arrivedState } = useScroll(scrollContainer, {
   behavior: "smooth",
+});
+
+// Custom scrollbar state
+const scrollbarThumb = ref<HTMLElement | null>(null);
+const isDraggingScrollbar = ref(false);
+
+// Scrollbar dimensions
+const scrollbarWidth = computed(() => {
+  if (!scrollContainer.value) return 0;
+  const container = scrollContainer.value;
+  const scrollWidth = container.scrollWidth;
+  const clientWidth = container.clientWidth;
+  if (scrollWidth <= clientWidth) return 100; // Full width if no scroll needed
+  return (clientWidth / scrollWidth) * 100;
+});
+
+const scrollbarPosition = computed(() => {
+  if (!scrollContainer.value) return 0;
+  const container = scrollContainer.value;
+  const scrollWidth = container.scrollWidth;
+  const clientWidth = container.clientWidth;
+  const maxScroll = scrollWidth - clientWidth;
+  if (maxScroll <= 0) return 0;
+  return (scrollX.value / maxScroll) * (100 - scrollbarWidth.value);
+});
+
+const showScrollbar = computed(() => {
+  if (!scrollContainer.value) return false;
+  return scrollContainer.value.scrollWidth > scrollContainer.value.clientWidth;
 });
 
 // Get current image index
@@ -569,5 +615,54 @@ const handleRemoveLayout = async () => {
   } finally {
     removingLayout.value = false;
   }
+};
+
+// Scrollbar drag handlers
+const handleScrollbarMouseDown = (e: MouseEvent) => {
+  if (!scrollContainer.value) return;
+  isDraggingScrollbar.value = true;
+
+  const track = e.currentTarget as HTMLElement;
+  const trackRect = track.getBoundingClientRect();
+  const clickX = e.clientX - trackRect.left;
+  const trackWidth = trackRect.width;
+
+  const container = scrollContainer.value;
+  const maxScroll = container.scrollWidth - container.clientWidth;
+  const newScrollX = (clickX / trackWidth) * maxScroll;
+
+  scrollX.value = newScrollX;
+};
+
+const handleScrollbarThumbMouseDown = (e: MouseEvent) => {
+  e.stopPropagation();
+  if (!scrollContainer.value) return;
+  isDraggingScrollbar.value = true;
+
+  const startX = e.clientX;
+  const startScrollX = scrollX.value;
+
+  const handleMouseMove = (moveEvent: MouseEvent) => {
+    if (!scrollContainer.value) return;
+    const deltaX = moveEvent.clientX - startX;
+    const container = scrollContainer.value;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    const trackWidth = container.clientWidth;
+    const scrollDelta = (deltaX / trackWidth) * maxScroll;
+
+    scrollX.value = Math.max(
+      0,
+      Math.min(maxScroll, startScrollX + scrollDelta)
+    );
+  };
+
+  const handleMouseUp = () => {
+    isDraggingScrollbar.value = false;
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+
+  document.addEventListener("mousemove", handleMouseMove);
+  document.addEventListener("mouseup", handleMouseUp);
 };
 </script>
