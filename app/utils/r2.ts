@@ -83,15 +83,26 @@ export async function listR2Objects() {
   const sizeMatches = text.matchAll(/<Size>(.*?)<\/Size>/g);
   const dateMatches = text.matchAll(/<LastModified>(.*?)<\/LastModified>/g);
 
-  const keys = Array.from(keyMatches).map((m) => m[1]);
-  const sizes = Array.from(sizeMatches).map((m) => parseInt(m[1]));
-  const dates = Array.from(dateMatches).map((m) => new Date(m[1]));
+  const keys = Array.from(keyMatches).map((m: RegExpMatchArray) => m[1]!);
+  const sizes = Array.from(sizeMatches).map((m: RegExpMatchArray) =>
+    parseInt(m[1]!)
+  );
+  const dates = Array.from(dateMatches).map(
+    (m: RegExpMatchArray) => new Date(m[1]!)
+  );
+
+  // Validate all arrays have matching lengths
+  if (keys.length !== sizes.length || keys.length !== dates.length) {
+    throw new Error(
+      `Malformed R2 response: mismatched field counts (keys: ${keys.length}, sizes: ${sizes.length}, dates: ${dates.length})`
+    );
+  }
 
   for (let i = 0; i < keys.length; i++) {
     objects.push({
-      key: keys[i],
-      size: sizes[i],
-      lastModified: dates[i],
+      key: keys[i]!,
+      size: sizes[i]!,
+      lastModified: dates[i]!,
     });
   }
 

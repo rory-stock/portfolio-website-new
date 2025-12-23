@@ -8,6 +8,7 @@
       :src="images[0].r2_path"
       :alt="images[0].alt || ''"
       format="webp"
+      quality="100"
       densities="x1 x2"
       :img-attrs="{
         class: 'h-full w-full cursor-pointer object-cover',

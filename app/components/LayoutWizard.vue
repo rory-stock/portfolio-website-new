@@ -1,526 +1,593 @@
 <template>
-  <div
-    class="space-y-4 rounded-lg border border-neutral-800 bg-neutral-900 p-4"
-  >
-    <h3 class="text-lg font-semibold text-neutral-100">Layout Configuration</h3>
+  <div class="space-y-4 border-t border-neutral-800 pt-4">
+    <h4 class="font-medium text-neutral-100">Layout Configuration</h4>
 
-    <!-- Current Layout Status -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 -translate-y-2"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 -translate-y-2"
-    >
+    <!-- Single container box -->
+    <div class="rounded-lg border border-neutral-700 bg-neutral-800 p-4">
+      <!-- Current Layout Display (when layout exists and wizard closed) -->
       <div
-        v-if="currentImage.layout_type && wizardStep === 0"
-        class="rounded bg-neutral-800 p-3"
+        v-if="props.currentImage.layout_type && !showWizard"
+        class="flex items-center justify-between"
       >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-neutral-400">Current Layout</p>
-            <p class="text-base font-medium text-neutral-100">
-              {{
-                LAYOUT_TYPES[currentImage.layout_type]?.label ||
-                currentImage.layout_type
-              }}
-            </p>
-            <p
-              v-if="currentImage.layout_group_id"
-              class="text-xs text-neutral-500"
-            >
-              Group #{{ currentImage.layout_group_id }}
-            </p>
-          </div>
+        <div>
+          <p class="text-sm text-neutral-400">Current Layout</p>
+          <p class="font-medium text-neutral-100">
+            {{ getLayoutLabel(props.currentImage.layout_type) }}
+          </p>
+          <p
+            v-if="props.currentImage.layout_group_id"
+            class="mt-1 text-xs text-neutral-500"
+          >
+            Group ID: {{ props.currentImage.layout_group_id }}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            @click="showWizard = true"
+            class="rounded bg-neutral-700 px-3 py-1.5 text-sm text-neutral-100 transition-colors hover:bg-neutral-600"
+          >
+            Change Layout
+          </button>
           <button
             type="button"
             @click="handleRemoveLayout"
-            :disabled="removing"
-            class="rounded bg-red-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+            :disabled="removingLayout"
+            class="rounded bg-red-800 px-3 py-1.5 text-sm text-white transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {{ removing ? "Removing..." : "Remove Layout" }}
+            {{ removingLayout ? "Removing..." : "Remove" }}
           </button>
         </div>
       </div>
-    </Transition>
 
-    <!-- No Layout - Show Assign Button (hide when wizard active) -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 -translate-y-2"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 -translate-y-2"
-    >
-      <div
-        v-if="!currentImage.layout_type && wizardStep === 0"
-        class="text-center"
-      >
-        <p class="mb-3 text-sm text-neutral-400">No layout assigned</p>
-        <button
-          type="button"
-          @click="wizardStep = 1"
-          class="rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-980 transition-colors hover:bg-neutral-300"
-        >
-          Assign Layout
-        </button>
-      </div>
-    </Transition>
-
-    <!-- Change Layout Button (when layout exists, hide when wizard active) -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 -translate-y-2"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 -translate-y-2"
-    >
+      <!-- Assign Layout Button (when no layout and wizard closed) -->
       <button
-        v-if="currentImage.layout_type && wizardStep === 0"
+        v-if="!props.currentImage.layout_type && !showWizard"
         type="button"
-        @click="wizardStep = 1"
-        class="w-full rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors hover:bg-neutral-800"
+        @click="showWizard = true"
+        class="hover:bg-neutral-750 w-full rounded-lg border-2 border-dashed border-neutral-600 px-4 py-3 text-neutral-300 transition-colors hover:border-neutral-500"
       >
-        Change Layout
+        + Assign Layout
       </button>
-    </Transition>
 
-    <!-- Wizard Step 1: Layout Type Selection -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 translate-x-4"
-      enter-to-class="opacity-100 translate-x-0"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-x-0"
-      leave-to-class="opacity-0 -translate-x-4"
-    >
-      <div v-if="wizardStep === 1" class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h4 class="text-sm font-medium text-neutral-100">
-            Step 1: Select Layout Type
-          </h4>
+      <!-- Layout Wizard (when wizard open) -->
+      <div v-if="showWizard" class="space-y-4">
+        <!-- Header -->
+        <div
+          class="flex items-center justify-between border-b border-neutral-700 pb-3"
+        >
+          <h5 class="font-medium text-neutral-100">
+            {{ currentStep === 1 ? "Select Layout Type" : "Select Images" }}
+          </h5>
           <button
-            type="button"
-            @click="cancelWizard"
-            class="text-xs text-neutral-400 hover:text-neutral-200"
+            @click="handleCloseWizard"
+            class="text-neutral-400 transition-colors hover:text-neutral-200"
           >
-            Cancel
+            <Icon name="cross" width="16" height="16" />
           </button>
         </div>
 
-        <!-- Layout Type Grid -->
-        <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <!-- Step 1: Select Layout Type -->
+        <div v-if="currentStep === 1">
           <div
-            v-for="layout in Object.values(LAYOUT_TYPES)"
-            :key="layout.id"
-            @click="selectLayoutType(layout.id)"
-            class="flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 p-3 transition-all hover:border-neutral-100 hover:bg-neutral-800"
-            :class="
-              selectedLayoutType === layout.id
-                ? 'border-neutral-100 bg-neutral-800'
-                : 'border-neutral-700'
-            "
+            v-if="availableLayoutTypes.length === 0"
+            class="py-8 text-center"
           >
-            <!-- Visual Icon -->
-            <div class="flex h-12 w-full items-center justify-center">
-              <LayoutIcon :layout-type="layout.id" />
-            </div>
-
-            <!-- Label -->
-            <div class="text-center">
-              <p class="text-xs font-medium text-neutral-100">
-                {{ layout.label }}
-              </p>
-              <p class="text-xs text-neutral-500">({{ layout.imageCount }})</p>
-            </div>
+            <p class="text-neutral-400">No layout types available.</p>
+            <p class="mt-2 text-sm text-neutral-500">
+              Images before or after this one may be in other layouts, leaving
+              no consecutive images available.
+            </p>
           </div>
-        </div>
-      </div>
-    </Transition>
 
-    <!-- Wizard Step 2: Image Selection -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 translate-x-4"
-      enter-to-class="opacity-100 translate-x-0"
-      leave-active-class="transition-all duration-200 ease-in"
-      leave-from-class="opacity-100 translate-x-0"
-      leave-to-class="opacity-0 -translate-x-4"
-    >
-      <div v-if="wizardStep === 2" class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h4 class="text-sm font-medium text-neutral-100">
-            Step 2: Select {{ selectedLayoutConfig?.imageCount }} Images
-          </h4>
-          <button
-            type="button"
-            @click="wizardStep = 1"
-            class="text-xs text-neutral-400 hover:text-neutral-200"
-          >
-            ← Back
-          </button>
-        </div>
-
-        <p class="text-xs text-neutral-400">
-          Select {{ requiredCount }} more
-          {{ requiredCount === 1 ? "image" : "images" }} to group with the
-          current image
-        </p>
-
-        <!-- Scrollable Image Selection (drag to scroll) -->
-        <div v-if="availableImages.length > 0" class="space-y-2">
-          <div
-            ref="scrollContainer"
-            class="cursor-grab overflow-x-auto scroll-smooth select-none active:cursor-grabbing"
-            @mousedown="startDrag"
-            @mousemove="onDrag"
-            @mouseup="stopDrag"
-            @mouseleave="stopDrag"
-          >
-            <div class="flex gap-2 pb-2">
-              <div
-                v-for="img in availableImages"
-                :key="img.id"
-                @click="toggleImageSelection(img)"
-                :ref="
-                  img.id === currentImage.id ? 'currentImageRef' : undefined
-                "
-                class="pointer-events-auto relative shrink-0 cursor-pointer rounded-md border-2 transition-all"
-                :class="[
-                  isImageSelected(img)
-                    ? 'border-neutral-100'
-                    : 'border-neutral-700 hover:border-neutral-500',
-                ]"
-              >
-                <NuxtPicture
-                  :src="img.r2_path"
-                  :alt="img.alt"
-                  format="webp"
-                  :img-attrs="{
-                    class: 'h-36 w-auto object-cover rounded',
-                  }"
-                />
-
-                <!-- Position Label -->
-                <div
-                  class="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded bg-neutral-900 px-1.5 py-0.5 text-xs text-neutral-400"
-                >
-                  {{ getImagePositionLabel(img) }}
+          <div v-else class="grid grid-cols-2 gap-3">
+            <button
+              v-for="[key, layout] in availableLayoutTypes"
+              :key="key"
+              type="button"
+              @click="selectLayoutType(key)"
+              class="layout-card flex flex-col"
+              :class="{ 'ring-2 ring-neutral-100': selectedLayoutType === key }"
+            >
+              <LayoutIcon :layout-type="key" class="h-20 w-full" />
+              <div class="mt-2">
+                <div class="font-medium text-neutral-100">
+                  {{ layout.label }}
+                </div>
+                <div class="text-sm text-neutral-400">
+                  {{ layout.description }}
+                </div>
+                <div class="mt-1 text-xs text-neutral-500">
+                  {{ layout.imageCount }} image{{
+                    layout.imageCount > 1 ? "s" : ""
+                  }}
                 </div>
               </div>
-            </div>
+            </button>
           </div>
 
-          <!-- Selected Count -->
-          <p class="text-xs text-neutral-500">
-            {{ selectedImages.length }} of
-            {{ selectedLayoutConfig?.imageCount }} selected
-          </p>
+          <!-- Navigation -->
+          <div class="mt-4 flex justify-end gap-2">
+            <button
+              @click="handleCloseWizard"
+              class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700"
+            >
+              Cancel
+            </button>
+            <button
+              @click="goToStep2"
+              :disabled="!selectedLayoutType"
+              class="rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
 
-        <!-- No valid images -->
-        <div v-else class="rounded bg-neutral-800 p-4 text-center">
-          <p class="text-sm text-neutral-400">
-            Not enough consecutive images available for this layout.
+        <!-- Step 2: Select Images -->
+        <div v-if="currentStep === 2">
+          <p class="mb-3 text-sm text-neutral-400">
+            Select
+            {{
+              selectedLayoutType
+                ? (LAYOUT_TYPES[selectedLayoutType]?.imageCount ?? 0)
+                : 0
+            }}
+            consecutive image{{
+              selectedLayoutType &&
+              (LAYOUT_TYPES[selectedLayoutType]?.imageCount ?? 0) > 1
+                ? "s"
+                : ""
+            }}
+            for this layout. Images must be next to each other with no gaps.
           </p>
-          <button
-            type="button"
-            @click="wizardStep = 1"
-            class="mt-3 text-sm text-neutral-100 hover:text-neutral-300"
+
+          <!-- Horizontal scrolling image picker -->
+          <div
+            ref="scrollContainer"
+            class="relative no-scrollbar flex gap-3 overflow-x-auto pb-4"
           >
-            ← Choose a different layout
-          </button>
-        </div>
+            <button
+              v-for="image in props.allImages"
+              :key="image.id"
+              type="button"
+              @click="toggleImageSelection(image)"
+              :disabled="!canSelectImage(image)"
+              class="image-select-button relative"
+              :class="{
+                selected: selectedImages.includes(image.id),
+                current: image.id === props.currentImage.id,
+                disabled: !canSelectImage(image),
+                'in-layout': imagesInLayouts.has(image.id),
+              }"
+            >
+              <NuxtPicture
+                :src="image.r2_path"
+                :alt="image.alt || 'Image'"
+                loading="lazy"
+                class="h-full w-full object-cover"
+              />
 
-        <!-- Create Layout Button -->
-        <button
-          v-if="
-            availableImages.length > 0 &&
-            selectedImages.length === selectedLayoutConfig?.imageCount
-          "
-          type="button"
-          @click="handleCreateLayout"
-          :disabled="assigning"
-          class="w-full rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-980 transition-colors hover:bg-neutral-300 disabled:opacity-50"
-        >
-          {{ assigning ? "Creating Layout..." : "Create Layout" }}
-        </button>
+              <!-- Position label -->
+              <div
+                class="absolute top-2 left-2 rounded bg-black/70 px-2 py-1 text-xs text-white"
+              >
+                <span v-if="image.id === props.currentImage.id">Current</span>
+                <span v-else>{{ getPositionLabel(image) }}</span>
+              </div>
+
+              <!-- In layout badge -->
+              <div
+                v-if="imagesInLayouts.has(image.id)"
+                class="absolute top-2 right-2 rounded bg-neutral-700 px-2 py-1 text-xs text-neutral-300"
+              >
+                In Layout
+              </div>
+
+              <!-- Selected checkmark -->
+              <div
+                v-if="selectedImages.includes(image.id)"
+                class="absolute inset-0 border-2 border-neutral-100 bg-neutral-100/10"
+              >
+                <div
+                  class="absolute top-2 right-2 rounded-full bg-neutral-100 p-1"
+                >
+                  <svg
+                    class="h-4 w-4 text-neutral-900"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Validation message -->
+          <div
+            v-if="validationMessage"
+            class="mt-3 text-center text-sm text-neutral-400"
+          >
+            {{ validationMessage }}
+          </div>
+
+          <!-- Navigation -->
+          <div class="mt-4 flex justify-between">
+            <button
+              @click="goToStep1"
+              class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700"
+            >
+              Back
+            </button>
+            <div class="flex gap-2">
+              <button
+                type="button"
+                @click="handleCloseWizard"
+                class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700"
+              >
+                Cancel
+              </button>
+              <button
+                @click="handleAssignLayout"
+                :disabled="!canSubmit || assigningLayout"
+                class="rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {{ assigningLayout ? "Assigning..." : "Assign Layout" }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-    </Transition>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { ImageBase } from "~~/types/imageTypes";
-import { LAYOUT_TYPES, type LayoutTypeId } from "~~/types/layoutTypes";
+import { LAYOUT_TYPES } from "~~/types/layoutTypes";
+import type { LayoutTypeId } from "~~/types/layoutTypes";
+import { useScroll } from "@vueuse/core";
 
 interface Props {
   currentImage: ImageBase;
   allImages: ImageBase[];
+  context: string;
 }
 
 const props = defineProps<Props>();
+
 const emit = defineEmits<{
   "layout-assigned": [];
   "layout-removed": [];
 }>();
 
-const { success, error: showError } = useToast();
+const { error: showError } = useToast();
 
-const wizardStep = ref(0);
+// Wizard state
+const showWizard = ref(false);
+const currentStep = ref(1);
 const selectedLayoutType = ref<LayoutTypeId | null>(null);
-const selectedImages = ref<ImageBase[]>([]);
-const assigning = ref(false);
-const removing = ref(false);
+const selectedImages = ref<number[]>([]);
+const assigningLayout = ref(false);
+const removingLayout = ref(false);
 
+// Scroll container for image selection
 const scrollContainer = ref<HTMLElement | null>(null);
-const currentImageRef = ref<HTMLElement | null>(null);
-
-const isDragging = ref(false);
-const startX = ref(0);
-const scrollLeft = ref(0);
-
-const selectedLayoutConfig = computed(() => {
-  return selectedLayoutType.value
-    ? LAYOUT_TYPES[selectedLayoutType.value]
-    : null;
+const { x: scrollX } = useScroll(scrollContainer, {
+  behavior: "smooth",
 });
 
-const requiredCount = computed(() => {
-  if (!selectedLayoutConfig.value) return 0;
-  return selectedLayoutConfig.value.imageCount - 1;
-});
-
+// Get current image index
 const currentImageIndex = computed(() => {
   return props.allImages.findIndex((img) => img.id === props.currentImage.id);
 });
 
-const availableImages = computed<ImageBase[]>(() => {
-  if (!selectedLayoutConfig.value || wizardStep.value !== 2) return [];
+// Get images already in layouts (excluding current image's group)
+const imagesInLayouts = computed(() => {
+  const currentGroupId = props.currentImage.layout_group_id;
+  return new Set(
+    props.allImages
+      .filter(
+        (img) =>
+          img.layout_type !== null &&
+          img.layout_type !== "" &&
+          img.layout_group_id !== currentGroupId // Allow selecting current group members
+      )
+      .map((img) => img.id)
+  );
+});
 
-  const needed = selectedLayoutConfig.value.imageCount;
+// Get consecutive available images around current image
+const consecutiveAvailableImages = computed(() => {
   const currentIdx = currentImageIndex.value;
+  if (currentIdx === -1) return { before: 0, after: 0 };
 
-  if (currentIdx === -1) return [];
+  let before = 0;
+  let after = 0;
 
-  const images = props.allImages;
-  const maxBefore = Math.min(currentIdx, needed - 1);
-  const maxAfter = Math.min(images.length - currentIdx - 1, needed - 1);
+  // Count consecutive available images before
+  for (let i = currentIdx - 1; i >= 0; i--) {
+    const img = props.allImages[i];
+    if (!img || imagesInLayouts.value.has(img.id)) break;
+    before++;
+  }
 
-  const startIdx = currentIdx - maxBefore;
-  const endIdx = currentIdx + maxAfter;
-  const slice = images.slice(startIdx, endIdx + 1);
+  // Count consecutive available images after
+  for (let i = currentIdx + 1; i < props.allImages.length; i++) {
+    const img = props.allImages[i];
+    if (!img || imagesInLayouts.value.has(img.id)) break;
+    after++;
+  }
 
-  return slice.filter((img) => {
-    if (img.order === null) return false;
+  return { before, after };
+});
 
-    const imgIdx = slice.indexOf(img);
-    if (imgIdx > 0) {
-      const prev = slice[imgIdx - 1];
-      if (prev && prev.order !== null && img.order - prev.order !== 1) {
-        return false;
-      }
-    }
-    return true;
+// Filter available layout types based on consecutive images
+const availableLayoutTypes = computed(() => {
+  const available = consecutiveAvailableImages.value;
+  const totalAvailable = 1 + available.before + available.after; // Include current image
+
+  return Object.entries(LAYOUT_TYPES).filter(([_, config]) => {
+    return config.imageCount <= totalAvailable;
   });
 });
 
-function toggleImageSelection(image: ImageBase) {
-  if (image.id === props.currentImage.id) return;
+// Check if an image can be selected
+const canSelectImage = (image: ImageBase): boolean => {
+  if (!selectedLayoutType.value) return false;
 
-  const index = selectedImages.value.findIndex((img) => img.id === image.id);
+  const layoutConfig = LAYOUT_TYPES[selectedLayoutType.value];
+  if (!layoutConfig) return false;
+
+  const neededCount = layoutConfig.imageCount;
+
+  // Can't select if already in another layout
+  if (imagesInLayouts.value.has(image.id)) return false;
+
+  // Can't select if it would create a gap
+  const currentIdx = currentImageIndex.value;
+  const imageIdx = props.allImages.findIndex((img) => img.id === image.id);
+  const distance = Math.abs(imageIdx - currentIdx);
+
+  // For layouts needing multiple images, check if within range
+  if (neededCount > 1) {
+    const maxDistance = neededCount - 1;
+    if (distance > maxDistance) return false;
+  }
+
+  return true;
+};
+
+// Validate selected images are consecutive
+const areImagesConsecutive = computed(() => {
+  if (selectedImages.value.length <= 1) return true;
+
+  const indices = selectedImages.value
+    .map((id) => props.allImages.findIndex((img) => img.id === id))
+    .sort((a, b) => a - b);
+
+  for (let i = 1; i < indices.length; i++) {
+    const prevIndex = indices[i - 1];
+    const currIndex = indices[i];
+    if (prevIndex === undefined || currIndex === undefined) return false;
+    if (currIndex - prevIndex !== 1) {
+      return false;
+    }
+  }
+
+  return true;
+});
+
+// Validation message
+const validationMessage = computed(() => {
+  if (!selectedLayoutType.value) return "";
+
+  const layoutConfig = LAYOUT_TYPES[selectedLayoutType.value];
+  if (!layoutConfig) return "";
+
+  const needed = layoutConfig.imageCount;
+  const selected = selectedImages.value.length;
+
+  if (selected < needed) {
+    return `Select ${needed - selected} more image${needed - selected > 1 ? "s" : ""}`;
+  }
+
+  if (selected > needed) {
+    return `Too many images selected (need ${needed})`;
+  }
+
+  if (!areImagesConsecutive.value) {
+    return "Images must be consecutive (no gaps)";
+  }
+
+  return "Ready to assign"; // Valid
+});
+
+// Can submit
+const canSubmit = computed(() => {
+  if (!selectedLayoutType.value) return false;
+  const layoutConfig = LAYOUT_TYPES[selectedLayoutType.value];
+  if (!layoutConfig) return false;
+
+  return (
+    selectedImages.value.length === layoutConfig.imageCount &&
+    areImagesConsecutive.value
+  );
+});
+
+// Get the position label for an image
+const getPositionLabel = (image: ImageBase): string => {
+  const currentIdx = currentImageIndex.value;
+  const imageIdx = props.allImages.findIndex((img) => img.id === image.id);
+  const diff = imageIdx - currentIdx;
+
+  if (diff > 0) return `+${diff}`;
+  return diff.toString();
+};
+
+// Get layout label
+const getLayoutLabel = (layoutType: string): string => {
+  return LAYOUT_TYPES[layoutType as LayoutTypeId]?.label || layoutType;
+};
+
+// Toggle image selection
+const toggleImageSelection = (image: ImageBase) => {
+  if (!canSelectImage(image)) return;
+
+  const index = selectedImages.value.indexOf(image.id);
   if (index > -1) {
     selectedImages.value.splice(index, 1);
   } else {
-    if (
-      selectedImages.value.length <
-      (selectedLayoutConfig.value?.imageCount || 0)
-    ) {
-      selectedImages.value.push(image);
-    }
+    selectedImages.value.push(image.id);
   }
-}
+};
 
-function isImageSelected(image: ImageBase): boolean {
-  return (
-    image.id === props.currentImage.id ||
-    selectedImages.value.some((img) => img.id === image.id)
-  );
-}
+// Select the layout type and go to step 2
+const selectLayoutType = (layoutType: string) => {
+  selectedLayoutType.value = layoutType as LayoutTypeId;
+};
 
-function getImagePositionLabel(img: ImageBase): string {
-  const currentIdx = props.allImages.findIndex(
-    (i) => i.id === props.currentImage.id
-  );
-  const imgIdx = props.allImages.findIndex((i) => i.id === img.id);
-  const relativePos = imgIdx - currentIdx;
+// Navigation
+const goToStep2 = () => {
+  currentStep.value = 2;
+  selectedImages.value = [props.currentImage.id];
 
-  if (relativePos === 0) return "Current";
-  if (relativePos < 0) return `−${Math.abs(relativePos)}`;
-  return `+${relativePos}`;
-}
+  // Only scroll once on the initial step 2 load
+  nextTick(() => {
+    if (scrollContainer.value) {
+      const currentIdx = currentImageIndex.value;
+      const imageWidth = 208; // 12rem (w-48) + 0.75rem gap
+      const containerWidth = scrollContainer.value.clientWidth;
+      const scrollTo =
+        currentIdx * imageWidth - containerWidth / 2 + imageWidth / 2;
 
-function selectLayoutType(layoutId: LayoutTypeId) {
-  selectedLayoutType.value = layoutId;
-
-  const config = LAYOUT_TYPES[layoutId];
-  if (!config) return;
-
-  if (config.imageCount === 1) {
-    handleCreateLayout();
-  } else {
-    wizardStep.value = 2;
-  }
-}
-
-function startDrag(e: MouseEvent) {
-  if (!scrollContainer.value) return;
-  isDragging.value = true;
-  startX.value = e.pageX - scrollContainer.value.offsetLeft;
-  scrollLeft.value = scrollContainer.value.scrollLeft;
-}
-
-function onDrag(e: MouseEvent) {
-  if (!isDragging.value || !scrollContainer.value) return;
-  e.preventDefault();
-  const x = e.pageX - scrollContainer.value.offsetLeft;
-  const walk = (x - startX.value) * 2; // Scroll speed multiplier
-  scrollContainer.value.scrollLeft = scrollLeft.value - walk;
-}
-
-function stopDrag() {
-  isDragging.value = false;
-}
-
-// Centre scroll on the current image when step 2 loads
-watch(wizardStep, async (newStep) => {
-  if (newStep === 2) {
-    selectedImages.value = [props.currentImage];
-
-    await nextTick();
-
-    if (scrollContainer.value && currentImageRef.value) {
-      const container = scrollContainer.value;
-      const current = currentImageRef.value;
-
-      container.scrollLeft =
-        current.offsetLeft -
-        container.clientWidth / 2 +
-        current.clientWidth / 2;
+      // Use scrollLeft instead of VueUse scrollX for one-time scroll
+      scrollContainer.value.scrollLeft = Math.max(0, scrollTo);
     }
-  }
-});
+  });
+};
 
-watch(
-  () => props.currentImage,
-  () => {
-    // Reset wizard when image changes (e.g., after layout assignment/removal)
-    if (wizardStep.value !== 0) {
-      cancelWizard();
-    }
-  },
-  { deep: true }
-);
+const goToStep1 = () => {
+  currentStep.value = 1;
+  selectedImages.value = [];
+};
 
-async function handleCreateLayout() {
-  if (!selectedLayoutType.value) return;
+// Close wizard and reset
+const handleCloseWizard = () => {
+  showWizard.value = false;
+  currentStep.value = 1;
+  selectedLayoutType.value = null;
+  selectedImages.value = [];
+};
 
-  const config = LAYOUT_TYPES[selectedLayoutType.value];
-  if (!config) return;
+// Assign layout
+const handleAssignLayout = async () => {
+  if (!selectedLayoutType.value || !canSubmit.value) return;
 
-  assigning.value = true;
+  assigningLayout.value = true;
 
   try {
-    let imageIds: number[];
-
-    if (config.imageCount === 1) {
-      imageIds = [props.currentImage.id];
-    } else {
-      const allSelected = selectedImages.value;
-
-      if (allSelected.length !== config.imageCount) {
-        showError(`Please select exactly ${config.imageCount} images`);
-        assigning.value = false;
-        return;
-      }
-
-      const sorted = allSelected.sort(
-        (a, b) => (a.order ?? 0) - (b.order ?? 0)
-      );
-      imageIds = sorted.map((img) => img.id);
-    }
-
-    await $fetch("/api/images/layouts", {
+    const response = await $fetch("/api/images/layouts", {
       method: "POST",
       body: {
-        image_ids: imageIds,
+        image_ids: selectedImages.value,
         layout_type: selectedLayoutType.value,
-        context: props.currentImage.context,
+        context: props.context,
       },
+      headers: useRequestHeaders(["cookie"]),
     });
 
-    success("Layout assigned successfully");
-    emit("layout-assigned");
-    cancelWizard();
-  } catch (e: any) {
-    showError(e.data?.message || e.message || "Failed to assign layout");
+    if (response.success) {
+      handleCloseWizard();
+      emit("layout-assigned"); // Only emit AFTER a successful API call
+    }
+  } catch (error: any) {
+    showError(error.data?.message || "Failed to assign layout");
   } finally {
-    assigning.value = false;
+    assigningLayout.value = false;
   }
-}
+};
 
-async function handleRemoveLayout() {
-  if (!props.currentImage.layout_type) return;
-
-  if (
-    !confirm("Remove this layout? This will affect all images in the group.")
-  ) {
-    return;
-  }
-
-  removing.value = true;
+// Remove layout
+const handleRemoveLayout = async () => {
+  removingLayout.value = true;
 
   try {
-    await $fetch(`/api/images/${props.currentImage.id}`, {
+    const response = await $fetch(`/api/images/${props.currentImage.id}`, {
       method: "PATCH",
       body: {
         remove_layout: true,
       },
+      headers: useRequestHeaders(["cookie"]),
     });
 
-    success("Layout removed successfully");
-    emit("layout-removed");
-  } catch (e: any) {
-    showError(e.data?.message || e.message || "Failed to remove layout");
+    if (response.success) {
+      emit("layout-removed"); // Only emit AFTER a successful API call
+    }
+  } catch (error: any) {
+    showError(error.data?.message || "Failed to remove layout");
   } finally {
-    removing.value = false;
+    removingLayout.value = false;
   }
-}
-
-function cancelWizard() {
-  wizardStep.value = 0;
-  selectedLayoutType.value = null;
-  selectedImages.value = [];
-}
+};
 </script>
 
 <style scoped>
-div::-webkit-scrollbar {
-  display: block;
-  height: 8px;
+.image-select-button {
+  position: relative;
+  height: 8rem;
+  width: 12rem;
+  flex-shrink: 0;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
-div::-webkit-scrollbar-track {
-  background: rgb(38 38 38);
-  border-radius: 4px;
+
+.image-select-button:not(.disabled):hover {
+  box-shadow: 0 0 0 2px rgb(229 229 229); /* neutral-200 */
 }
-div::-webkit-scrollbar-thumb {
-  background: rgb(115 115 115);
-  border-radius: 4px;
+
+.image-select-button.selected {
+  box-shadow: 0 0 0 2px rgb(245 245 245); /* neutral-100 */
 }
-div::-webkit-scrollbar-thumb:hover {
-  background: rgb(163 163 163);
+
+.image-select-button.current {
+  box-shadow: 0 0 0 2px rgb(212 212 212); /* neutral-300 */
+}
+
+.image-select-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
+
+.image-select-button.in-layout {
+  opacity: 0.6;
+}
+
+.layout-card {
+  cursor: pointer;
+  border-radius: 0.5rem;
+  border: 1px solid rgb(64 64 64);
+  background-color: rgb(38 38 38);
+  padding: 1rem;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+.layout-card:hover {
+  border-color: rgb(82 82 82);
+  background-color: rgb(42 42 42);
 }
 </style>

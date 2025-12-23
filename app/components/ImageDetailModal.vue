@@ -229,8 +229,9 @@
                 v-if="props.image"
                 :current-image="props.image"
                 :all-images="props.allImages"
-                @layout-assigned="emit('refresh')"
-                @layout-removed="emit('refresh')"
+                :context="props.context"
+                @layout-assigned="handleLayoutAssigned"
+                @layout-removed="handleLayoutRemoved"
               />
 
               <!-- Action buttons -->
@@ -279,6 +280,7 @@ interface Props {
   image: ImageBase | null;
   fields: ImageField[];
   allImages: ImageBase[];
+  context: string;
 }
 
 const props = defineProps<Props>();
@@ -541,5 +543,40 @@ const handleDelete = async () => {
   } finally {
     deleting.value = false;
   }
+};
+
+// Refetch image data after layout operations
+const refetchImage = async () => {
+  if (!props.image?.id) return;
+
+  try {
+    const response = await $fetch<{
+      image: ImageBase;
+      layout_removed?: boolean;
+      group_was_removed?: boolean;
+    }>(`/api/images/${props.image.id}`, {
+      headers: useRequestHeaders(["cookie"]),
+    });
+
+    if (response.image) {
+      emit("refresh");
+      await nextTick();
+      emit("updated");
+    }
+  } catch (error) {
+    console.error("Failed to refetch image:", error);
+  }
+};
+
+// Handle layout assigned from LayoutWizard
+const handleLayoutAssigned = async () => {
+  await refetchImage();
+  success("Layout assigned successfully");
+};
+
+// Handle layout removed from the LayoutWizard
+const handleLayoutRemoved = async () => {
+  await refetchImage();
+  success("Layout removed successfully");
 };
 </script>

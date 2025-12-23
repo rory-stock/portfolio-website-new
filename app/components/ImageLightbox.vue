@@ -38,7 +38,7 @@ const handleImageLoad = () => {
   imageLoading.value = false;
 };
 
-// Reset loading state when image changes
+// Reset loading state when the image changes
 watch(
   () => props.imagePath,
   () => {
@@ -65,7 +65,7 @@ watch(
         <button
           type="button"
           @click="emit('close')"
-          class="absolute top-8 right-10 z-50 flex h-10 w-10 cursor-pointer items-center justify-center"
+          class="absolute top-3 right-3 z-50 flex h-10 w-10 cursor-pointer items-center justify-center md:top-8 md:right-10"
           aria-label="Close"
         >
           <Icon name="cross" :size="32" />

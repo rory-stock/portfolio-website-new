@@ -137,6 +137,7 @@
       :open="modalOpen"
       :image="selectedImage"
       :all-images="images"
+      :context="context"
       :fields="fields"
       @close="modalOpen = false"
       @updated="handleImageUpdated"
@@ -148,7 +149,7 @@
 
 <script setup lang="ts">
 import draggable from "vuedraggable";
-import { useAsyncState, onKeyStroke } from "@vueuse/core";
+import { onKeyStroke } from "@vueuse/core";
 import type { ImageBase, ImageField, ImageGroup } from "~~/types/imageTypes";
 import { LAYOUT_TYPES } from "~~/types/layoutTypes";
 import {
@@ -171,27 +172,36 @@ const saving = ref(false);
 const modalOpen = ref(false);
 const selectedImage = ref<ImageBase | null>(null);
 
-const {
-  state: images,
-  isLoading,
-  error: fetchError,
-  execute: fetchImages,
-} = useAsyncState(
-  async () => {
+const images = ref<ImageBase[]>([]);
+const isLoading = ref(false);
+const fetchError = ref<string | null>(null);
+
+const fetchImages = async () => {
+  isLoading.value = true;
+  fetchError.value = null;
+
+  try {
     const response = await $fetch<{ images: ImageBase[]; total: number }>(
-      `/api/images?context=${props.context}`
+      `/api/images?context=${props.context}`,
+      {
+        // Force fresh fetch, no cache
+        headers: useRequestHeaders(["cookie"]),
+      }
     );
-    return response.images;
-  },
-  [] as ImageBase[],
-  {
-    immediate: true,
-    onError: (e) => {
-      const message = e instanceof Error ? e.message : "Failed to load images";
-      showError(message);
-    },
+    images.value = response.images;
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to load images";
+    fetchError.value = message;
+    showError(message);
+  } finally {
+    isLoading.value = false;
   }
-);
+};
+
+// Initial fetch
+onMounted(() => {
+  fetchImages();
+});
 
 // Organize images into groups for display
 const organizedItems = ref<(ImageBase | ImageGroup)[]>([]);

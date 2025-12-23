@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
@@ -51,7 +51,11 @@ export default defineEventHandler(async (event) => {
     const wasGrouped = currentImage.layout_group_id !== null;
 
     // If the image is in a group, remove the layout from the entire group
-    if (wasGrouped && currentImage.layout_group_id !== null && currentImage.layout_type !== null) {
+    if (
+      wasGrouped &&
+      currentImage.layout_group_id !== null &&
+      currentImage.layout_type !== null
+    ) {
       await db
         .update(images)
         .set({
@@ -94,6 +98,30 @@ export default defineEventHandler(async (event) => {
 
   if (!currentImage) {
     throw createError({ statusCode: 404, message: "Image not found" });
+  }
+
+  // Handle layout change for grouped images
+  // If this image is currently in a group and getting a new layout assigned,
+  // remove layout from all OTHER members of the old group
+  // Check if the body has layout_type as a property (using the 'in' operator for type safety)
+  if (
+    "layout_type" in body &&
+    body.layout_type !== undefined &&
+    currentImage.layout_group_id !== null
+  ) {
+    await db
+      .update(images)
+      .set({
+        layout_type: null,
+        layout_group_id: null,
+        group_display_order: null,
+      })
+      .where(
+        and(
+          eq(images.layout_group_id, currentImage.layout_group_id),
+          ne(images.id, id) // Don't update the current image yet
+        )
+      );
   }
 
   // Apply field updates based on centralized scope configuration
@@ -140,7 +168,7 @@ export default defineEventHandler(async (event) => {
         break;
 
       case "single_record":
-        // Update only this specific record (e.g., is_public)
+        // Update only this specific record (e.g. is_public)
         await db
           .update(images)
           .set({ [field]: value })
