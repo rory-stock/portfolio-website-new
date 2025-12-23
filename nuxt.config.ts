@@ -24,6 +24,7 @@ export default defineNuxtConfig({
     server: {
       allowedHosts: ["test.rorystock.com"],
     },
+    logLevel: "info",
   },
   nitro: {
     preset: "cloudflare-pages",

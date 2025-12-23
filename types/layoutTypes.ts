@@ -12,7 +12,7 @@ export const LAYOUT_TYPES: Record<string, LayoutType> = {
     id: "fullscreen-hero",
     label: "Fullscreen Hero",
     imageCount: 1,
-    description: "Full viewport coverage (fills entire screen below header)",
+    description: "Full viewport coverage",
   },
   "single-hero": {
     id: "single-hero",

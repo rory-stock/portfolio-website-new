@@ -40,15 +40,20 @@
         </div>
       </div>
 
-      <!-- Assign Layout Button (when no layout and wizard closed) -->
-      <button
+      <!-- No Layout State (when no layout and wizard closed) -->
+      <div
         v-if="!props.currentImage.layout_type && !showWizard"
-        type="button"
-        @click="showWizard = true"
-        class="hover:bg-neutral-750 w-full rounded-lg border-2 border-dashed border-neutral-600 px-4 py-3 text-neutral-300 transition-colors hover:border-neutral-500"
+        class="flex items-center gap-4"
       >
-        + Assign Layout
-      </button>
+        <span class="text-sm text-neutral-400">Layout: None</span>
+        <button
+          type="button"
+          @click="showWizard = true"
+          class="rounded bg-neutral-700 px-4 py-2 text-sm text-white transition-colors hover:bg-neutral-600"
+        >
+          Assign Layout
+        </button>
+      </div>
 
       <!-- Layout Wizard (when wizard open) -->
       <div v-if="showWizard" class="space-y-4">
@@ -80,24 +85,28 @@
             </p>
           </div>
 
-          <div v-else class="grid grid-cols-2 gap-3">
+          <div v-else class="flex flex-col gap-2 md:grid md:grid-cols-3">
             <button
               v-for="[key, layout] in availableLayoutTypes"
               :key="key"
               type="button"
               @click="selectLayoutType(key)"
-              class="layout-card flex flex-col"
-              :class="{ 'ring-2 ring-neutral-100': selectedLayoutType === key }"
+              class="flex flex-col rounded border p-3 text-left transition-colors duration-300"
+              :class="
+                selectedLayoutType === key
+                  ? 'border-neutral-100 bg-neutral-800'
+                  : 'border-neutral-700 bg-neutral-800/50 hover:border-neutral-600 hover:bg-neutral-800'
+              "
             >
-              <LayoutIcon :layout-type="key" class="h-20 w-full" />
-              <div class="mt-2">
-                <div class="font-medium text-neutral-100">
+              <LayoutIcon :layout-type="key" class="h-8 w-full" />
+              <div class="mt-2 space-y-0.5">
+                <div class="text-sm font-medium text-neutral-100">
                   {{ layout.label }}
                 </div>
-                <div class="text-sm text-neutral-400">
+                <div class="text-xs text-neutral-400">
                   {{ layout.description }}
                 </div>
-                <div class="mt-1 text-xs text-neutral-500">
+                <div class="text-xs text-neutral-500">
                   {{ layout.imageCount }} image{{
                     layout.imageCount > 1 ? "s" : ""
                   }}
@@ -107,17 +116,17 @@
           </div>
 
           <!-- Navigation -->
-          <div class="mt-4 flex justify-end gap-2">
+          <div class="mt-4 flex flex-col justify-end gap-2 md:flex-row">
             <button
               @click="handleCloseWizard"
-              class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700"
+              class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700"
             >
               Cancel
             </button>
             <button
               @click="goToStep2"
               :disabled="!selectedLayoutType"
-              class="rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
+              class="rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 transition-colors duration-300 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>
@@ -145,7 +154,7 @@
           <!-- Horizontal scrolling image picker -->
           <div
             ref="scrollContainer"
-            class="relative no-scrollbar flex gap-3 overflow-x-auto pb-4"
+            class="relative flex gap-3 overflow-x-auto pb-4"
           >
             <button
               v-for="image in props.allImages"
@@ -153,19 +162,26 @@
               type="button"
               @click="toggleImageSelection(image)"
               :disabled="!canSelectImage(image)"
-              class="image-select-button relative"
+              class="relative h-32 w-48 shrink-0 cursor-pointer overflow-hidden rounded-xl border transition-colors duration-300"
               :class="{
-                selected: selectedImages.includes(image.id),
-                current: image.id === props.currentImage.id,
-                disabled: !canSelectImage(image),
-                'in-layout': imagesInLayouts.has(image.id),
+                'border-none': selectedImages.includes(image.id),
+                'border-neutral-300':
+                  image.id === props.currentImage.id &&
+                  !selectedImages.includes(image.id),
+                'border-neutral-700 hover:border-neutral-500':
+                  canSelectImage(image) &&
+                  !selectedImages.includes(image.id) &&
+                  image.id !== props.currentImage.id,
+                'cursor-not-allowed border-transparent opacity-40 grayscale':
+                  !canSelectImage(image),
+                'opacity-60': imagesInLayouts.has(image.id),
               }"
             >
               <NuxtPicture
                 :src="image.r2_path"
                 :alt="image.alt || 'Image'"
                 loading="lazy"
-                class="h-full w-full object-cover"
+                class="h-fit w-fit object-cover"
               />
 
               <!-- Position label -->
@@ -184,29 +200,11 @@
                 In Layout
               </div>
 
-              <!-- Selected checkmark -->
+              <!-- Selected state - just border -->
               <div
                 v-if="selectedImages.includes(image.id)"
-                class="absolute inset-0 border-2 border-neutral-100 bg-neutral-100/10"
-              >
-                <div
-                  class="absolute top-2 right-2 rounded-full bg-neutral-100 p-1"
-                >
-                  <svg
-                    class="h-4 w-4 text-neutral-900"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-              </div>
+                class="pointer-events-none absolute inset-0 border-2 border-neutral-100"
+              ></div>
             </button>
           </div>
 
@@ -219,25 +217,28 @@
           </div>
 
           <!-- Navigation -->
-          <div class="mt-4 flex justify-between">
+          <div
+            class="mt-4 flex flex-col justify-between gap-2 md:flex-row md:gap-0"
+          >
             <button
               @click="goToStep1"
-              class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700"
+              class="flex w-full justify-center rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700 md:w-min"
             >
+              <Icon name="back" :size="18" class="mt-0.5 mr-0.5" />
               Back
             </button>
-            <div class="flex gap-2">
+            <div class="flex flex-col gap-2 md:flex-row">
               <button
                 type="button"
                 @click="handleCloseWizard"
-                class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700"
+                class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700"
               >
                 Cancel
               </button>
               <button
                 @click="handleAssignLayout"
                 :disabled="!canSubmit || assigningLayout"
-                class="rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
+                class="rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 transition-colors duration-300 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {{ assigningLayout ? "Assigning..." : "Assign Layout" }}
               </button>
@@ -347,19 +348,48 @@ const canSelectImage = (image: ImageBase): boolean => {
   if (!layoutConfig) return false;
 
   const neededCount = layoutConfig.imageCount;
+  const currentSelected = selectedImages.value.length;
+
+  // If already selected, allow interaction (for deselection)
+  const isSelected = selectedImages.value.includes(image.id);
+
+  // If we have enough images selected, disable all non-selected images
+  if (currentSelected >= neededCount && !isSelected) {
+    return false;
+  }
 
   // Can't select if already in another layout
   if (imagesInLayouts.value.has(image.id)) return false;
 
-  // Can't select if it would create a gap
-  const currentIdx = currentImageIndex.value;
-  const imageIdx = props.allImages.findIndex((img) => img.id === image.id);
-  const distance = Math.abs(imageIdx - currentIdx);
+  // If some images are selected, check if this one would create a gap
+  if (currentSelected > 0 && !isSelected) {
+    const selectedIndices = selectedImages.value
+      .map((id) => props.allImages.findIndex((img) => img.id === id))
+      .sort((a, b) => a - b);
 
-  // For layouts needing multiple images, check if within range
-  if (neededCount > 1) {
-    const maxDistance = neededCount - 1;
-    if (distance > maxDistance) return false;
+    const imageIdx = props.allImages.findIndex((img) => img.id === image.id);
+
+    // Check if adding this image would maintain consecutiveness
+    const minIdx = Math.min(...selectedIndices);
+    const maxIdx = Math.max(...selectedIndices);
+
+    // Image must be adjacent to the current selection range
+    if (imageIdx !== minIdx - 1 && imageIdx !== maxIdx + 1) {
+      return false;
+    }
+
+    // Check if there's a gap between this image and the selection
+    if (imageIdx < minIdx) {
+      for (let i = imageIdx + 1; i < minIdx; i++) {
+        const img = props.allImages[i];
+        if (!img || imagesInLayouts.value.has(img.id)) return false;
+      }
+    } else if (imageIdx > maxIdx) {
+      for (let i = maxIdx + 1; i < imageIdx; i++) {
+        const img = props.allImages[i];
+        if (!img || imagesInLayouts.value.has(img.id)) return false;
+      }
+    }
   }
 
   return true;
@@ -440,6 +470,9 @@ const getLayoutLabel = (layoutType: string): string => {
 // Toggle image selection
 const toggleImageSelection = (image: ImageBase) => {
   if (!canSelectImage(image)) return;
+
+  // Prevent deselecting the current image
+  if (image.id === props.currentImage.id) return;
 
   const index = selectedImages.value.indexOf(image.id);
   if (index > -1) {
@@ -538,56 +571,3 @@ const handleRemoveLayout = async () => {
   }
 };
 </script>
-
-<style scoped>
-.image-select-button {
-  position: relative;
-  height: 8rem;
-  width: 12rem;
-  flex-shrink: 0;
-  cursor: pointer;
-  overflow: hidden;
-  border-radius: 0.5rem;
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
-}
-
-.image-select-button:not(.disabled):hover {
-  box-shadow: 0 0 0 2px rgb(229 229 229); /* neutral-200 */
-}
-
-.image-select-button.selected {
-  box-shadow: 0 0 0 2px rgb(245 245 245); /* neutral-100 */
-}
-
-.image-select-button.current {
-  box-shadow: 0 0 0 2px rgb(212 212 212); /* neutral-300 */
-}
-
-.image-select-button.disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-  filter: grayscale(100%);
-}
-
-.image-select-button.in-layout {
-  opacity: 0.6;
-}
-
-.layout-card {
-  cursor: pointer;
-  border-radius: 0.5rem;
-  border: 1px solid rgb(64 64 64);
-  background-color: rgb(38 38 38);
-  padding: 1rem;
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
-}
-
-.layout-card:hover {
-  border-color: rgb(82 82 82);
-  background-color: rgb(42 42 42);
-}
-</style>
