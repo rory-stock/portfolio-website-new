@@ -37,7 +37,7 @@
           </div>
 
           <!-- Content -->
-          <div class="space-y-6 p-6">
+          <div class="space-y-3 p-6">
             <!-- Image preview -->
             <div class="flex justify-center">
               <NuxtPicture
@@ -51,7 +51,15 @@
             </div>
 
             <!-- Metadata -->
-            <div class="grid grid-cols-2 gap-4 text-sm">
+            <div
+              class="mb-4 flex flex-col gap-2 text-sm md:mb-6 md:grid md:grid-cols-2 md:gap-4"
+            >
+              <div>
+                <span class="text-neutral-400">Filename:</span>
+                <span class="ml-2 text-neutral-100">{{
+                  image.original_filename
+                }}</span>
+              </div>
               <div>
                 <span class="text-neutral-400">Dimensions:</span>
                 <span class="ml-2 text-neutral-100"
@@ -62,12 +70,6 @@
                 <span class="text-neutral-400">File Size:</span>
                 <span class="ml-2 text-neutral-100">{{
                   formatFileSize(image.file_size)
-                }}</span>
-              </div>
-              <div>
-                <span class="text-neutral-400">Filename:</span>
-                <span class="ml-2 text-neutral-100">{{
-                  image.original_filename
                 }}</span>
               </div>
               <div>

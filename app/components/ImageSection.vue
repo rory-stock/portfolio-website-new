@@ -73,7 +73,7 @@
               :class="getGroupGridClass(item.layout_type)"
             >
               <template #item="{ element: image }">
-                <div class="cursor-move">
+                <div class="cursor-move w-fit h-fit">
                   <ImageAdminThumbnail
                     :image="image"
                     @click="openModal(image)"
