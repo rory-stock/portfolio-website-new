@@ -139,6 +139,7 @@
       :all-images="images"
       :context="context"
       :fields="fields"
+      :show-layout-wizard="props.showLayoutWizard"
       @close="modalOpen = false"
       @updated="handleImageUpdated"
       @deleted="handleImageDeleted"
@@ -162,9 +163,12 @@ interface Props {
   context: string;
   title: string;
   fields: ImageField[];
+  showLayoutWizard?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  showLayoutWizard: false,
+});
 const { success, error: showError } = useToast();
 
 const saving = ref(false);
@@ -389,6 +393,18 @@ onKeyStroke(
     if ((e.ctrlKey || e.metaKey) && orderChanged.value && !saving.value) {
       e.preventDefault();
       handleSaveOrder();
+    }
+  },
+  { dedupe: true }
+);
+
+// Keyboard shortcut: Ctrl/Cmd + Z to discard order
+onKeyStroke(
+  "z",
+  (e) => {
+    if ((e.ctrlKey || e.metaKey) && orderChanged.value && !saving.value) {
+      e.preventDefault();
+      handleDiscardOrder();
     }
   },
   { dedupe: true }

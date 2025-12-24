@@ -25,7 +25,7 @@
           <button
             type="button"
             @click="showWizard = true"
-            class="rounded bg-neutral-700 px-3 py-1.5 text-sm text-neutral-100 transition-colors hover:bg-neutral-600"
+            class="cursor-pointer rounded bg-neutral-700 px-3 py-1.5 text-sm text-neutral-100 transition-colors hover:bg-neutral-600"
           >
             Change Layout
           </button>
@@ -33,7 +33,7 @@
             type="button"
             @click="handleRemoveLayout"
             :disabled="removingLayout"
-            class="rounded bg-red-800 px-3 py-1.5 text-sm text-white transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50"
+            class="cursor-pointer rounded bg-red-800 px-3 py-1.5 text-sm text-white transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {{ removingLayout ? "Removing..." : "Remove" }}
           </button>
@@ -49,7 +49,7 @@
         <button
           type="button"
           @click="showWizard = true"
-          class="rounded bg-neutral-700 px-4 py-2 text-sm text-white transition-colors hover:bg-neutral-600"
+          class="cursor-pointer rounded bg-neutral-700 px-4 py-2 text-sm text-white transition-colors hover:bg-neutral-600"
         >
           Assign Layout
         </button>
@@ -66,7 +66,7 @@
           </h5>
           <button
             @click="handleCloseWizard"
-            class="text-neutral-400 transition-colors hover:text-neutral-200"
+            class="cursor-pointer text-neutral-400 transition-colors hover:text-neutral-200"
           >
             <Icon name="cross" width="16" height="16" />
           </button>
@@ -91,7 +91,7 @@
               :key="key"
               type="button"
               @click="selectLayoutType(key)"
-              class="flex flex-col rounded border p-3 text-left transition-colors duration-300"
+              class="flex cursor-pointer flex-col rounded border p-3 text-left transition-colors duration-300"
               :class="
                 selectedLayoutType === key
                   ? 'border-neutral-100 bg-neutral-800'
@@ -99,19 +99,19 @@
               "
             >
               <LayoutIcon :layout-type="key" class="h-8 w-full" />
-              <div class="mt-2 space-y-0.5">
-                <div class="text-sm font-medium text-neutral-100">
+              <span class="mt-2 flex flex-col space-y-0.5">
+                <span class="text-sm font-medium text-neutral-100">
                   {{ layout.label }}
-                </div>
-                <div class="text-xs text-neutral-400">
+                </span>
+                <span class="text-xs text-neutral-400">
                   {{ layout.description }}
-                </div>
-                <div class="text-xs text-neutral-500">
+                </span>
+                <span class="text-xs text-neutral-500">
                   {{ layout.imageCount }} image{{
                     layout.imageCount > 1 ? "s" : ""
                   }}
-                </div>
-              </div>
+                </span>
+              </span>
             </button>
           </div>
 
@@ -119,14 +119,14 @@
           <div class="mt-4 flex flex-col justify-end gap-2 md:flex-row">
             <button
               @click="handleCloseWizard"
-              class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700"
+              class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700"
             >
               Cancel
             </button>
             <button
               @click="goToStep2"
               :disabled="!selectedLayoutType"
-              class="rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 transition-colors duration-300 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
+              class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 transition-colors duration-300 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>
@@ -152,65 +152,78 @@
           </p>
 
           <!-- Horizontal scrolling image picker -->
-          <div
-            ref="scrollContainer"
-            class="relative flex gap-3 overflow-x-auto pb-4"
-          >
-            <button
-              v-for="image in props.allImages"
-              :key="image.id"
-              type="button"
-              @click="toggleImageSelection(image)"
-              :disabled="!canSelectImage(image)"
-              class="relative h-32 w-48 shrink-0 cursor-pointer overflow-hidden rounded-xl border transition-colors duration-300"
-              :class="{
-                'border-none': selectedImages.includes(image.id),
-                'border-neutral-300':
-                  image.id === props.currentImage.id &&
-                  !selectedImages.includes(image.id),
-                'border-neutral-700 hover:border-neutral-500':
-                  canSelectImage(image) &&
-                  !selectedImages.includes(image.id) &&
-                  image.id !== props.currentImage.id,
-                'cursor-not-allowed border-transparent opacity-40 grayscale':
-                  !canSelectImage(image),
-                'opacity-60': imagesInLayouts.has(image.id),
-              }"
+          <div class="relative">
+            <!-- Left fade -->
+            <div
+              v-if="showScrollbar && !arrivedState.left"
+              class="pointer-events-none absolute top-0 left-0 z-10 h-full w-10 bg-linear-to-r from-neutral-800 to-transparent md:w-16"
+            ></div>
+
+            <!-- Right fade -->
+            <div
+              v-if="showScrollbar && !arrivedState.right"
+              class="pointer-events-none absolute top-0 right-0 z-10 h-full w-10 bg-linear-to-l from-neutral-800 to-transparent md:w-16"
+            ></div>
+            <div
+              ref="scrollContainer"
+              class="relative flex gap-3 overflow-x-auto pb-2"
             >
-              <NuxtPicture
-                :src="image.r2_path"
-                :alt="image.alt || 'Image'"
-                class="h-fit w-fit object-cover"
-              />
-
-              <!-- Position label -->
-              <div
-                class="absolute top-2 left-2 rounded bg-black/70 px-2 py-1 text-xs text-white"
+              <button
+                v-for="image in props.allImages"
+                :key="image.id"
+                type="button"
+                @click="toggleImageSelection(image)"
+                :disabled="!canSelectImage(image)"
+                class="relative flex h-32 w-48 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border transition-colors duration-300"
+                :class="{
+                  'border-none': selectedImages.includes(image.id),
+                  'border border-neutral-300':
+                    image.id === props.currentImage.id &&
+                    !selectedImages.includes(image.id),
+                  'border-neutral-700 hover:border-neutral-500':
+                    canSelectImage(image) &&
+                    !selectedImages.includes(image.id) &&
+                    image.id !== props.currentImage.id,
+                  'cursor-not-allowed border-transparent opacity-40 grayscale':
+                    !canSelectImage(image),
+                  'opacity-60': imagesInLayouts.has(image.id),
+                }"
               >
-                <span v-if="image.id === props.currentImage.id">Current</span>
-                <span v-else>{{ getPositionLabel(image) }}</span>
-              </div>
+                <NuxtPicture
+                  :src="image.r2_path"
+                  :alt="image.alt || 'Image'"
+                  class="h-full w-full object-cover"
+                />
 
-              <!-- In layout badge -->
-              <div
-                v-if="imagesInLayouts.has(image.id)"
-                class="absolute top-2 right-2 rounded bg-neutral-700 px-2 py-1 text-xs text-neutral-300"
-              >
-                In Layout
-              </div>
+                <!-- Position label -->
+                <span
+                  class="absolute top-2 left-2 rounded bg-black/70 px-2 py-1 text-xs text-neutral-100"
+                >
+                  <span v-if="image.id === props.currentImage.id">Current</span>
+                  <span v-else>{{ getPositionLabel(image) }}</span>
+                </span>
 
-              <!-- Selected state - just border -->
-              <div
-                v-if="selectedImages.includes(image.id)"
-                class="pointer-events-none absolute inset-0 border-2 border-neutral-100"
-              ></div>
-            </button>
+                <!-- In layout badge -->
+                <span
+                  v-if="imagesInLayouts.has(image.id)"
+                  class="absolute top-2 right-2 rounded bg-black/70 px-2 py-1 text-xs text-neutral-100"
+                >
+                  In Layout
+                </span>
+
+                <!-- Selected state - just border -->
+                <span
+                  v-if="selectedImages.includes(image.id)"
+                  class="pointer-events-none absolute inset-0 rounded-lg border-2 border-neutral-100"
+                ></span>
+              </button>
+            </div>
           </div>
 
           <!-- Scrollbar -->
           <div
             v-if="showScrollbar"
-            class="relative h-2 w-full rounded-full border border-neutral-700 bg-neutral-800"
+            class="relative h-2.5 w-full rounded-full border border-neutral-700 bg-neutral-900/30"
             @mousedown="handleScrollbarMouseDown"
           >
             <div
@@ -239,7 +252,7 @@
           >
             <button
               @click="goToStep1"
-              class="flex w-full justify-center rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700 md:w-min"
+              class="flex w-full cursor-pointer justify-center rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700 md:w-min"
             >
               <Icon name="back" :size="18" class="mt-0.5 mr-0.5" />
               Back
@@ -248,14 +261,14 @@
               <button
                 type="button"
                 @click="handleCloseWizard"
-                class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700"
+                class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700"
               >
                 Cancel
               </button>
               <button
                 @click="handleAssignLayout"
                 :disabled="!canSubmit || assigningLayout"
-                class="rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 transition-colors duration-300 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
+                class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 transition-colors duration-300 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {{ assigningLayout ? "Assigning..." : "Assign Layout" }}
               </button>
@@ -269,8 +282,8 @@
 
 <script setup lang="ts">
 import type { ImageBase } from "~~/types/imageTypes";
-import { LAYOUT_TYPES } from "~~/types/layoutTypes";
 import type { LayoutTypeId } from "~~/types/layoutTypes";
+import { LAYOUT_TYPES } from "~~/types/layoutTypes";
 import { useScroll } from "@vueuse/core";
 
 interface Props {
@@ -629,9 +642,8 @@ const handleScrollbarMouseDown = (e: MouseEvent) => {
 
   const container = scrollContainer.value;
   const maxScroll = container.scrollWidth - container.clientWidth;
-  const newScrollX = (clickX / trackWidth) * maxScroll;
 
-  scrollX.value = newScrollX;
+  scrollX.value = (clickX / trackWidth) * maxScroll;
 };
 
 const handleScrollbarThumbMouseDown = (e: MouseEvent) => {

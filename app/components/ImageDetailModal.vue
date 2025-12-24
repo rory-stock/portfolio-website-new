@@ -226,7 +226,7 @@
 
               <!-- Layout Configuration -->
               <LayoutWizard
-                v-if="props.image"
+                v-if="props.image && props.showLayoutWizard"
                 :current-image="props.image"
                 :all-images="props.allImages"
                 :context="props.context"
@@ -281,9 +281,12 @@ interface Props {
   fields: ImageField[];
   allImages: ImageBase[];
   context: string;
+  showLayoutWizard?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  showLayoutWizard: false,
+});
 const emit = defineEmits<{
   close: [];
   updated: [];

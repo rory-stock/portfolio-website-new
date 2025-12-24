@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold text-white md:text-3xl">
       Overview Page Admin
     </h1>
-    <ImageSection context="overview" title="Overview" :fields="imageFields" />
+    <ImageSection context="overview" title="Overview" :fields="imageFields" :show-layout-wizard="true" />
     <Toast />
   </div>
 </template>

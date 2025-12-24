@@ -247,7 +247,7 @@ function handleCancelAll() {
           class="flex items-start gap-3 text-xs"
         >
           <!-- Status Dot -->
-          <div class="mt-1 flex-shrink-0">
+          <div class="mt-1 shrink-0">
             <div
               :class="[
                 'h-2 w-2 rounded-full',
@@ -263,13 +263,13 @@ function handleCancelAll() {
               <span class="truncate font-medium text-neutral-100">
                 {{ file.fileName }}
               </span>
-              <span class="flex-shrink-0 text-[0.7rem] text-neutral-500">
+              <span class="shrink-0 text-[0.7rem] text-neutral-500">
                 ({{ formatFileSize(file.fileSize) }})
               </span>
               <!-- Large file warning -->
               <div
                 v-if="file.isLargeFile && file.status === 'pending'"
-                class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500"
+                class="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"
                 title="Large file - may take longer to upload"
               />
             </div>
@@ -290,7 +290,7 @@ function handleCancelAll() {
         <button
           v-if="!state.isCancelling"
           @click="cancelUpload"
-          class="rounded-lg border border-neutral-600 bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-700"
+          class="cursor-pointer rounded-lg border border-neutral-600 bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-700"
         >
           Cancel Upload
         </button>
@@ -318,7 +318,7 @@ function handleCancelAll() {
           :key="file.id"
           class="flex items-start gap-3 text-xs"
         >
-          <div class="mt-1 flex-shrink-0">
+          <div class="mt-1 shrink-0">
             <div
               :class="['h-2 w-2 rounded-full', getStatusDotColor(file.status)]"
             />
@@ -328,7 +328,7 @@ function handleCancelAll() {
               <span class="truncate font-medium text-neutral-100">
                 {{ file.fileName }}
               </span>
-              <span class="flex-shrink-0 text-[0.7rem] text-neutral-500">
+              <span class="shrink-0 text-[0.7rem] text-neutral-500">
                 ({{ formatFileSize(file.fileSize) }})
               </span>
             </div>
