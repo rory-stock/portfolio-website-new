@@ -2,12 +2,10 @@ import { eq, and } from "drizzle-orm";
 import { content } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
+import { requireAuth } from "~~/server/utils/requireAuth";
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event);
-  if (!session.user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
-  }
+  await requireAuth(event);
 
   const { table, updates } = await readBody(event);
 

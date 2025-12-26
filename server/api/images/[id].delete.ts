@@ -1,14 +1,12 @@
 import { eq } from "drizzle-orm";
-
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
 import { deleteR2Object } from "~/utils/r2";
+import { requireAuth } from "~~/server/utils/requireAuth";
+import { logger } from "~/utils/logger";
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event);
-  if (!session.user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
-  }
+  await requireAuth(event);
 
   const idParam = getRouterParam(event, "id");
   const id = parseInt(idParam || "");
@@ -46,7 +44,7 @@ export default defineEventHandler(async (event) => {
     try {
       await deleteR2Object(r2_path);
     } catch (error) {
-      console.error("R2 Delete Error:", error);
+      logger.error("R2 Delete Error - DB record already deleted", error);
       // Don't throw - DB record is already deleted
     }
   }

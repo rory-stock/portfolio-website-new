@@ -1,5 +1,6 @@
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { logger } from "~/utils/logger";
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -23,6 +24,7 @@ export default defineEventHandler(async (event) => {
     return { success: true };
   }
 
+  logger.unauthorized("Bad credentials", { email });
   throw createError({
     statusCode: 401,
     message: "Bad credentials",

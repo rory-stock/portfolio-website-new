@@ -90,22 +90,23 @@
         v-if="organizedItems.length > 0"
         class="flex flex-col gap-2 border-t border-neutral-800 pt-4 md:flex-row md:gap-3"
       >
-        <button
+        <AppButton
           type="button"
           @click="onSaveOrder"
           :disabled="!orderChanged || saving"
-          class="cursor-pointer rounded bg-neutral-100 px-2 py-2 text-[0.92rem] text-neutral-980 transition-all duration-200 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:px-4 md:text-base"
+          :loading="saving"
         >
-          {{ saving ? "Saving Order..." : "Save Order" }}
-        </button>
-        <button
+          <template #loading>Saving Order...</template>
+          Save Order
+        </AppButton>
+        <AppButton
+          variant="secondary"
           type="button"
           @click="handleDiscardOrder"
           :disabled="!orderChanged || saving"
-          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 md:px-4 md:text-base"
         >
           Discard Order Changes
-        </button>
+        </AppButton>
       </div>
     </div>
 

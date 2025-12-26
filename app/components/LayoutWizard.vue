@@ -22,21 +22,22 @@
           </p>
         </div>
         <div class="flex gap-2">
-          <button
-            type="button"
+          <AppButton
+            variant="secondary"
             @click="showWizard = true"
-            class="cursor-pointer rounded bg-neutral-700 px-3 py-1.5 text-sm text-neutral-100 transition-colors hover:bg-neutral-600"
+            class="bg-neutral-700 px-3 py-1.5 text-sm hover:bg-neutral-600"
           >
             Change Layout
-          </button>
-          <button
-            type="button"
+          </AppButton>
+          <AppButton
+            variant="danger"
             @click="handleRemoveLayout"
             :disabled="removingLayout"
-            class="cursor-pointer rounded bg-red-800 px-3 py-1.5 text-sm text-white transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50"
+            :loading="removingLayout"
+            class="px-3 py-1.5 text-xs"
           >
-            {{ removingLayout ? "Removing..." : "Remove" }}
-          </button>
+            Remove
+          </AppButton>
         </div>
       </div>
 
@@ -46,13 +47,13 @@
         class="flex items-center gap-4"
       >
         <span class="text-sm text-neutral-400">Layout: None</span>
-        <button
-          type="button"
+        <AppButton
+          variant="secondary"
           @click="showWizard = true"
-          class="cursor-pointer rounded bg-neutral-700 px-4 py-2 text-sm text-white transition-colors hover:bg-neutral-600"
+          class="bg-neutral-700 px-4 py-2 text-sm hover:bg-neutral-600"
         >
           Assign Layout
-        </button>
+        </AppButton>
       </div>
 
       <!-- Layout Wizard (when wizard open) -->
@@ -117,19 +118,16 @@
 
           <!-- Navigation -->
           <div class="mt-4 flex flex-col justify-end gap-2 md:flex-row">
-            <button
+            <AppButton
+              variant="secondary"
               @click="handleCloseWizard"
-              class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700"
+              class="hover:bg-neutral-700"
             >
               Cancel
-            </button>
-            <button
-              @click="goToStep2"
-              :disabled="!selectedLayoutType"
-              class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 transition-colors duration-300 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
-            >
+            </AppButton>
+            <AppButton @click="goToStep2" :disabled="!selectedLayoutType">
               Next
-            </button>
+            </AppButton>
           </div>
         </div>
 
@@ -250,28 +248,31 @@
           <div
             class="mt-4 flex flex-col justify-between gap-2 md:flex-row md:gap-0"
           >
-            <button
+            <AppButton
+              variant="secondary"
               @click="goToStep1"
-              class="flex w-full cursor-pointer justify-center rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700 md:w-min"
+              class="flex w-full justify-center hover:bg-neutral-700 md:w-min"
             >
               <Icon name="back" :size="18" class="mt-0.5 mr-0.5" />
               Back
-            </button>
+            </AppButton>
             <div class="flex flex-col gap-2 md:flex-row">
-              <button
+              <AppButton
+                variant="secondary"
                 type="button"
                 @click="handleCloseWizard"
-                class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors duration-300 hover:bg-neutral-700"
+                class="hover:bg-neutral-700"
               >
                 Cancel
-              </button>
-              <button
+              </AppButton>
+              <AppButton
                 @click="handleAssignLayout"
                 :disabled="!canSubmit || assigningLayout"
-                class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-900 transition-colors duration-300 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50"
+                :loading="assigningLayout"
               >
-                {{ assigningLayout ? "Assigning..." : "Assign Layout" }}
-              </button>
+                <template #loading>Assigning...</template>
+                Assign Layout
+              </AppButton>
             </div>
           </div>
         </div>

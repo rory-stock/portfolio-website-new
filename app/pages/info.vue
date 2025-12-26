@@ -21,23 +21,11 @@ const image = computed(() => {
 
 const imagePath = computed(() => image.value?.r2_path);
 
-const { data: info } = await useFetch("/api/content", {
-  query: { table: "info" },
-  transform: (data: any[]) => {
-    if (!Array.isArray(data)) return null;
-    return data.reduce(
-      (acc, item) => {
-        acc[item.key] = item.value;
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-  },
-});
+const { content: info } = await useContentData("info", true);
 </script>
 
 <template>
-  <div class="md:flex md:flex-1 md:grow md:justify-start md:mt-20 md:ml-10">
+  <div class="md:mt-20 md:ml-10 md:flex md:flex-1 md:grow md:justify-start">
     <!-- Profile Image -->
     <div
       class="mx-3 w-full flex-1 pt-3 grayscale md:max-w-80 lg:mx-0 lg:max-w-80 lg:pt-4 lg:pl-4 xl:max-w-[20rem]"

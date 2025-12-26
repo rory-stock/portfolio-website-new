@@ -38,21 +38,22 @@
       <div
         class="flex flex-col gap-2 border-t border-neutral-800 pt-4 md:flex-row md:gap-3"
       >
-        <button
+        <AppButton
           type="submit"
           :disabled="!hasChanges || saving"
-          class="cursor-pointer rounded bg-neutral-100 px-2 py-2 text-[0.92rem] text-neutral-980 transition-all duration-200 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:px-4 md:text-base"
+          :loading="saving"
         >
-          {{ saving ? "Saving..." : "Save Changes" }}
-        </button>
-        <button
+          <template #loading>Saving...</template>
+          Save Changes
+        </AppButton>
+        <AppButton
+          variant="secondary"
           type="button"
           @click="handleDiscard"
           :disabled="!hasChanges || saving"
-          class="cursor-pointer rounded border border-neutral-700 px-2 py-2 text-[0.92rem] text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 md:px-4 md:text-base"
         >
           Discard Changes
-        </button>
+        </AppButton>
       </div>
     </form>
   </div>
@@ -103,7 +104,7 @@ const {
       data[item.key] = item.value || "";
     }
 
-    // Initialize form with field keys (even if not in DB yet)
+    // Initialize the form with field keys (even if not in DB yet)
     const initialized: FormData = {};
     for (const field of props.fields) {
       initialized[field.key] = data[field.key] || "";
@@ -123,7 +124,7 @@ const {
 
 const { cloned: formData, sync } = useCloned(contentData);
 
-// Check if form has changes
+// Check if the form has changes
 const hasChanges = computed(() => {
   return props.fields.some(
     (field) => formData.value[field.key] !== contentData.value[field.key]

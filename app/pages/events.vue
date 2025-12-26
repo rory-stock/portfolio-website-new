@@ -15,19 +15,7 @@ const { data: imageData } = await useFetch("/api/images", {
   query: { context: "events" },
 });
 
-const { data: event } = await useFetch("/api/content", {
-  query: { table: "events" },
-  transform: (data: any[]) => {
-    if (!Array.isArray(data)) return {};
-    return data.reduce(
-      (acc, item) => {
-        acc[item.key] = item.value;
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-  },
-});
+const { content: event } = await useContentData("events", true);
 
 const images = computed(() => imageData.value?.images || []);
 
@@ -48,7 +36,7 @@ const eventURL = (eventName: string | null) => {
     </h1>
 
     <div
-      class="flex flex-col pt-2 pb-4 px-8 gap-8 md:px-20 md:gap-12 md:pb-12 lg:grid lg:grid-cols-2 lg:gap-x-24 lg:gap-y-12 lg:px-28"
+      class="flex flex-col gap-8 px-8 pt-2 pb-4 md:gap-12 md:px-20 md:pb-12 lg:grid lg:grid-cols-2 lg:gap-x-24 lg:gap-y-12 lg:px-28"
     >
       <NuxtLink
         v-for="image in images"
@@ -62,7 +50,7 @@ const eventURL = (eventName: string | null) => {
           class="peer cursor-pointer"
         />
         <div
-          class="mt-1 lg:mt-2 flex font-ghost text-base md:text-xl group-hover:font-ghost-italic"
+          class="mt-1 flex font-ghost text-base group-hover:font-ghost-italic md:text-xl lg:mt-2"
         >
           <p>{{ image.event_name }}</p>
         </div>

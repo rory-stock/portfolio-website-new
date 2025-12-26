@@ -4,8 +4,9 @@ import {
   isValidContext,
   type Context,
 } from "~/utils/context";
-
-console.log("Upload URL endpoint hit - using crypto hash");
+import { requireAuth } from "~~/server/utils/requireAuth";
+import { FILE_CONSTRAINTS, VALID_IMAGE_EXTENSIONS } from "~/utils/constants";
+import { getValidImageFormats } from "~/utils/formatMimeType";
 
 function generateHash(length: number = 6): string {
   const array = new Uint8Array(length);
@@ -16,10 +17,7 @@ function generateHash(length: number = 6): string {
 }
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event);
-  if (!session.user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
-  }
+  await requireAuth(event);
 
   const body = await readBody(event);
   const { filename, context, fileSize } = body as {
@@ -35,8 +33,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60MB
-  if (fileSize && fileSize > MAX_FILE_SIZE) {
+  if (fileSize && fileSize > FILE_CONSTRAINTS.MAX_FILE_SIZE) {
     throw createError({
       statusCode: 400,
       message: "File too large. Maximum size is 60MB",
@@ -61,11 +58,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const ext = filename.toLowerCase().split(".").pop();
-  const validExts = ["jpg", "jpeg", "png", "webp"];
-  if (!ext || !validExts.includes(ext)) {
+  if (!ext || !VALID_IMAGE_EXTENSIONS.includes(ext as any)) {
     throw createError({
       statusCode: 400,
-      message: "Invalid file type. Only JPG, PNG, WebP allowed",
+      message: "Invalid file type. Only" + getValidImageFormats() + " allowed",
     });
   }
 

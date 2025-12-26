@@ -86,12 +86,9 @@ async function logout() {
           </div>
 
           <!-- Submit button -->
-          <button
-            type="submit"
-            class="w-full cursor-pointer rounded-lg bg-neutral-100 px-4 py-1.5 text-[0.95rem] text-black transition-opacity duration-200 hover:opacity-85"
-          >
+          <AppButton type="submit" class="w-full rounded-lg py-1.5">
             Login
-          </button>
+          </AppButton>
         </form>
 
         <div
@@ -106,20 +103,17 @@ async function logout() {
         <!-- Action buttons below form -->
         <div class="flex gap-4">
           <!-- Logout button - only shown when user is logged in -->
-          <button
+          <AppButton
             v-if="loggedIn"
             @click="logout"
-            class="w-full cursor-pointer rounded-lg bg-neutral-100 px-4 py-1.5 text-[0.95rem] text-black transition-opacity duration-200 hover:opacity-85"
+            class="w-full rounded-lg py-1.5"
           >
             Logout
-          </button>
+          </AppButton>
           <!-- Home navigation button -->
-          <button
-            @click="navigateTo('/')"
-            class="w-full cursor-pointer rounded-lg bg-neutral-100 px-4 py-1.5 text-[0.95rem] text-black transition-opacity duration-200 hover:opacity-85"
-          >
+          <AppButton @click="navigateTo('/')" class="w-full rounded-lg py-1.5">
             Home
-          </button>
+          </AppButton>
         </div>
       </div>
     </div>

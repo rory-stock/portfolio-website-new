@@ -1,10 +1,8 @@
 import { VALID_CONTEXTS } from "~/utils/context";
+import { requireAuth } from "~~/server/utils/requireAuth";
 
 export default defineEventHandler(async (event) => {
-  const { user } = await requireUserSession(event);
-  if (!user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
-  }
+  await requireAuth(event);
 
   return { contexts: VALID_CONTEXTS };
 });

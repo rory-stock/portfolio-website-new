@@ -240,29 +240,33 @@
               <div
                 class="flex flex-col gap-2 border-t border-neutral-800 pt-4 md:flex-row md:gap-3"
               >
-                <button
+                <AppButton
                   type="submit"
                   :disabled="!hasChanges || saving"
-                  class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-sm text-neutral-980 transition-all duration-200 hover:bg-neutral-300 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
+                  :loading="saving"
                 >
-                  {{ saving ? "Saving..." : "Save Changes" }}
-                </button>
-                <button
+                  <template #loading>Saving...</template>
+                  Save Changes
+                </AppButton>
+                <AppButton
+                  variant="secondary"
                   type="button"
                   @click="handleDiscard"
                   :disabled="!hasChanges || saving"
-                  class="cursor-pointer rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-all duration-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
                 >
                   Discard Changes
-                </button>
-                <button
+                </AppButton>
+                <AppButton
+                  variant="danger"
                   type="button"
                   @click="handleDelete"
                   :disabled="deleting"
-                  class="mt-6 cursor-pointer rounded bg-red-800 px-4 py-2 text-sm text-white transition-all duration-200 hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50 md:mt-0 md:ml-auto md:text-base"
+                  :loading="deleting"
+                  class="mt-6 md:mt-0 md:ml-auto"
                 >
-                  {{ deleting ? "Deleting..." : "Delete Image" }}
-                </button>
+                  <template #loading>Deleting...</template>
+                  Delete Image
+                </AppButton>
               </div>
             </form>
           </div>

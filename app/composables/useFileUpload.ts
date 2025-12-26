@@ -1,10 +1,8 @@
 import { computed, reactive, ref } from "vue";
 import { formatFileSize } from "~/utils/formatFileSize";
+import { formatMimeType, getValidImageFormats } from "~/utils/formatMimeType";
+import { FILE_CONSTRAINTS, VALID_IMAGE_TYPES } from "~/utils/constants";
 
-// Constants
-const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60MB hard limit
-const LARGE_FILE_SIZE = 10 * 1024 * 1024; // 10MB warning threshold
-const VALID_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const FILENAME_REGEX = /^[a-zA-Z0-9\-\.]+$/;
 
 // Custom Error Class
@@ -134,16 +132,16 @@ export function useFileUpload(options: UseFileUploadOptions) {
     const reasons: string[] = [];
 
     // Check file size
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > FILE_CONSTRAINTS.MAX_FILE_SIZE) {
       reasons.push(
-        `File too large (${formatFileSize(file.size)}). Maximum is 60MB`
+        `File too large (${formatFileSize(file.size)}). Maximum is ${formatFileSize(FILE_CONSTRAINTS.MAX_FILE_SIZE)}`
       );
     }
 
     // Check file type
-    if (!VALID_TYPES.includes(file.type)) {
+    if (!VALID_IMAGE_TYPES.includes(file.type as any)) {
       reasons.push(
-        `Invalid file type (${file.type}). Only JPG, PNG, WebP allowed`
+        `Invalid file type (${formatMimeType(file.type)}). Only ${getValidImageFormats()} allowed`
       );
     }
 
@@ -183,7 +181,7 @@ export function useFileUpload(options: UseFileUploadOptions) {
           fileSize: file.size,
           status: "pending",
           progress: 0,
-          isLargeFile: file.size > LARGE_FILE_SIZE,
+          isLargeFile: file.size > FILE_CONSTRAINTS.LARGE_FILE_THRESHOLD,
           retryCount: 0,
         });
       }
@@ -405,11 +403,15 @@ export function useFileUpload(options: UseFileUploadOptions) {
             allImageIds.push(...imageIds);
             succeeded++;
           })
-          .catch((_error) => {
+          .catch((error) => {
             if (file.status === "cancelled") {
               cancelled++;
             } else {
               failed++;
+              logger.debug("File upload failed", {
+                fileName: file.fileName,
+                error,
+              });
             }
           })
           .finally(() => {

@@ -3,12 +3,11 @@ import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { getNextLayoutGroupId } from "~/utils/layoutGroups";
 import { LAYOUT_TYPES } from "~~/types/layoutTypes";
+import { requireAuth } from "~~/server/utils/requireAuth";
+import { logger } from "~/utils/logger";
 
 export default defineEventHandler(async (event) => {
-  const { user } = await requireUserSession(event);
-  if (!user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
-  }
+  await requireAuth(event);
 
   const db = useDB(event);
   const body = await readBody(event);
@@ -75,6 +74,7 @@ export default defineEventHandler(async (event) => {
           group_display_order: null,
         })
         .where(eq(images.layout_group_id, groupId));
+      logger.info("Removed layout from group", { groupId, context });
     }
   }
 

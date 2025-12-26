@@ -75,7 +75,7 @@ function handleFileInputChange(event: Event) {
       startUpload();
     }
   }
-  // Reset input value to allow selecting same files again
+  // Reset input value to allow selecting the same files again
   input.value = "";
 }
 
@@ -168,19 +168,20 @@ function handleCancelAll() {
         </div>
       </div>
       <div class="flex flex-col gap-3 md:flex-row">
-        <button
+        <AppButton
           v-if="hasValidFiles"
           @click="skipInvalidAndUpload"
-          class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-xs font-medium text-neutral-950 transition-colors duration-300 hover:bg-neutral-300"
+          class="text-xs font-medium"
         >
           Skip invalid & continue ({{ state.files.length }} valid)
-        </button>
-        <button
-          @click="handleCancelAll"
-          class="cursor-pointer rounded border border-neutral-600 bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-100 transition-colors duration-300 hover:bg-neutral-700"
+        </AppButton>
+        <AppButton
+          v-if="hasValidFiles"
+          @click="skipInvalidAndUpload"
+          class="text-xs font-medium"
         >
-          Cancel all
-        </button>
+          Skip invalid & continue ({{ state.files.length }} valid)
+        </AppButton>
       </div>
     </div>
 
@@ -207,13 +208,9 @@ function handleCancelAll() {
         Drop images here or click to browse
       </p>
 
-      <button
-        type="button"
-        @click="triggerFileInput"
-        class="cursor-pointer rounded bg-neutral-100 px-2 py-2 text-[0.92rem] text-neutral-980 transition-all duration-200 hover:bg-neutral-300 md:px-4 md:text-base"
-      >
+      <AppButton type="button" @click="triggerFileInput">
         Select Files
-      </button>
+      </AppButton>
 
       <p class="mt-3 text-xs text-neutral-500">
         JPG, PNG, WebP • Max 60MB per file
@@ -287,13 +284,14 @@ function handleCancelAll() {
 
       <!-- Cancel Button -->
       <div class="text-center">
-        <button
+        <AppButton
           v-if="!state.isCancelling"
+          variant="secondary"
           @click="cancelUpload"
-          class="cursor-pointer rounded-lg border border-neutral-600 bg-neutral-800 px-4 py-2 text-xs font-medium text-neutral-300 hover:bg-neutral-700"
+          class="rounded-lg text-xs font-medium"
         >
           Cancel Upload
-        </button>
+        </AppButton>
       </div>
     </div>
 
@@ -344,12 +342,7 @@ function handleCancelAll() {
         </div>
       </div>
 
-      <button
-        @click="reset"
-        class="cursor-pointer rounded bg-neutral-100 px-4 py-2 text-xs font-medium text-neutral-980 transition-all duration-200 hover:bg-neutral-300"
-      >
-        Close
-      </button>
+      <AppButton @click="reset" class="text-xs font-medium">Close</AppButton>
     </div>
   </div>
 </template>

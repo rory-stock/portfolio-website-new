@@ -1,12 +1,11 @@
 import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
 import { listR2Objects, deleteR2Object } from "~/utils/r2";
+import { requireAuth } from "~~/server/utils/requireAuth";
+import { logger } from "~/utils/logger";
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event);
-  if (!session.user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
-  }
+  await requireAuth(event);
 
   const db = useDB(event);
 
@@ -30,7 +29,7 @@ export default defineEventHandler(async (event) => {
       await deleteR2Object(file.key);
       deleted.push(file.key);
     } catch (error) {
-      console.error(`Failed to delete ${file.key}:`, error);
+      logger.error(`Failed to delete R2 file: ${file.key}`, error);
       errors.push({ key: file.key, error });
     }
   }

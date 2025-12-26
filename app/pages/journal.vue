@@ -14,19 +14,7 @@ const { data: imageData } = await useFetch("/api/images", {
   query: { context: "journal" },
 });
 
-const { data: journal } = await useFetch("/api/content", {
-  query: { table: "journal" },
-  transform: (data: any[]) => {
-    if (!Array.isArray(data)) return {};
-    return data.reduce(
-      (acc, item) => {
-        acc[item.key] = item.value;
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-  },
-});
+const { content: journal } = await useContentData("journal", true);
 
 const images = computed(() => imageData.value?.images || []);
 const selectedImage = ref<(typeof images.value)[0] | null>(null);

@@ -64,7 +64,7 @@ watch(isOpen, (open) => {
   }
 });
 
-// Close on Escape key
+// Close on the Escape key
 onKeyStroke("Escape", () => {
   if (isOpen.value) {
     if (showConfirmation.value) {
@@ -139,14 +139,6 @@ async function handleDeleteAll() {
 function closeModal() {
   isOpen.value = false;
 }
-
-// Shared button classes
-const primaryButtonClass =
-  "cursor-pointer rounded-lg bg-neutral-980 px-4 py-2 text-[0.92rem] text-neutral-100 transition-colors hover:bg-neutral-800 md:text-base";
-const secondaryButtonClass =
-  "cursor-pointer rounded-lg bg-neutral-300 px-4 py-2 text-neutral-900 transition-colors hover:bg-neutral-400 disabled:cursor-not-allowed disabled:opacity-50";
-const dangerButtonClass =
-  "cursor-pointer rounded-lg bg-red-800 px-4 py-2 text-neutral-100 transition-colors hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-50";
 </script>
 
 <template>
@@ -168,14 +160,15 @@ const dangerButtonClass =
               <Icon name="cleanup" class="h-6 w-6" />
               <h2 class="text-xl font-semibold">Orphaned Files</h2>
             </div>
-            <button
+            <AppButton
+              variant="secondary"
               @click="closeModal"
-              class="cursor-pointer rounded-lg bg-neutral-400 p-2 transition-colors duration-200 hover:bg-neutral-500 disabled:cursor-not-allowed disabled:opacity-50"
               :disabled="isDeleting"
+              class="rounded-lg border-none bg-neutral-400 p-2 text-neutral-900 hover:bg-neutral-500"
               aria-label="Close modal"
             >
               <Icon name="cross" class="h-5 w-5" />
-            </button>
+            </AppButton>
           </div>
 
           <!-- Content -->
@@ -199,13 +192,13 @@ const dangerButtonClass =
               <p class="text-[0.92rem] text-red-600 md:text-base">
                 {{ String(error) || "Failed to load orphaned files" }}
               </p>
-              <button
+              <AppButton
                 @click="() => fetchOrphanedFiles()"
-                :class="primaryButtonClass"
                 :disabled="isLoading"
+                :loading="isLoading"
               >
-                {{ isLoading ? "Loading..." : "Try Again" }}
-              </button>
+                Try Again
+              </AppButton>
             </div>
 
             <!-- Empty State -->
@@ -229,7 +222,7 @@ const dangerButtonClass =
               >
                 <!-- Thumbnail -->
                 <div
-                  class="h-12 w-12 flex-shrink-0 overflow-hidden rounded bg-neutral-200"
+                  class="h-12 w-12 shrink-0 overflow-hidden rounded bg-neutral-200"
                 >
                   <NuxtPicture
                     v-if="isImageFile(file.key)"
@@ -288,33 +281,37 @@ const dangerButtonClass =
                   This action cannot be undone.
                 </p>
                 <div class="flex gap-3">
-                  <button
+                  <AppButton
+                    variant="secondary"
                     @click="toggleConfirmation(false)"
-                    :class="[secondaryButtonClass, 'flex-1']"
                     :disabled="isDeleting"
+                    class="flex-1 border-none bg-neutral-300 text-neutral-900 hover:bg-neutral-400"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </AppButton>
+                  <AppButton
+                    variant="danger"
                     @click="handleDeleteAll"
-                    :class="[dangerButtonClass, 'flex-1']"
                     :disabled="isDeleting"
+                    :loading="isDeleting"
+                    class="flex-1"
                   >
-                    <span v-if="isDeleting">Deleting...</span>
-                    <span v-else>Delete All</span>
-                  </button>
+                    <template #loading>Deleting...</template>
+                    Delete All
+                  </AppButton>
                 </div>
               </div>
 
               <!-- Delete Button -->
-              <button
+              <AppButton
                 v-else
+                variant="danger"
                 @click="toggleConfirmation(true)"
-                :class="[dangerButtonClass, 'w-full']"
                 :disabled="isDeleting"
+                class="w-full"
               >
                 Delete All Orphaned Files ({{ orphanedFiles.length }})
-              </button>
+              </AppButton>
             </Transition>
           </div>
         </div>

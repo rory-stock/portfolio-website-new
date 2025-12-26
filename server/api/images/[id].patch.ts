@@ -1,5 +1,4 @@
 import { eq, and, ne } from "drizzle-orm";
-
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
@@ -10,12 +9,10 @@ import {
   createContextRecord,
   type ImageUpdateBody,
 } from "~/utils/imageFields";
+import { requireAuth } from "~~/server/utils/requireAuth";
 
 export default defineEventHandler(async (event) => {
-  const { user } = await requireUserSession(event);
-  if (!user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
-  }
+  await requireAuth(event);
 
   const db = useDB(event);
   const id = Number(getRouterParam(event, "id"));

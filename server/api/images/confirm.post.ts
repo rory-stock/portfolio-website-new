@@ -6,12 +6,13 @@ import {
   createImageRecord,
   type ImageConfirmBody,
 } from "~/utils/imageFields";
+import { requireAuth } from "~~/server/utils/requireAuth";
+import { FILE_CONSTRAINTS } from "~/utils/constants";
+import { formatFileSize } from "~/utils/formatFileSize";
+import { logger } from "~/utils/logger";
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event);
-  if (!session.user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
-  }
+  await requireAuth(event);
 
   const body = await readBody<ImageConfirmBody>(event);
 
@@ -59,13 +60,12 @@ export default defineEventHandler(async (event) => {
     const buffer = Buffer.concat(chunks);
 
     // Validate file size
-    const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60MB
-    if (buffer.length > MAX_FILE_SIZE) {
+    if (buffer.length > FILE_CONSTRAINTS.MAX_FILE_SIZE) {
       // Cleanup: delete from R2
       await deleteR2Object(body.r2_path);
       throw createError({
         statusCode: 400,
-        message: "File too large. Maximum size is 60MB",
+        message: "File too large. Maximum size is" + formatFileSize(FILE_CONSTRAINTS.MAX_FILE_SIZE) + " bytes.",
       });
     }
 
@@ -90,13 +90,13 @@ export default defineEventHandler(async (event) => {
       images: inserted,
     };
   } catch (error: any) {
-    console.error("Image processing error:", error);
+    logger.error("Image processing error", error);
 
     // Cleanup: try to delete from R2 on failure
     try {
       await deleteR2Object(body.r2_path);
     } catch (e) {
-      console.error("Failed to cleanup R2 file:", e);
+      logger.error("Failed to cleanup R2 file after processing error", e);
     }
 
     throw createError({
