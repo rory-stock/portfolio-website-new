@@ -16,7 +16,7 @@
       :animation="150"
       ghost-class="opacity-50"
       drag-class="cursor-grabbing"
-      :class="['grid gap-3', gridClass]"
+      class="flex gap-2 justify-around"
     >
       <div
         v-for="img in localImages"
@@ -60,15 +60,4 @@ const localImages = computed({
 const layoutLabel = computed(
   () => LAYOUT_TYPES[props.layoutType]?.label || props.layoutType
 );
-
-const gridClass = computed(() => {
-  const count = LAYOUT_TYPES[props.layoutType]?.imageCount || 1;
-  const baseClasses = "grid gap-3";
-  const cols =
-    {
-      2: "grid-cols-2",
-      3: "grid-cols-3",
-    }[count] || "grid-cols-1";
-  return `${baseClasses} ${cols}`;
-});
 </script>

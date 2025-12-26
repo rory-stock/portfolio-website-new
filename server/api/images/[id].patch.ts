@@ -12,7 +12,6 @@ import {
 } from "~/utils/imageFields";
 
 export default defineEventHandler(async (event) => {
-  // Auth required
   const { user } = await requireUserSession(event);
   if (!user) {
     throw createError({ statusCode: 401, message: "Unauthorized" });
