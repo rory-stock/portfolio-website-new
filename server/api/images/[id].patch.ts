@@ -100,30 +100,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: "Image not found" });
   }
 
-  // Handle layout change for grouped images
-  // If this image is currently in a group and getting a new layout assigned,
-  // remove layout from all OTHER members of the old group
-  // Check if the body has layout_type as a property (using the 'in' operator for type safety)
-  if (
-    "layout_type" in body &&
-    body.layout_type !== undefined &&
-    currentImage.layout_group_id !== null
-  ) {
-    await db
-      .update(images)
-      .set({
-        layout_type: null,
-        layout_group_id: null,
-        group_display_order: null,
-      })
-      .where(
-        and(
-          eq(images.layout_group_id, currentImage.layout_group_id),
-          ne(images.id, id) // Don't update the current image yet
-        )
-      );
-  }
-
   // Apply field updates based on centralized scope configuration
   for (const [field, value] of Object.entries(body)) {
     // Skip undefined values and context operations

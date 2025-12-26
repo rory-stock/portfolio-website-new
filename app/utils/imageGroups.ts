@@ -1,13 +1,14 @@
-import type { ImageBase, ImageGroup } from "~~/types/imageTypes";
+import type { ImageBase, ImageGroupProxy } from "~~/types/imageTypes";
 
 /**
  * Group images by layout_group_id for admin UI
- * Returns an array of groups and individual images in display order
+ * Returns an array of group PROXIES and individual images in display order
+ * Proxies don't contain nested arrays - prevents vueDraggable issues
  */
 export function organizeImagesForAdmin(
   images: ImageBase[]
-): (ImageBase | ImageGroup)[] {
-  const result: (ImageBase | ImageGroup)[] = [];
+): (ImageBase | ImageGroupProxy)[] {
+  const result: (ImageBase | ImageGroupProxy)[] = [];
   const processedGroups = new Set<number>();
 
   for (const image of images) {
@@ -18,20 +19,15 @@ export function organizeImagesForAdmin(
         continue;
       }
 
-      // Find all images in this group
-      const groupImages = images.filter(
-        (img) => img.layout_group_id === image.layout_group_id
-      );
-
-      // Create the group object
-      const group: ImageGroup = {
+      // Create a lightweight PROXY - no nested images array
+      const groupProxy: ImageGroupProxy = {
+        type: "group-proxy",
         group_id: image.layout_group_id,
         layout_type: image.layout_type!,
-        images: groupImages,
         display_order: image.group_display_order ?? 0,
       };
 
-      result.push(group);
+      result.push(groupProxy);
       processedGroups.add(image.layout_group_id);
     } else {
       // Individual image
@@ -43,26 +39,42 @@ export function organizeImagesForAdmin(
 }
 
 /**
- * Check if the item is an ImageGroup
+ * Get all images belonging to a specific group
  */
-export function isImageGroup(item: ImageBase | ImageGroup): item is ImageGroup {
-  return "group_id" in item;
+export function getGroupMembers(
+  images: ImageBase[],
+  groupId: number
+): ImageBase[] {
+  return images
+    .filter((img) => img.layout_group_id === groupId)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
+
+/**
+ * Check if the item is an ImageGroupProxy
+ */
+export function isImageGroupProxy(
+  item: ImageBase | ImageGroupProxy
+): item is ImageGroupProxy {
+  return "type" in item && item.type === "group-proxy";
 }
 
 /**
  * Flatten groups back to individual images for API submission
  */
 export function flattenImagesForApi(
-  items: (ImageBase | ImageGroup)[]
+  items: (ImageBase | ImageGroupProxy)[],
+  allImages: ImageBase[]
 ): number[] {
   const imageIds: number[] = [];
 
   for (const item of items) {
-    if (isImageGroup(item)) {
-      // Add all group member IDs in order
-      imageIds.push(...item.images.map((img) => img.id));
+    if (isImageGroupProxy(item)) {
+      // Get group members from the source images array
+      const groupMembers = getGroupMembers(allImages, item.group_id);
+      imageIds.push(...groupMembers.map((img) => img.id));
     } else {
-      // Add individual image ID
+      // Individual image
       imageIds.push(item.id);
     }
   }

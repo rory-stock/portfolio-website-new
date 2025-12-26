@@ -27,8 +27,8 @@
     "nuxt-seo-utils": "^7.0.18",
     "tailwindcss": "^4.1.16",
     "vue": "^3.5.22",
+    "vue-draggable-plus": "^0.6.0",
     "vue-router": "^4.6.3",
-    "vuedraggable": "^4.1.0",
     "wrangler": "^4.46.0"
   },
   "devDependencies": {

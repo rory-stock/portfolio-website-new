@@ -55,6 +55,29 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  // Check if any selected images are already in a layout group
+  // If so, remove the layout from all members of those old groups
+  const oldGroupIds = selectedImages
+    .map((img) => img.layout_group_id)
+    .filter((id) => id !== null);
+
+  if (oldGroupIds.length > 0) {
+    // Get unique group IDs
+    const uniqueGroupIds = [...new Set(oldGroupIds)];
+
+    // Remove layout from all members of these groups
+    for (const groupId of uniqueGroupIds) {
+      await db
+        .update(images)
+        .set({
+          layout_type: null,
+          layout_group_id: null,
+          group_display_order: null,
+        })
+        .where(eq(images.layout_group_id, groupId));
+    }
+  }
+
   // Sort images by their current display order
   const sortedImages = selectedImages.sort((a, b) => {
     const orderA = a.order ?? Infinity;

@@ -61,3 +61,11 @@ export interface ImageGroup {
   images: ImageBase[];
   display_order: number;
 }
+
+// Lightweight proxy for vuedraggable compatibility
+export interface ImageGroupProxy {
+  type: "group-proxy";
+  group_id: number;
+  layout_type: string;
+  display_order: number;
+}
