@@ -58,10 +58,10 @@
         <template v-for="element in organizedItems" :key="getItemKey(element)">
           <!-- Group Container - Isolated Component (spans full width) -->
           <ImageGroupContainer
-            v-if="isGroupProxy(element)"
-            :group-images="getGroupImages(element.group_id)"
+            v-if="isGroup(element)"
+            :group-images="element.images"
             :layout-type="element.layout_type"
-            @update="updateGroupMembers(element.group_id, $event)"
+            @update="(newOrder) => (element.images = newOrder)"
             @open-modal="openModal"
             @toggle-primary="handleTogglePrimary"
             class="col-span-3"
@@ -127,7 +127,7 @@
 <script setup lang="ts">
 import { VueDraggable } from "vue-draggable-plus";
 import { onKeyStroke } from "@vueuse/core";
-import { isImageGroupProxy, getGroupMembers } from "~/utils/imageGroups";
+import { isImageGroup } from "~/utils/imageGroups";
 import type { ImageBase, ImageField } from "~~/types/imageTypes";
 
 interface Props {
@@ -212,35 +212,13 @@ const handleTogglePrimary = async (image: ImageBase) => {
 };
 
 // Helper functions for template
-const isGroupProxy = isImageGroupProxy;
+const isGroup = isImageGroup;
 
 const getItemKey = (item: any) => {
-  if (isGroupProxy(item)) {
+  if (isGroup(item)) {
     return `group-${item.group_id}`;
   }
   return `image-${item.id}`;
-};
-
-const getGroupImages = (groupId: number): ImageBase[] => {
-  return getGroupMembers(images.value, groupId);
-};
-
-const updateGroupMembers = (groupId: number, newOrder: ImageBase[]) => {
-  newOrder.forEach((img, index) => {
-    const found = images.value.find((i) => i.id === img.id);
-    if (found) {
-      console.log(`Updating image ${img.id} order: ${found.order} → ${index}`);
-      found.order = index;
-    }
-  });
-  console.log(
-    "After update, images.value:",
-    images.value.map((i) => ({ id: i.id, order: i.order }))
-  );
-
-  organizedItems.value = props.showLayoutWizard
-    ? organizeImagesForAdmin(images.value)
-    : [...images.value];
 };
 
 // Keyboard shortcuts

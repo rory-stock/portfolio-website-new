@@ -1,9 +1,5 @@
-import type { ImageBase, ImageGroupProxy } from "~~/types/imageTypes";
-import {
-  organizeImagesForAdmin,
-  isImageGroupProxy,
-  flattenImagesForApi,
-} from "~/utils/imageGroups";
+import type { ImageBase, ImageGroup } from "~~/types/imageTypes";
+import { flattenImagesForApi, organizeImagesForAdmin, } from "~/utils/imageGroups";
 
 export function useImageOrdering(
   context: string,
@@ -13,7 +9,7 @@ export function useImageOrdering(
   const { success, error } = useToast();
 
   // Transform images based on whether layouts are enabled
-  const organizedItems = ref<(ImageBase | ImageGroupProxy)[]>([]);
+  const organizedItems = ref<(ImageBase | ImageGroup)[]>([]);
 
   // CRITICAL: Snapshot of original order taken ONCE when images load
   const originalOrderSnapshot = ref<number[]>([]);
@@ -33,7 +29,7 @@ export function useImageOrdering(
 
       // Take snapshot of original order
       originalOrderSnapshot.value = hasLayouts
-        ? flattenImagesForApi(organizeImagesForAdmin(newImages), newImages)
+        ? flattenImagesForApi(organizeImagesForAdmin(newImages))
         : newImages.map((img) => img.id);
     },
     { immediate: true }
@@ -41,24 +37,12 @@ export function useImageOrdering(
 
   // Track the current order (can change as the user drags)
   const currentOrder = computed(() => {
-    const result = hasLayouts
-      ? flattenImagesForApi(organizedItems.value, images.value)
+    return hasLayouts
+      ? flattenImagesForApi(organizedItems.value)
       : (organizedItems.value as ImageBase[]).map((img) => img.id);
-    console.log("currentOrder recalculated:", result);
-    return result;
   });
 
   const orderChanged = computed(() => {
-    console.log("Checking orderChanged:", {
-      currentLength: currentOrder.value.length,
-      originalLength: originalOrderSnapshot.value.length,
-      current: currentOrder.value,
-      original: originalOrderSnapshot.value,
-      changed: currentOrder.value.some(
-        (id, index) => id !== originalOrderSnapshot.value[index]
-      ),
-    });
-
     if (currentOrder.value.length !== originalOrderSnapshot.value.length)
       return true;
     return currentOrder.value.some(
