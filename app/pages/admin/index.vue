@@ -3,13 +3,18 @@
     <h1 class="text-2xl font-bold text-white md:text-3xl">
       Overview Page Admin
     </h1>
-    <ImageSection context="overview" title="Overview" :fields="imageFields" :show-layout-wizard="true" />
+    <ImageSection
+      context="overview"
+      title="Overview"
+      :fields="imageFields"
+      :show-layout-wizard="true"
+    />
     <Toast />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { ImageField } from "~~/types/imageTypes";
+import { FIELD_SETS } from "~~/types/imageFields";
 
 const { fetch: refreshSession } = useUserSession();
 
@@ -24,12 +29,5 @@ definePageMeta({
 
 useHead({ title: "Admin" });
 
-const imageFields: ImageField[] = [
-  {
-    key: "alt",
-    label: "Alt Text",
-    type: "text" as const,
-    placeholder: "Image Alt Text",
-  },
-];
+const imageFields = FIELD_SETS.basic;
 </script>

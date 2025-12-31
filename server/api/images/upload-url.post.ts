@@ -6,7 +6,7 @@ import {
 } from "~/utils/context";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { FILE_CONSTRAINTS, VALID_IMAGE_EXTENSIONS } from "~/utils/constants";
-import { getValidImageFormats } from "~/utils/formatMimeType";
+import { getValidImageFormats } from "~/utils/format";
 
 function generateHash(length: number = 6): string {
   const array = new Uint8Array(length);

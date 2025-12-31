@@ -5,6 +5,7 @@ import {
   onKeyStroke,
   useScrollLock,
 } from "@vueuse/core";
+import { formatDateRelative, formatFileSize } from "~/utils/format";
 
 interface OrphanedFile {
   key: string;
@@ -76,28 +77,6 @@ onKeyStroke("Escape", () => {
     }
   }
 });
-
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-  return date.toLocaleDateString();
-}
 
 function getFileName(path: string): string {
   return path.split("/").pop() || path;
@@ -249,7 +228,7 @@ function closeModal() {
                   <div class="flex items-center gap-3 text-sm text-neutral-600">
                     <span>{{ formatFileSize(file.size) }}</span>
                     <span class="text-neutral-400">•</span>
-                    <span>{{ formatDate(file.lastModified) }}</span>
+                    <span>{{ formatDateRelative(file.lastModified) }}</span>
                   </div>
                 </div>
               </div>
@@ -321,16 +300,6 @@ function closeModal() {
 </template>
 
 <style scoped>
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
 .modal-enter-active > div,
 .modal-leave-active > div {
   transition: transform 0.2s ease;

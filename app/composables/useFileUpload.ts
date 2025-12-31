@@ -1,6 +1,9 @@
 import { computed, reactive, ref } from "vue";
-import { formatFileSize } from "~/utils/formatFileSize";
-import { formatMimeType, getValidImageFormats } from "~/utils/formatMimeType";
+import {
+  formatFileSize,
+  formatMimeType,
+  getValidImageFormats,
+} from "~/utils/format";
 import { FILE_CONSTRAINTS, VALID_IMAGE_TYPES } from "~/utils/constants";
 
 const FILENAME_REGEX = /^[a-zA-Z0-9\-\.]+$/;

@@ -279,7 +279,7 @@
 <script setup lang="ts">
 import type { ImageBase, ImageField } from "~~/types/imageTypes";
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
-import { formatFileSize } from "~/utils/formatFileSize";
+import { formatFileSize, formatDate } from "~/utils/format";
 
 interface Props {
   open: boolean;
@@ -446,16 +446,6 @@ watch(
   },
   { immediate: true }
 );
-
-const formatDate = (date: string | Date) => {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const togglePublic = () => {
   formData.value.is_public = !formData.value.is_public;

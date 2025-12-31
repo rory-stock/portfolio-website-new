@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ImageField } from "~~/types/imageTypes";
+import { FIELD_SETS } from "~~/types/imageFields";
 
 definePageMeta({
   middleware: "authenticated",
@@ -28,32 +28,7 @@ const contentFields = [
   },
 ];
 
-const imageFields: ImageField[] = [
-  {
-    key: "alt",
-    label: "Alt Text",
-    type: "text" as const,
-    placeholder: "Image Alt Text",
-  },
-  {
-    key: "event_name",
-    label: "Event Name",
-    type: "text" as const,
-    placeholder: "Event Name",
-  },
-  {
-    key: "event_date",
-    label: "Event Date",
-    type: "text" as const,
-    placeholder: "Event Date",
-  },
-  {
-    key: "event_location",
-    label: "Event Location",
-    type: "text" as const,
-    placeholder: "Event Location",
-  },
-];
+const imageFields = FIELD_SETS.events;
 </script>
 
 <style scoped></style>

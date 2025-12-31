@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 import { useDropZone } from "@vueuse/core";
 import { useFileUpload } from "~/composables/useFileUpload";
-import { formatFileSize } from "~/utils/formatFileSize";
+import { formatFileSize } from "~/utils/format";
 
 const props = defineProps<{
   context: string;

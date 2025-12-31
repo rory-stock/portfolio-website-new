@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ImageField } from "~~/types/imageTypes";
+import { FIELD_SETS } from "~~/types/imageFields";
 
 definePageMeta({
   middleware: "authenticated",
@@ -30,18 +30,5 @@ const contentFields = [
   },
 ];
 
-const imageFields: ImageField[] = [
-  {
-    key: "alt",
-    label: "Alt Text",
-    type: "text" as const,
-    placeholder: "Image Alt Text",
-  },
-  {
-    key: "description",
-    label: "Description",
-    type: "text" as const,
-    placeholder: "Image Description",
-  },
-];
+const imageFields = FIELD_SETS.withDescription;
 </script>

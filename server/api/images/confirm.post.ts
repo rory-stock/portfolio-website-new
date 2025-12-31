@@ -8,7 +8,7 @@ import {
 } from "~/utils/imageFields";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { FILE_CONSTRAINTS } from "~/utils/constants";
-import { formatFileSize } from "~/utils/formatFileSize";
+import { formatFileSize } from "~/utils/format";
 import { logger } from "~/utils/logger";
 
 export default defineEventHandler(async (event) => {
