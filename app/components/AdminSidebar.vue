@@ -64,7 +64,7 @@ async function logout() {
 }
 
 function handleNavClick() {
-  // Close sidebar on mobile when navigation item is clicked
+  // Close the sidebar on mobile when a navigation item is clicked
   if (isMobile.value) {
     emit("close");
   }
@@ -72,7 +72,7 @@ function handleNavClick() {
 
 function openCleanupModal() {
   showCleanupModal.value = true;
-  // Close sidebar on mobile when cleanup is opened
+  // Close the sidebar on mobile when clean-up is opened
   if (isMobile.value) {
     emit("close");
   }

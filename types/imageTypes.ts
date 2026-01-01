@@ -1,5 +1,7 @@
 // Shared types for images across client and server
 
+import type { LayoutTypeId } from "~/utils/layouts"
+
 export interface ImageBase {
   id: number;
   context: string;
@@ -18,7 +20,7 @@ export interface ImageBase {
   is_public: boolean;
   is_primary: boolean;
   order: number | null;
-  layout_type: string | null;
+  layout_type: LayoutTypeId | null;
   layout_group_id: number | null;
   group_display_order: number | null;
 }
@@ -45,12 +47,12 @@ export interface SnapImage {
   alt: string | null;
   r2_path?: string;
   description?: string | null;
-  layout_type: string | null;
+  layout_type: LayoutTypeId | null;
   [key: string]: any;
 }
 
 export interface SnapSection {
-  layoutType: string | null;
+  layoutType: LayoutTypeId | null;
   images: SnapImage[];
 }
 

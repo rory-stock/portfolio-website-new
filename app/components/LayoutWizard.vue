@@ -166,7 +166,7 @@
 
 <script setup lang="ts">
 import type { ImageBase } from "~~/types/imageTypes";
-import type { LayoutTypeId } from "~/utils/layouts";
+import type { LayoutTypeId, LayoutType } from "~/utils/layouts";
 import { LAYOUT_TYPES } from "~/utils/layouts";
 import { useScroll } from "@vueuse/core";
 
@@ -240,7 +240,6 @@ const imagesInLayouts = computed(() => {
       .filter(
         (img) =>
           img.layout_type !== null &&
-          img.layout_type !== "" &&
           img.layout_group_id !== currentGroupId
       )
       .map((img) => img.id)
@@ -277,7 +276,7 @@ const availableLayoutTypes = computed(() => {
 
   return Object.entries(LAYOUT_TYPES).filter(([_, config]) => {
     return config.imageCount <= totalAvailable;
-  });
+  }) as Array<[LayoutTypeId, LayoutType]>;
 });
 
 // Check if an image can be selected

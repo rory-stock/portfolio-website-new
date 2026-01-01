@@ -37,10 +37,11 @@
 import { VueDraggable } from "vue-draggable-plus";
 import type { ImageBase } from "~~/types/imageTypes";
 import { LAYOUT_TYPES } from "~/utils/layouts";
+import type { LayoutTypeId } from "~/utils/layouts";
 
 interface Props {
   groupImages: ImageBase[];
-  layoutType: string;
+  layoutType: LayoutTypeId;
 }
 
 const props = defineProps<Props>();

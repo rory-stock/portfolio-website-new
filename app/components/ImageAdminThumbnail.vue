@@ -48,17 +48,10 @@
 </template>
 
 <script setup lang="ts">
-interface Image {
-  id: number;
-  r2_path: string;
-  url: string;
-  alt: string;
-  is_primary: boolean;
-  is_public: boolean;
-}
+import type { ImageBase } from "~~/types/imageTypes";
 
 interface Props {
-  image: Image;
+  image: ImageBase;
 }
 
 const props = defineProps<Props>();
