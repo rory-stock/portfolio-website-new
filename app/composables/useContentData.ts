@@ -6,6 +6,11 @@ type ContentRow = InferSelectModel<typeof content>;
 export async function useContentData(table: string, immediate = false) {
   const url = `/api/content?table=${table}`;
 
+  console.log("=== useContentData DEBUG ===");
+  console.log("Table:", table);
+  console.log("Server?:", import.meta.server);
+  console.log("Client?:", import.meta.client);
+
   const { data, error, refresh } = await useAsyncData(
     `content-${table}`,
     () => $fetch<ContentRow[]>(url),
@@ -15,6 +20,10 @@ export async function useContentData(table: string, immediate = false) {
       default: () => [],
     }
   );
+
+  console.log("Fetched data:", data.value);
+  console.log("Error:", error.value);
+  console.log("===========================");
 
   // Transform the array to an object with just the values
   const contentMap = computed(() => {
