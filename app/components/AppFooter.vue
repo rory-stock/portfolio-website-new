@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { content: footer } = await useContentData("footer", true);
+const { data: footer } = await useContentData("footer");
 </script>
 
 <template>

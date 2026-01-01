@@ -14,7 +14,7 @@ const { data: imageData } = await useFetch("/api/images", {
   query: { context: "journal" },
 });
 
-const { content: journal } = await useContentData("journal", true);
+const { data: journal } = await useContentData("journal");
 
 const images = computed(() => imageData.value?.images || []);
 const selectedImage = ref<(typeof images.value)[0] | null>(null);

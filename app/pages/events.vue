@@ -15,7 +15,7 @@ const { data: imageData } = await useFetch("/api/images", {
   query: { context: "events" },
 });
 
-const { content: event } = await useContentData("events", true);
+const { data: event } = await useContentData("events");
 
 const images = computed(() => imageData.value?.images || []);
 

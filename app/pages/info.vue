@@ -21,14 +21,7 @@ const image = computed(() => {
 
 const imagePath = computed(() => image.value?.r2_path);
 
-const { content: info } = await useContentData("info", true);
-
-// DEBUGGING
-console.log("=== INFO PAGE DEBUG ===");
-console.log("Server?:", import.meta.server);
-console.log("Client?:", import.meta.client);
-console.log("Content:", info.value);
-console.log("=======================");
+const { data: info } = await useContentData("info");
 </script>
 
 <template>
