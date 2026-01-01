@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { VueDraggable } from "vue-draggable-plus";
 import type { ImageBase } from "~~/types/imageTypes";
-import { LAYOUT_TYPES } from "~~/types/layoutTypes";
+import { LAYOUT_TYPES } from "~/utils/layouts";
 
 interface Props {
   groupImages: ImageBase[];

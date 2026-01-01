@@ -30,5 +30,3 @@ const contentFields = [
 
 const imageFields = FIELD_SETS.events;
 </script>
-
-<style scoped></style>

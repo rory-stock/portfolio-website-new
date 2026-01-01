@@ -4,8 +4,9 @@ import { images } from "~~/server/db/schema";
 import { deleteR2Object } from "~/utils/r2";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { logger } from "~/utils/logger";
+import type { ImageDeleteResponse } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ImageDeleteResponse> => {
   await requireAuth(event);
 
   const idParam = getRouterParam(event, "id");

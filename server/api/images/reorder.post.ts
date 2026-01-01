@@ -4,12 +4,13 @@ import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { logger } from "~/utils/logger";
+import type { ImageReorderRequest, ImageReorderResponse } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ImageReorderResponse> => {
   await requireAuth(event);
 
   const db = useDB(event);
-  const body = await readBody(event);
+  const body = await readBody<ImageReorderRequest>(event);
 
   const { context, order } = body as {
     context: string;

@@ -1,9 +1,10 @@
-import { eq, and, desc, sql, asc, count } from "drizzle-orm";
+import { eq, and, desc, asc, count } from "drizzle-orm";
 
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
+import type { ImageListResponse } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ImageListResponse> => {
   const db = useDB(event);
   const query = getQuery(event);
   const session = await getUserSession(event);

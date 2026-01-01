@@ -1,13 +1,6 @@
 <template>
   <div class="fixed top-4 right-4 z-50 space-y-2">
-    <TransitionGroup
-      enter-active-class="transition-all duration-300 ease-out"
-      enter-from-class="opacity-0 translate-x-full"
-      enter-to-class="opacity-100 translate-x-0"
-      leave-active-class="transition-all duration-300 ease-in"
-      leave-from-class="opacity-100 translate-x-0"
-      leave-to-class="opacity-0 translate-x-full"
-    >
+    <TransitionGroup name="slide">
       <div
         v-for="toast in toasts"
         :key="toast.id"
@@ -20,7 +13,7 @@
           <Icon
             :name="toastIcons[toast.type]"
             :size="20"
-            class="flex-shrink-0"
+            class="shrink-0"
           />
           <p class="flex-1 text-sm">{{ toast.message }}</p>
         </div>

@@ -1,4 +1,4 @@
-import { eq, and, ne } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
@@ -7,16 +7,16 @@ import {
   IMAGE_FIELD_CONFIGS,
   isUpdatableField,
   createContextRecord,
-  type ImageUpdateBody,
 } from "~/utils/imageFields";
 import { requireAuth } from "~~/server/utils/requireAuth";
+import type { ImageUpdateRequest, ImageUpdateResponse } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ImageUpdateResponse> => {
   await requireAuth(event);
 
   const db = useDB(event);
   const id = Number(getRouterParam(event, "id"));
-  const body = await readBody<ImageUpdateBody>(event);
+  const body = await readBody<ImageUpdateRequest>(event);
 
   // Centralized validation
   const validation = validateImageUpdate(body);

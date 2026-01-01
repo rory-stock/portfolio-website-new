@@ -2,8 +2,9 @@ import { useDB } from "~~/server/db/client";
 import { images } from "~~/server/db/schema";
 import { listR2Objects } from "~/utils/r2";
 import { requireAuth } from "~~/server/utils/requireAuth";
+import type { OrphanedFilesResponse } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<OrphanedFilesResponse> => {
   await requireAuth(event);
 
   const db = useDB(event);
@@ -25,7 +26,7 @@ export default defineEventHandler(async (event) => {
     orphaned: orphaned.map((file) => ({
       key: file.key,
       size: file.size,
-      lastModified: file.lastModified,
+      lastModified: file.lastModified.toISOString(),
     })),
     total: orphaned.length,
   };

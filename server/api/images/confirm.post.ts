@@ -4,17 +4,17 @@ import { getR2Object, deleteR2Object } from "~/utils/r2";
 import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
 import {
   createImageRecord,
-  type ImageConfirmBody,
 } from "~/utils/imageFields";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { FILE_CONSTRAINTS } from "~/utils/constants";
 import { formatFileSize } from "~/utils/format";
 import { logger } from "~/utils/logger";
+import type { ImageConfirmRequest, ImageConfirmResponse } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ImageConfirmResponse> => {
   await requireAuth(event);
 
-  const body = await readBody<ImageConfirmBody>(event);
+  const body = await readBody<ImageConfirmRequest>(event);
 
   if (!body.r2_path || !body.context) {
     throw createError({

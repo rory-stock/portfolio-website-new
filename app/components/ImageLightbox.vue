@@ -49,14 +49,7 @@ watch(
 
 <template>
   <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-200 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-200 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
+    <Transition name="fade">
       <div
         v-if="isOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-white p-6"

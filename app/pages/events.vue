@@ -58,5 +58,3 @@ const eventURL = (eventName: string | null) => {
     </div>
   </div>
 </template>
-
-<style scoped></style>

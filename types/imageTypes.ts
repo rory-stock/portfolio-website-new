@@ -5,11 +5,11 @@ export interface ImageBase {
   context: string;
   r2_path: string;
   url: string;
-  alt: string;
-  description: string;
-  event_name: string;
-  event_date: string;
-  event_location: string;
+  alt: string | null;
+  description: string | null;
+  event_name: string | null;
+  event_date: string | null;
+  event_location: string | null;
   width: number;
   height: number;
   file_size: number;

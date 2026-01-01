@@ -1,13 +1,14 @@
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { logger } from "~/utils/logger";
+import type { LoginResponse } from "~~/types/api";
 
 const bodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
 });
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<LoginResponse> => {
   const { email, password } = await readValidatedBody(event, bodySchema.parse);
   const config = useRuntimeConfig();
 

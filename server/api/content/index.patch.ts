@@ -3,11 +3,12 @@ import { content } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
 import { requireAuth } from "~~/server/utils/requireAuth";
+import type { ContentResponse, ContentUpdateRequest } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ContentResponse> => {
   await requireAuth(event);
 
-  const { table, updates } = await readBody(event);
+  const { table, updates } = await readBody<ContentUpdateRequest>(event);
 
   if (!table || !isValidContext(table)) {
     throw createError({

@@ -150,7 +150,7 @@
 </template>
 
 <script setup lang="ts">
-import type { LayoutTypeId } from "~~/types/layoutTypes";
+import type { LayoutTypeId } from "~/utils/layouts";
 
 interface Props {
   layoutType: LayoutTypeId;

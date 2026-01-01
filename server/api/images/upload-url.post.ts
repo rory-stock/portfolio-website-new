@@ -7,6 +7,10 @@ import {
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { FILE_CONSTRAINTS, VALID_IMAGE_EXTENSIONS } from "~/utils/constants";
 import { getValidImageFormats } from "~/utils/format";
+import type {
+  ImageUploadUrlRequest,
+  ImageUploadUrlResponse,
+} from "~~/types/api";
 
 function generateHash(length: number = 6): string {
   const array = new Uint8Array(length);
@@ -16,10 +20,10 @@ function generateHash(length: number = 6): string {
     .slice(0, length);
 }
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ImageUploadUrlResponse> => {
   await requireAuth(event);
 
-  const body = await readBody(event);
+  const body = await readBody<ImageUploadUrlRequest>(event);
   const { filename, context, fileSize } = body as {
     filename: string;
     context: Context;
@@ -48,7 +52,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Validate filename
-  const filenameRegex = /^[a-zA-Z0-9\-\.]+$/;
+  const filenameRegex = /^[a-zA-Z0-9\-.]+$/;
   if (!filenameRegex.test(filename)) {
     throw createError({
       statusCode: 400,

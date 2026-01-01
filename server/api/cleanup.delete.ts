@@ -3,8 +3,9 @@ import { images } from "~~/server/db/schema";
 import { listR2Objects, deleteR2Object } from "~/utils/r2";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { logger } from "~/utils/logger";
+import type { CleanupResponse } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<CleanupResponse> => {
   await requireAuth(event);
 
   const db = useDB(event);

@@ -3,8 +3,9 @@ import { eq } from "drizzle-orm";
 
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
+import type { ImageBase } from "~~/types/imageTypes";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<{ image: ImageBase }> => {
   const db = useDB(event);
   const id = Number(getRouterParam(event, "id"));
   const session = await getUserSession(event);

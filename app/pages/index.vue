@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { groupImagesByLayout } from "~~/types/layoutTypes";
+import { groupImagesByLayout } from "~/utils/layouts";
 import type { SnapImage } from "~~/types/imageTypes";
 
 useHead({ title: "Overview" });

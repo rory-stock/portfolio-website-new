@@ -298,15 +298,3 @@ function closeModal() {
     </Transition>
   </Teleport>
 </template>
-
-<style scoped>
-.modal-enter-active > div,
-.modal-leave-active > div {
-  transition: transform 0.2s ease;
-}
-
-.modal-enter-from > div,
-.modal-leave-to > div {
-  transform: scale(0.95);
-}
-</style>

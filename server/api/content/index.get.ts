@@ -2,8 +2,9 @@ import { eq } from "drizzle-orm";
 import { content } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { isValidContext, VALID_CONTEXTS } from "~/utils/context";
+import type { ContentItem } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<ContentItem[]> => {
   const { table } = getQuery(event);
 
   if (!table || !isValidContext(table)) {

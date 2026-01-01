@@ -2,15 +2,16 @@ import { eq, inArray, and, asc } from "drizzle-orm";
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { getNextLayoutGroupId } from "~/utils/layoutGroups";
-import { LAYOUT_TYPES } from "~~/types/layoutTypes";
+import { isValidLayoutType, LAYOUT_TYPES } from "~/utils/layouts";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { logger } from "~/utils/logger";
+import type { LayoutAssignRequest, LayoutAssignResponse } from "~~/types/api";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<LayoutAssignResponse> => {
   await requireAuth(event);
 
   const db = useDB(event);
-  const body = await readBody(event);
+  const body = await readBody<LayoutAssignRequest>(event);
 
   const { image_ids, layout_type, context } = body as {
     image_ids: number[];
@@ -23,6 +24,13 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 400,
       message: "image_ids, layout_type, and context required",
+    });
+  }
+
+  if (!isValidLayoutType(layout_type)) {
+    throw createError({
+      statusCode: 400,
+      message: `Invalid layout_type: ${layout_type}`,
     });
   }
 

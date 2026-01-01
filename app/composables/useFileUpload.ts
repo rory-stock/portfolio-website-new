@@ -6,13 +6,12 @@ import {
 } from "~/utils/format";
 import { FILE_CONSTRAINTS, VALID_IMAGE_TYPES } from "~/utils/constants";
 
-const FILENAME_REGEX = /^[a-zA-Z0-9\-\.]+$/;
+const FILENAME_REGEX = /^[a-zA-Z0-9\-.]+$/;
 
 // Custom Error Class
 export class UploadError extends Error {
   constructor(
     message: string,
-    public code: "VALIDATION" | "NETWORK" | "SERVER" | "CANCELLED",
     public file?: File
   ) {
     super(message);
@@ -21,24 +20,55 @@ export class UploadError extends Error {
 }
 
 // Types
-export type FileStatus =
-  | "pending"
-  | "uploading"
-  | "success"
-  | "error"
-  | "cancelled";
-
-export interface UploadFile {
-  id: string;
-  file: File | null;
-  fileName: string; // Store separately for display after file is cleared
-  fileSize: number; // Store separately for display after file is cleared
-  status: FileStatus;
-  progress: number;
-  error?: string;
-  isLargeFile: boolean;
-  retryCount: number;
-}
+export type UploadFile =
+  | {
+      id: string;
+      file: File;
+      fileName: string;
+      fileSize: number;
+      status: "pending";
+      isLargeFile: boolean;
+      retryCount: number;
+    }
+  | {
+      id: string;
+      file: File;
+      fileName: string;
+      fileSize: number;
+      status: "uploading";
+      progress: number;
+      isLargeFile: boolean;
+      retryCount: number;
+    }
+  | {
+      id: string;
+      file: null;
+      fileName: string;
+      fileSize: number;
+      status: "success";
+      progress: 100;
+      isLargeFile: boolean;
+      retryCount: number;
+    }
+  | {
+      id: string;
+      file: null;
+      fileName: string;
+      fileSize: number;
+      status: "error";
+      error: string;
+      isLargeFile: boolean;
+      retryCount: number;
+    }
+  | {
+      id: string;
+      file: null;
+      fileName: string;
+      fileSize: number;
+      status: "cancelled";
+      isLargeFile: boolean;
+      retryCount: number;
+    };
 
 export interface InvalidFile {
   file: File;
@@ -183,7 +213,6 @@ export function useFileUpload(options: UseFileUploadOptions) {
           fileName: file.name,
           fileSize: file.size,
           status: "pending",
-          progress: 0,
           isLargeFile: file.size > FILE_CONSTRAINTS.LARGE_FILE_THRESHOLD,
           retryCount: 0,
         });
@@ -221,8 +250,10 @@ export function useFileUpload(options: UseFileUploadOptions) {
    * Upload a single file through the 3-step process with retry logic
    */
   async function uploadSingleFile(uploadFile: UploadFile): Promise<number[]> {
-    uploadFile.status = "uploading";
-    uploadFile.progress = 0;
+    Object.assign(uploadFile, {
+      status: "uploading" as const,
+      progress: 0,
+    });
 
     try {
       // Step 1: Get presigned URL
@@ -249,7 +280,9 @@ export function useFileUpload(options: UseFileUploadOptions) {
 
         xhr.upload.addEventListener("progress", (e) => {
           if (e.lengthComputable) {
-            uploadFile.progress = Math.round((e.loaded / e.total) * 100);
+            if (uploadFile.status === "uploading") {
+              uploadFile.progress = Math.round((e.loaded / e.total) * 100);
+            }
 
             // Update total bytes uploaded
             const byteDiff = e.loaded - previousLoaded;
@@ -265,7 +298,6 @@ export function useFileUpload(options: UseFileUploadOptions) {
             reject(
               new UploadError(
                 `Upload failed with status ${xhr.status}`,
-                "SERVER",
                 uploadFile.file || undefined
               )
             );
@@ -276,7 +308,6 @@ export function useFileUpload(options: UseFileUploadOptions) {
           reject(
             new UploadError(
               "Network error during upload",
-              "NETWORK",
               uploadFile.file || undefined
             )
           );
@@ -284,16 +315,12 @@ export function useFileUpload(options: UseFileUploadOptions) {
 
         xhr.addEventListener("abort", () => {
           reject(
-            new UploadError(
-              "Upload aborted",
-              "CANCELLED",
-              uploadFile.file || undefined
-            )
+            new UploadError("Upload aborted", uploadFile.file || undefined)
           );
         });
 
         if (!uploadFile.file) {
-          reject(new UploadError("File object is null", "VALIDATION"));
+          reject(new UploadError("File object is null"));
           return;
         }
 
@@ -321,14 +348,20 @@ export function useFileUpload(options: UseFileUploadOptions) {
       });
 
       const { images } = confirmResponse as { images: Array<{ id: number }> };
-      uploadFile.status = "success";
-      uploadFile.progress = 100;
+      Object.assign(uploadFile, {
+        status: "success" as const,
+        progress: 100,
+        file: null,
+      });
 
       return images.map((img) => img.id);
     } catch (error: any) {
       // Check if it was a cancellation
       if (error.name === "AbortError" || error.code === "CANCELLED") {
-        uploadFile.status = "cancelled";
+        Object.assign(uploadFile, {
+          status: "cancelled" as const,
+          file: null,
+        });
         throw error;
       }
 
@@ -345,14 +378,20 @@ export function useFileUpload(options: UseFileUploadOptions) {
         );
 
         // Reset progress for retry
-        uploadFile.progress = 0;
+        Object.assign(uploadFile, {
+          status: "uploading" as const,
+          progress: 0,
+          file: uploadFile.file,
+        });
 
         return uploadSingleFile(uploadFile);
       }
 
-      uploadFile.status = "error";
-      uploadFile.error =
-        error.data?.message || error.message || "Upload failed";
+      Object.assign(uploadFile, {
+        status: "error" as const,
+        error: error.data?.message || error.message || "Upload failed",
+        file: null,
+      });
       throw error;
     }
   }
