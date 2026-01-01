@@ -1,4 +1,5 @@
 import type { ImageBase, ImageGroup } from "~~/types/imageTypes";
+import { isValidLayoutType, type LayoutTypeId } from "~/utils/layouts";
 
 /**
  * Group images by layout_group_id for admin UI
@@ -23,10 +24,18 @@ export function organizeImagesForAdmin(
         (img) => img.layout_group_id === image.layout_group_id
       );
 
+      // Validate layout_type
+      const layoutType: LayoutTypeId =
+        image.layout_type && isValidLayoutType(image.layout_type)
+          ? image.layout_type
+          : (() => {
+              throw new Error(`Invalid layout_type: ${image.layout_type}`);
+            })();
+
       // Create the group object with the images array
       const group: ImageGroup = {
         group_id: image.layout_group_id,
-        layout_type: image.layout_type!,
+        layout_type: layoutType,
         images: groupImages,
         display_order: image.group_display_order ?? 0,
       };

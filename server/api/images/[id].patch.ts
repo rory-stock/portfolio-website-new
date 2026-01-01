@@ -10,6 +10,7 @@ import {
 } from "~/utils/imageFields";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import type { ImageUpdateRequest, ImageUpdateResponse } from "~~/types/api";
+import { toImageBase, toImageBaseArray } from "~~/server/utils/imageTransform";
 
 export default defineEventHandler(async (event): Promise<ImageUpdateResponse> => {
   await requireAuth(event);
@@ -38,7 +39,8 @@ export default defineEventHandler(async (event): Promise<ImageUpdateResponse> =>
     const [currentImage] = await db
       .select()
       .from(images)
-      .where(eq(images.id, id));
+      .where(eq(images.id, id))
+      .then(results => results.map(toImageBase));
 
     if (!currentImage) {
       throw createError({ statusCode: 404, message: "Image not found" });
@@ -76,13 +78,14 @@ export default defineEventHandler(async (event): Promise<ImageUpdateResponse> =>
     const [updatedImage] = await db
       .select()
       .from(images)
-      .where(eq(images.id, id));
+      .where(eq(images.id, id))
+      .then(results => results.map(toImageBase));
 
     return {
       success: true,
       image: updatedImage,
       layout_removed: true,
-      group_was_removed: wasGrouped, // Frontend uses this to trigger refetching
+      group_was_removed: wasGrouped,
     };
   }
 
@@ -90,7 +93,8 @@ export default defineEventHandler(async (event): Promise<ImageUpdateResponse> =>
   const [currentImage] = await db
     .select()
     .from(images)
-    .where(eq(images.id, id));
+    .where(eq(images.id, id))
+    .then(results => results.map(toImageBase));
 
   if (!currentImage) {
     throw createError({ statusCode: 404, message: "Image not found" });
@@ -204,7 +208,8 @@ export default defineEventHandler(async (event): Promise<ImageUpdateResponse> =>
   const [updatedImage] = await db
     .select()
     .from(images)
-    .where(eq(images.id, id));
+    .where(eq(images.id, id))
+    .then(results => results.map(toImageBase));
 
   // Get all contexts if contexts were modified
   let allContexts = undefined;
@@ -213,6 +218,7 @@ export default defineEventHandler(async (event): Promise<ImageUpdateResponse> =>
       .select()
       .from(images)
       .where(eq(images.r2_path, currentImage.r2_path));
+    allContexts = toImageBaseArray(allContexts);
   }
 
   return {

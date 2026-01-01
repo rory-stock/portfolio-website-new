@@ -1,7 +1,3 @@
-/**
- * Layout utility functions
- */
-
 import type { SnapSection, SnapImage } from "~~/types/imageTypes";
 import { LAYOUT_TYPES } from "~/utils/layouts/definitions";
 import type { LayoutTypeId } from "~/utils/layouts/types";
@@ -12,10 +8,13 @@ import type { LayoutTypeId } from "~/utils/layouts/types";
 export function groupImagesByLayout(images: SnapImage[]): SnapSection[] {
   const sections: SnapSection[] = [];
   let currentGroup: SnapImage[] = [];
-  let currentLayoutType: string | null = null;
+  let currentLayoutType: LayoutTypeId | null = null;
 
   for (const image of images) {
-    const layoutType = image.layout_type === "" ? null : image.layout_type;
+    const layoutType: LayoutTypeId | null =
+      image.layout_type && isValidLayoutType(image.layout_type)
+        ? image.layout_type
+        : null;
 
     if (layoutType === null) {
       if (currentGroup.length > 0) {

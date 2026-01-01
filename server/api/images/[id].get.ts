@@ -1,9 +1,9 @@
-// server/api/images/[id].get.ts
 import { eq } from "drizzle-orm";
 
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import type { ImageBase } from "~~/types/imageTypes";
+import { toImageBase } from "~~/server/utils/imageTransform";
 
 export default defineEventHandler(async (event): Promise<{ image: ImageBase }> => {
   const db = useDB(event);
@@ -20,5 +20,5 @@ export default defineEventHandler(async (event): Promise<{ image: ImageBase }> =
     throw createError({ statusCode: 403, message: "Forbidden" });
   }
 
-  return { image };
+  return { image: toImageBase(image) };
 });

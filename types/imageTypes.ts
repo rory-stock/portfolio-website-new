@@ -59,7 +59,7 @@ export interface SnapSection {
 // Helper type for grouped images in the admin UI
 export interface ImageGroup {
   group_id: number;
-  layout_type: string;
+  layout_type: LayoutTypeId;
   images: ImageBase[];
   display_order: number;
 }

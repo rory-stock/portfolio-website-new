@@ -6,6 +6,7 @@ import { isValidLayoutType, LAYOUT_TYPES } from "~/utils/layouts";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { logger } from "~/utils/logger";
 import type { LayoutAssignRequest, LayoutAssignResponse } from "~~/types/api";
+import { toImageBaseArray } from "~~/server/utils/imageTransform";
 
 export default defineEventHandler(async (event): Promise<LayoutAssignResponse> => {
   await requireAuth(event);
@@ -147,7 +148,7 @@ export default defineEventHandler(async (event): Promise<LayoutAssignResponse> =
 
   return {
     success: true,
-    images: updatedImages,
+    images: toImageBaseArray(updatedImages),
     group_id: groupId,
   };
 });

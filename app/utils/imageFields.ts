@@ -1,6 +1,7 @@
 import type { InferSelectModel } from "drizzle-orm";
 import type { images } from "~~/server/db/schema";
 import imageSize from "image-size";
+import type { ImageBase } from "~~/types/imageTypes";
 
 // Type derived from schema
 export type ImageRecord = InferSelectModel<typeof images>;
@@ -124,7 +125,7 @@ export function isUpdatableField(
 
 // Helper to create new context record from existing image
 export function createContextRecord(
-  currentImage: ImageRecord,
+  currentImage: ImageRecord | ImageBase,
   newContext: string
 ) {
   return {

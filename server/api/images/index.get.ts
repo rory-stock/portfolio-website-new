@@ -3,6 +3,7 @@ import { eq, and, desc, asc, count } from "drizzle-orm";
 import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import type { ImageListResponse } from "~~/types/api";
+import { toImageBaseArray } from "~~/server/utils/imageTransform";
 
 export default defineEventHandler(async (event): Promise<ImageListResponse> => {
   const db = useDB(event);
@@ -18,7 +19,7 @@ export default defineEventHandler(async (event): Promise<ImageListResponse> => {
         ? false
         : undefined;
   const r2Path = query.r2_path as string | undefined;
-  const includeLayouts = query.include_layouts === "true"; // NEW: opt-in for layout sorting
+  const includeLayouts = query.include_layouts === "true"; // opt-in for layout sorting
 
   // Build where conditions
   const conditions = [];
@@ -60,7 +61,7 @@ export default defineEventHandler(async (event): Promise<ImageListResponse> => {
   ]);
 
   return {
-    images: imageResults,
+    images: toImageBaseArray(imageResults),
     total: countResult.count,
   };
 });

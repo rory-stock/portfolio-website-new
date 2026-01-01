@@ -5,6 +5,7 @@ import { useDB } from "~~/server/db/client";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { logger } from "~/utils/logger";
 import type { ImageReorderRequest, ImageReorderResponse } from "~~/types/api";
+import { toImageBaseArray } from "~~/server/utils/imageTransform";
 
 export default defineEventHandler(async (event): Promise<ImageReorderResponse> => {
   await requireAuth(event);
@@ -74,6 +75,6 @@ export default defineEventHandler(async (event): Promise<ImageReorderResponse> =
 
   return {
     success: true,
-    images: updatedImages,
+    images: toImageBaseArray(updatedImages),
   };
 });
