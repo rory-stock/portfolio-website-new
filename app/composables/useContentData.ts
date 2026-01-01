@@ -10,17 +10,17 @@ export async function useContentData(table: string, immediate = false) {
     `content-${table}`,
     () => $fetch<ContentRow[]>(url),
     {
-      server: immediate,
-      lazy: false,
+      server: true,
+      lazy: !immediate,
     }
   );
 
-  // Transform array to object with just the values
+  // Transform the array to an object with just the values
   const contentMap = computed(() => {
     if (!result.data.value?.length) return {};
     return result.data.value.reduce(
       (acc, item) => {
-        acc[item.key] = item.value; // Just store the value string, not the whole object
+        acc[item.key] = item.value;
         return acc;
       },
       {} as Record<string, string>
