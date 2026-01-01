@@ -6,21 +6,22 @@ type ContentRow = InferSelectModel<typeof content>;
 export async function useContentData(table: string, immediate = false) {
   const url = `/api/content?table=${table}`;
 
-  const result = await useAsyncData(
+  const { data, error, refresh } = await useAsyncData(
     `content-${table}`,
     () => $fetch<ContentRow[]>(url),
     {
+      lazy: false,
       server: true,
-      lazy: !immediate,
+      default: () => [],
     }
   );
 
   // Transform the array to an object with just the values
   const contentMap = computed(() => {
-    if (!result.data.value?.length) return {};
-    return result.data.value.reduce(
+    if (!data.value?.length) return {};
+    return data.value.reduce(
       (acc, item) => {
-        acc[item.key] = item.value;
+        acc[item.key] = item.value || ""; // ADD: Fallback to empty string
         return acc;
       },
       {} as Record<string, string>
@@ -28,7 +29,7 @@ export async function useContentData(table: string, immediate = false) {
   });
 
   if (import.meta.client) {
-    watch(result.error, (newError) => {
+    watch(error, (newError) => {
       if (newError) {
         const nuxtApp = useNuxtApp();
         const toast = nuxtApp.$toast as any;
@@ -38,7 +39,9 @@ export async function useContentData(table: string, immediate = false) {
   }
 
   return {
-    ...result,
+    data,
+    error,
+    refresh,
     content: contentMap,
   };
 }
