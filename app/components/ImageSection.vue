@@ -130,6 +130,7 @@ import { VueDraggable } from "vue-draggable-plus";
 import { onKeyStroke } from "@vueuse/core";
 import { isImageGroup } from "~/utils/imageGroups";
 import type { ImageBase, ImageField } from "~~/types/imageTypes";
+import { useImageData } from "~/composables/useImageData";
 
 interface Props {
   context: string;

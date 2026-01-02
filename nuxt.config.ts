@@ -46,6 +46,35 @@ export default defineNuxtConfig({
     r2BucketName: process.env.R2_BUCKET_NAME,
     r2PublicUrl: process.env.R2_PUBLIC_URL,
   },
+  routeRules: {
+    "/**": {
+      headers: {
+        "Content-Security-Policy": [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline'",
+          "style-src 'self' 'unsafe-inline'",
+          "img-src 'self' https://images.rorystock.com",
+          "font-src 'self'",
+          "connect-src 'self'",
+          "frame-ancestors 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          "upgrade-insecure-requests",
+        ].join("; "),
+
+        "Strict-Transport-Security":
+          "max-age=31536000; includeSubDomains; preload",
+
+        "Cross-Origin-Opener-Policy": "same-origin",
+
+        "X-Frame-Options": "DENY",
+
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+      },
+    },
+  },
   // ******************************************* //
 
   //*********** Image Configuration *********** //

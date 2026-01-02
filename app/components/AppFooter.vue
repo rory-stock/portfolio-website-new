@@ -50,7 +50,11 @@ const { data: footer } = await useContentData("footer");
       <!---------------- Copyright ------------------>
       <div class="mt-7 flex justify-between">
         <p>{{ footer?.copyright }}</p>
-        <button @click="navigateTo('/admin')" class="cursor-pointer">
+        <button
+          @click="navigateTo('/admin')"
+          aria-hidden="true"
+          class="cursor-pointer"
+        >
           <Icon name="smile" width="18.41" height="19" />
         </button>
       </div>
