@@ -27,7 +27,7 @@
         @click="handleDelete"
         :disabled="deleting || !imageExists"
         :loading="deleting"
-        class="absolute top-2 right-2 z-50"
+        class="absolute top-2 right-2 z-50 hover:text-neutral-300"
       >
         <template #loading>Deleting...</template>
         <Icon name="bin" :size="20" />
@@ -55,7 +55,7 @@
     />
 
     <!-- Action Buttons -->
-    <div class="flex max-w-full mt-2 flex-col gap-2 lg:flex-row">
+    <div class="mt-2 flex max-w-full flex-col gap-2 lg:flex-row">
       <AppButton
         @click="triggerFileInput"
         :disabled="uploading"
