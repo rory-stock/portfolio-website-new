@@ -71,8 +71,6 @@ export default defineEventHandler(async (event): Promise<ImageReorderResponse> =
     .where(eq(images.context, context))
     .orderBy(asc(images.order));
 
-  logger.info("Images reordered", { context, count: order.length });
-
   return {
     success: true,
     images: toImageBaseArray(updatedImages),
