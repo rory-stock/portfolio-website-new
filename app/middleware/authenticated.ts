@@ -1,9 +1,11 @@
 export default defineNuxtRouteMiddleware(() => {
   const { loggedIn } = useUserSession()
 
-  // redirect the user to the login screen if they're not authenticated
   if (!loggedIn.value) {
-    logger.unauthorized('Unauthorized')
-    return navigateTo('/login')
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Forbidden",
+      message: "You don't have permission to view this page",
+    });
   }
 })

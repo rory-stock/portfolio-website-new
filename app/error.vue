@@ -1,48 +1,252 @@
 <script setup lang="ts">
-defineProps({ error: Object });
+import { reloadNuxtApp } from "#app";
+import { logger } from "~/utils/logger";
+import type { IconName } from "~/components/icons/iconData";
+import RecoveryHint from "~/components/error/RecoveryHint.vue";
+import TechnicalDetails from "~/components/error/TechnicalDetails.vue";
+
+const props = defineProps({
+  error: Object as PropType<{
+    statusCode?: number;
+    statusMessage?: string;
+    message?: string;
+    stack?: string;
+    url?: string;
+  }>,
+});
+
+const route = useRoute();
+const {
+  isAdminPage,
+  loggedIn,
+  getSuggestedPage,
+  getErrorTitle,
+  getErrorMessage,
+} = useErrorPage();
+
+// Error details
+const statusCode = computed(() => props.error?.statusCode || 500);
+const statusMessage = computed(() => props.error?.statusMessage || "");
+const errorMessage = computed(() =>
+  getErrorMessage(statusCode.value, props.error?.message)
+);
+const errorTitle = computed(() => getErrorTitle(statusCode.value));
+
+// Friendlier titles
+const friendlyTitle = computed(() => {
+  if (statusCode.value === 404) return "Oops! Lost your way?";
+  if (statusCode.value === 403) return "Access Denied";
+  if (statusCode.value >= 500) return "Something went wrong";
+  return "Unexpected Error";
+});
+
+// Stack trace
+const showTechnicalDetails = ref(false);
+const stackTrace = computed(() => {
+  if (!props.error?.stack) return [];
+  const lines = props.error.stack.split("\n");
+  return lines.slice(0, 8);
+});
+
+// Recovery
+const suggestedPage = computed(() => {
+  if (statusCode.value === 404) {
+    return getSuggestedPage(route.path);
+  }
+  return null;
+});
+
+// Email report
+const reportEmailSubject = computed(
+  () => `Error Report: ${statusCode.value} on ${route.path}`
+);
+
+const reportEmailBody = computed(() => {
+  const timestamp = new Date().toISOString();
+  return `
+Hey Rory,
+
+I encountered an error on your site:
+
+Error: ${statusCode.value} - ${errorMessage.value}
+Page: ${route.fullPath}
+Time: ${timestamp}
+
+[Add any additional details here]
+
+Cheers!
+  `.trim();
+});
+
+const reportEmail = computed(
+  () =>
+    `mailto:hello@rorystock.com?subject=${encodeURIComponent(reportEmailSubject.value)}&body=${encodeURIComponent(reportEmailBody.value)}`
+);
+
+// Logging
+onMounted(() => {
+  logger.error("Error page rendered", {
+    statusCode: statusCode.value,
+    message: errorMessage.value,
+    path: route.fullPath,
+    isAdmin: isAdminPage.value,
+    user: loggedIn.value ? "Admin" : "Guest",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Actions
+function handleGoBack() {
+  window.history.back();
+}
+
+function handleRetry() {
+  reloadNuxtApp({ path: route.fullPath });
+}
+
+function handleGoHome() {
+  navigateTo("/");
+}
+
+function handleGoAdmin() {
+  navigateTo("/admin");
+}
+
+// Public actions
+const publicActions = computed(() => {
+  const actions: Array<{
+    number: string;
+    label: string;
+    icon: IconName;
+    onClick?: () => void;
+    href?: string;
+  }> = [
+    { number: "01", label: "Go Back", icon: "back", onClick: handleGoBack },
+  ];
+
+  if (statusCode.value >= 500) {
+    actions.push({
+      number: "02",
+      label: "Try Again",
+      icon: "refresh",
+      onClick: handleRetry,
+    });
+  }
+
+  actions.push({
+    number: statusCode.value >= 500 ? "03" : "02",
+    label: "Home",
+    icon: "back",
+    onClick: handleGoHome,
+  });
+
+  actions.push({
+    number: statusCode.value >= 500 ? "04" : "03",
+    label: "Report Issue",
+    icon: "back",
+    onClick: () => (window.location.href = reportEmail.value), // Use onClick instead
+  });
+
+  return actions;
+});
+
+// Admin actions
+const adminActions = computed(() => {
+  const actions: Array<{
+    number: string;
+    label: string;
+    icon: IconName;
+    onClick?: () => void;
+    href?: string;
+  }> = [
+    { number: "01", label: "Go Back", icon: "back", onClick: handleGoBack },
+  ];
+
+  if (statusCode.value >= 500) {
+    actions.push({
+      number: "02",
+      label: "Try Again",
+      icon: "refresh",
+      onClick: handleRetry,
+    });
+  }
+
+  actions.push(
+    {
+      number: statusCode.value >= 500 ? "03" : "02",
+      label: "Admin Dashboard",
+      icon: "back",
+      onClick: handleGoAdmin,
+    },
+    {
+      number: statusCode.value >= 500 ? "04" : "03",
+      label: "Home",
+      icon: "back",
+      onClick: handleGoHome,
+    },
+    {
+      number: statusCode.value >= 500 ? "05" : "04",
+      label: "Report Issue",
+      icon: "back",
+      onClick: () => (window.location.href = reportEmail.value),
+    }
+  );
+
+  return actions;
+});
 </script>
 
 <template>
-  <NuxtLayout>
-    <div class="flex flex-col pt-4 pl-2 font-geist md:pt-8 md:pl-10">
-      <p
-        class="mb-1 w-fit rounded bg-black px-2 py-1 text-xs text-white uppercase select-none md:mb-2"
-      >
-        {{ error?.statusCode || "500" }} Error
-      </p>
-
-      <h1
-        class="text-2xl font-bold uppercase selection:bg-black selection:text-white md:text-4xl"
-      >
-        {{
-          error?.statusCode === 404 ? "Page Not Found" : "Something Went Wrong"
-        }}
-      </h1>
-
-      <p
-        class="text-lg text-black selection:bg-black selection:text-white md:text-xl md:font-medium"
-      >
-        {{ error?.message || "An unexpected error occurred" }}
-      </p>
-
-      <NuxtLink
-        to="/"
-        class="mt-5 flex w-fit items-center gap-1 rounded bg-black px-2 py-1 text-sm text-white transition-opacity select-none hover:opacity-80 md:mt-6 md:px-4 md:py-2"
-      >
-        Return Home
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="size-4"
+  <div>
+    <!-- Public Error -->
+    <div
+      v-if="!isAdminPage || !loggedIn"
+      class="flex min-h-screen flex-col items-start bg-white px-6 selection:bg-black selection:text-white md:px-12 lg:px-24"
+    >
+      <div class="flex w-full max-w-2xl flex-col justify-center">
+        <ErrorHeader
+          :status-code="statusCode"
+          :title="friendlyTitle"
+          :message="errorMessage"
         >
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
-      </NuxtLink>
+          <RecoveryHint v-if="suggestedPage" :suggested-page="suggestedPage" />
+        </ErrorHeader>
+
+        <ErrorActions :actions="publicActions" />
+      </div>
     </div>
-  </NuxtLayout>
+
+    <!-- Admin Error -->
+    <NuxtLayout v-else name="admin">
+      <div
+        class="flex min-h-screen flex-col items-start justify-center px-6 py-12 md:px-12"
+      >
+        <div class="w-full max-w-3xl">
+          <ErrorHeader
+            :status-code="statusCode"
+            :title="friendlyTitle"
+            :message="errorMessage"
+            is-dark
+          >
+            <RecoveryHint
+              v-if="suggestedPage"
+              :suggested-page="suggestedPage"
+              is-dark
+            />
+
+            <TechnicalDetails
+              v-model="showTechnicalDetails"
+              :status-code="statusCode"
+              :status-message="statusMessage"
+              :full-path="route.fullPath"
+              :stack-trace="stackTrace"
+              :is-logged-in="!!loggedIn"
+            />
+          </ErrorHeader>
+
+          <ErrorActions :actions="adminActions" is-dark />
+        </div>
+      </div>
+    </NuxtLayout>
+  </div>
 </template>

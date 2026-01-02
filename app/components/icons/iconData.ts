@@ -17,6 +17,7 @@ export const iconNames = [
   "check",
   "info",
   "bin",
+  "refresh",
 ] as const;
 
 export type IconName = (typeof iconNames)[number];
@@ -150,5 +151,10 @@ export const iconData: Record<IconName, IconData> = {
     strokeLinejoin: "round",
     strokeWidth: "2",
     path:"M10 11v6m4-6v6m5-11v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+  },
+  refresh: {
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    path: "M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z",
   },
 } as const;

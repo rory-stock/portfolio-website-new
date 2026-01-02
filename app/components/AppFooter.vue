@@ -1,5 +1,10 @@
 <script setup lang="ts">
 const { data: footer } = await useContentData("footer");
+const { loggedIn } = useUserSession();
+
+const authLink = computed(() => {
+  return loggedIn.value ? '/admin' : '/login';
+});
 </script>
 
 <template>
@@ -51,7 +56,7 @@ const { data: footer } = await useContentData("footer");
       <div class="mt-7 flex justify-between">
         <p>{{ footer?.copyright }}</p>
         <button
-          @click="navigateTo('/admin')"
+          @click="navigateTo(authLink)"
           aria-hidden="true"
           class="cursor-pointer"
         >
