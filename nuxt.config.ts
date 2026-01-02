@@ -19,6 +19,17 @@ export default defineNuxtConfig({
     "nuxt-auth-utils",
     "@nuxt/fonts",
   ],
+  pages: {
+    pattern: ["**/*.vue", "!**/components/**"],
+  },
+  components: [
+    "~/components",
+    {
+      path: "~/pages",
+      pattern: "**/components/**",
+      pathPrefix: false,
+    },
+  ],
   vite: {
     plugins: [tailwindcss()],
   },

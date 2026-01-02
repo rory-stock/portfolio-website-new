@@ -3,6 +3,10 @@ import { getOgImageUrl, getTwitterImageUrl } from "~/utils/meta";
 import { groupImagesByLayout } from "~/utils/layouts";
 import type { SnapImage } from "~~/types/imageTypes";
 
+definePageMeta({
+  path: "/",
+});
+
 useHead({ title: "Overview" });
 
 useSeoMeta({
