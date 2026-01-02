@@ -157,3 +157,35 @@ export interface LoginResponse {
 export interface LogoutResponse {
   success: boolean;
 }
+
+// ==================== Meta Images API ====================
+
+export interface MetaImageUploadRequest {
+  context: string;
+}
+
+export interface MetaImageUploadResponse {
+  success: boolean;
+  url: string;
+  context: string;
+}
+
+export interface MetaImageDeleteRequest {
+  context: string;
+}
+
+export interface MetaImageDeleteResponse {
+  success: boolean;
+  deleted: boolean;
+  path: string;
+}
+
+export interface MetaCachePurgeRequest {
+  context: string;
+}
+
+export interface MetaCachePurgeResponse {
+  success: boolean;
+  purged: boolean;
+  url?: string;
+}

@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { getOgImageUrl, getTwitterImageUrl } from "~/utils/meta";
+
 useHead({ title: "Info" });
 
 useSeoMeta({
-  ogImage:
-    "https://images.rorystock.com/cdn-cgi/image/w=1200,h=630/meta/info-og-image.jpg",
-  twitterImage:
-    "https://images.rorystock.com/cdn-cgi/image/w=1200,h=675/meta/info-twitter-image.jpg",
+  ogImage: getOgImageUrl("info"),
+  twitterImage: getTwitterImageUrl("info"),
 });
 
 const { data: imageData } = await useFetch("/api/images", {

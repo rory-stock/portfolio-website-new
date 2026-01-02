@@ -23,9 +23,9 @@ interface NavItem {
 // Admin-specific items that aren't public pages
 const adminOnlyItems: NavItem[] = [];
 
-const footerItem: NavItem = {
-  label: "Footer",
-  path: "/admin/footer",
+const metaItem: NavItem = {
+  label: "Meta",
+  path: "/admin/meta",
   icon: "footer",
 };
 
@@ -33,7 +33,7 @@ const footerItem: NavItem = {
 const navItems = computed(() => [
   ...adminOnlyItems,
   ...adminPageItems.value,
-  footerItem,
+  metaItem,
 ]);
 
 const { loggedIn, clear } = useUserSession();

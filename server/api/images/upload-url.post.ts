@@ -5,7 +5,7 @@ import {
   type Context,
 } from "~/utils/context";
 import { requireAuth } from "~~/server/utils/requireAuth";
-import { FILE_CONSTRAINTS, VALID_IMAGE_EXTENSIONS } from "~/utils/constants";
+import { fileConstraints, VALID_IMAGE_EXTENSIONS } from "~/utils/constants";
 import { getValidImageFormats } from "~/utils/format";
 import type {
   ImageUploadUrlRequest,
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event): Promise<ImageUploadUrlResponse>
     });
   }
 
-  if (fileSize && fileSize > FILE_CONSTRAINTS.MAX_FILE_SIZE) {
+  if (fileSize && fileSize > fileConstraints.maxFileSize) {
     throw createError({
       statusCode: 400,
       message: "File too large. Maximum size is 60MB",

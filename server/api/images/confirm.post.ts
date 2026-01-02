@@ -6,7 +6,7 @@ import {
   createImageRecord,
 } from "~/utils/imageFields";
 import { requireAuth } from "~~/server/utils/requireAuth";
-import { FILE_CONSTRAINTS } from "~/utils/constants";
+import { fileConstraints } from "~/utils/constants";
 import { formatFileSize } from "~/utils/format";
 import { logger } from "~/utils/logger";
 import type { ImageConfirmRequest, ImageConfirmResponse } from "~~/types/api";
@@ -60,12 +60,12 @@ export default defineEventHandler(async (event): Promise<ImageConfirmResponse> =
     const buffer = Buffer.concat(chunks);
 
     // Validate file size
-    if (buffer.length > FILE_CONSTRAINTS.MAX_FILE_SIZE) {
+    if (buffer.length > fileConstraints.maxFileSize) {
       // Cleanup: delete from R2
       await deleteR2Object(body.r2_path);
       throw createError({
         statusCode: 400,
-        message: "File too large. Maximum size is" + formatFileSize(FILE_CONSTRAINTS.MAX_FILE_SIZE) + " bytes.",
+        message: "File too large. Maximum size is" + formatFileSize(fileConstraints.maxFileSize) + " bytes.",
       });
     }
 

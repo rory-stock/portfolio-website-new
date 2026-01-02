@@ -4,7 +4,7 @@ import {
   formatMimeType,
   getValidImageFormats,
 } from "~/utils/format";
-import { FILE_CONSTRAINTS, VALID_IMAGE_TYPES } from "~/utils/constants";
+import { fileConstraints, VALID_IMAGE_TYPES } from "~/utils/constants";
 
 const FILENAME_REGEX = /^[a-zA-Z0-9\-.]+$/;
 
@@ -165,9 +165,9 @@ export function useFileUpload(options: UseFileUploadOptions) {
     const reasons: string[] = [];
 
     // Check file size
-    if (file.size > FILE_CONSTRAINTS.MAX_FILE_SIZE) {
+    if (file.size > fileConstraints.maxFileSize) {
       reasons.push(
-        `File too large (${formatFileSize(file.size)}). Maximum is ${formatFileSize(FILE_CONSTRAINTS.MAX_FILE_SIZE)}`
+        `File too large (${formatFileSize(file.size)}). Maximum is ${formatFileSize(fileConstraints.maxFileSize)}`
       );
     }
 
@@ -213,7 +213,7 @@ export function useFileUpload(options: UseFileUploadOptions) {
           fileName: file.name,
           fileSize: file.size,
           status: "pending",
-          isLargeFile: file.size > FILE_CONSTRAINTS.LARGE_FILE_THRESHOLD,
+          isLargeFile: file.size > fileConstraints.largeFileThreshold,
           retryCount: 0,
         });
       }

@@ -21,10 +21,6 @@ export default defineNuxtConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
-    server: {
-      allowedHosts: ["test.rorystock.com"],
-    },
-    logLevel: "info",
   },
   nitro: {
     preset: "cloudflare-pages",
@@ -45,6 +41,8 @@ export default defineNuxtConfig({
     r2SecretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
     r2BucketName: process.env.R2_BUCKET_NAME,
     r2PublicUrl: process.env.R2_PUBLIC_URL,
+    cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,
+    cloudflareZoneId: process.env.CLOUDFLARE_ZONE_ID,
   },
   routeRules: {
     "/**": {
@@ -53,9 +51,9 @@ export default defineNuxtConfig({
           "default-src 'self'",
           "script-src 'self' 'unsafe-inline'",
           "style-src 'self' 'unsafe-inline'",
-          "img-src 'self' https://images.rorystock.com",
+          "img-src 'self' https://images.rorystock.com blob:",
           "font-src 'self'",
-          "connect-src 'self'",
+          "connect-src 'self' https://*.r2.cloudflarestorage.com",
           "frame-ancestors 'none'",
           "base-uri 'self'",
           "form-action 'self'",
@@ -98,10 +96,11 @@ export default defineNuxtConfig({
   sitemap: {
     xslTips: false,
     xslColumns: [{ label: "URL", width: "50%" }],
+    zeroRuntime: true,
   },
   robots: {
     blockAiBots: true,
-    disallow: ["/admin/", "/login", "/admin/*"],
+    disallow: ["/admin", "/login", "/admin/*"],
   },
   seo: {
     // redirectToCanonicalSiteUrl: true, TODO: Enable when using a custom domain

@@ -4,16 +4,25 @@
  */
 
 // File size limits (in bytes)
-export const FILE_CONSTRAINTS = {
-  MAX_FILE_SIZE: 60 * 1024 * 1024, // 60MB
-  LARGE_FILE_THRESHOLD: 10 * 1024 * 1024, // 10MB - shows warning for files above this
+export const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60MB
+export const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024; // 10MB
+
+export const fileConstraints = {
+  maxFileSize: MAX_FILE_SIZE,
+  largeFileThreshold: LARGE_FILE_THRESHOLD,
+} as const;
+
+// Meta image constraints
+export const metaImageConstraints = {
+  width: 1200,
+  height: 675,
+  label: "Meta Image (Twitter/OG)",
+  ogWidth: 1200,
+  ogHeight: 630,
 } as const;
 
 // Valid MIME types for uploads
-export const VALID_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/webp",
-] as const;
+export const VALID_IMAGE_TYPES = ["image/jpeg", "image/webp"] as const;
 
 // Valid file extensions
 export const VALID_IMAGE_EXTENSIONS = ["jpg", "jpeg", "webp"] as const;

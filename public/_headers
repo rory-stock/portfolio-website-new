@@ -1,5 +1,15 @@
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://images.rorystock.com; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;
+  Content-Security-Policy: \
+    default-src 'self'; \
+    script-src 'self' 'unsafe-inline'; \
+    style-src 'self' 'unsafe-inline'; \
+    img-src 'self' https://images.rorystock.com blob:; \
+    font-src 'self'; \
+    connect-src 'self' https://*.r2.cloudflarestorage.com; \
+    frame-ancestors 'none'; \
+    base-uri 'self'; \
+    form-action 'self'; \
+    upgrade-insecure-requests;
 
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
