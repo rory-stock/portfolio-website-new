@@ -78,13 +78,6 @@ export function useErrorPage() {
     return matrix[b.length]![a.length]!;
   }
 
-  function getErrorTitle(statusCode: number): string {
-    if (statusCode === 404) return "Page Not Found";
-    if (statusCode === 403) return "Access Forbidden";
-    if (statusCode >= 500) return "Server Error";
-    return "An Error Occurred";
-  }
-
   function getErrorMessage(statusCode: number, message?: string): string {
     if (message) return message;
     if (statusCode === 404) return "This page doesn't exist";
@@ -100,7 +93,6 @@ export function useErrorPage() {
     isDarkMode,
     loggedIn,
     getSuggestedPage,
-    getErrorTitle,
     getErrorMessage,
   };
 }

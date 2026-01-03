@@ -20,7 +20,6 @@ const {
   isAdminPage,
   loggedIn,
   getSuggestedPage,
-  getErrorTitle,
   getErrorMessage,
 } = useErrorPage();
 
@@ -30,15 +29,17 @@ const statusMessage = computed(() => props.error?.statusMessage || "");
 const errorMessage = computed(() =>
   getErrorMessage(statusCode.value, props.error?.message)
 );
-const errorTitle = computed(() => getErrorTitle(statusCode.value));
 
-// Friendlier titles
-const friendlyTitle = computed(() => {
-  if (statusCode.value === 404) return "Oops! Lost your way?";
-  if (statusCode.value === 403) return "Access Denied";
-  if (statusCode.value >= 500) return "Something went wrong";
+const errorTitle = computed(() => {
+  if (statusCode.value === 404) return ["Page", "not found"];
+  if (statusCode.value === 403) return ["Access", "Denied"];
+  if (statusCode.value >= 500) return ["Something", "went wrong"];
   return "Unexpected Error";
 });
+
+const pageClass = computed(() =>
+  isAdminPage.value ? "flex flex-col" : "flex"
+);
 
 // Stack trace
 const showTechnicalDetails = ref(false);
@@ -197,16 +198,16 @@ const adminActions = computed(() => {
 </script>
 
 <template>
-  <div>
+  <div :class="pageClass">
     <!-- Public Error -->
     <div
       v-if="!isAdminPage || !loggedIn"
-      class="flex min-h-screen flex-col items-start bg-white px-6 selection:bg-black selection:text-white md:px-12 lg:px-24"
+      class="mt-8 flex min-h-screen flex-col items-start bg-white px-6 selection:bg-black selection:text-white md:px-12 lg:px-24"
     >
-      <div class="flex w-full max-w-2xl flex-col justify-center">
+      <div class="flex w-full flex-col justify-center">
         <ErrorHeader
           :status-code="statusCode"
-          :title="friendlyTitle"
+          :title="errorTitle"
           :message="errorMessage"
         >
           <RecoveryHint v-if="suggestedPage" :suggested-page="suggestedPage" />
@@ -219,12 +220,12 @@ const adminActions = computed(() => {
     <!-- Admin Error -->
     <NuxtLayout v-else name="admin">
       <div
-        class="flex min-h-screen flex-col items-start justify-center px-6 py-12 md:px-12"
+        class="mt-8 flex min-h-screen flex-col items-start justify-center px-6 py-12 md:px-12"
       >
-        <div class="w-full max-w-3xl">
+        <div>
           <ErrorHeader
             :status-code="statusCode"
-            :title="friendlyTitle"
+            :title="errorTitle"
             :message="errorMessage"
             is-dark
           >

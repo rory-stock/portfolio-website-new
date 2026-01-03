@@ -14,6 +14,9 @@ const props = defineProps<{
   isDark?: boolean;
 }>();
 
+const actionClass = computed(() =>
+  props.isDark ? "" : "fixed left-5 top-40 md:top-68"
+);
 const textColorClass = computed(() =>
   props.isDark ? "text-neutral-200" : "text-neutral-800"
 );
@@ -31,7 +34,7 @@ const borderColorClass = computed(() =>
 </script>
 
 <template>
-  <div class="actions-list space-y-3 pt-8">
+  <div class="actions-list space-y-3 pt-8" :class="actionClass">
     <component
       v-for="action in actions"
       :key="action.number"
