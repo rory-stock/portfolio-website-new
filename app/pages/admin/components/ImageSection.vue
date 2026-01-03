@@ -67,6 +67,24 @@
             class="col-span-3"
           />
 
+          <!-- Hero Image (1 column) -->
+          <div
+            v-else-if="isHero(element)"
+            class="relative h-fit w-fit rounded-lg border-2 border-neutral-100 p-2"
+          >
+            <div
+              class="absolute -top-3 left-3 flex gap-1 bg-neutral-900 px-2 py-0.5 text-xs text-neutral-400"
+            >
+              <Icon name="dashboard" :size="15" />
+              {{ heroLabel(element) }}
+            </div>
+            <ImageAdminThumbnail
+              :image="element"
+              @click="openModal(element)"
+              @toggle-primary="handleTogglePrimary(element)"
+            />
+          </div>
+
           <!-- Individual Image (1 column) -->
           <div v-else class="h-fit w-fit">
             <ImageAdminThumbnail
@@ -128,7 +146,7 @@
 <script setup lang="ts">
 import { VueDraggable } from "vue-draggable-plus";
 import { onKeyStroke } from "@vueuse/core";
-import { isImageGroup } from "~/utils/imageGroups";
+import { getHeroType, isImageGroup, isImageHero } from "~/utils/imageGroups";
 import type { ImageBase, ImageField } from "~~/types/imageTypes";
 import { useImageData } from "~/composables/useImageData";
 
@@ -215,6 +233,16 @@ const handleTogglePrimary = async (image: ImageBase) => {
 
 // Helper functions for template
 const isGroup = isImageGroup;
+const isHero = isImageHero;
+const heroType = getHeroType;
+
+const heroLabel = (item: ImageBase) => {
+  const type = heroType(item);
+  if (type == "fullscreen-hero") {
+    return "Fullscreen Hero";
+  }
+  return "Single Hero";
+};
 
 const getItemKey = (item: any) => {
   if (isGroup(item)) {

@@ -58,6 +58,23 @@ export function isImageGroup(item: ImageBase | ImageGroup): item is ImageGroup {
   return "group_id" in item && "images" in item;
 }
 
+/*
+ * Check if the item is in a fullscreen or single hero layout
+ */
+export function isImageHero(item: ImageBase | ImageGroup): boolean {
+  return item.layout_type === "fullscreen-hero" || item.layout_type === "single-hero";
+}
+
+/*
+ * Check hero type
+ */
+export function getHeroType(item: ImageBase | ImageGroup): LayoutTypeId | null {
+    if (item.layout_type === "fullscreen-hero" || item.layout_type === "single-hero") {
+      return item.layout_type;
+    }
+  return null;
+}
+
 /**
  * Flatten groups back to individual images for API submission
  */
