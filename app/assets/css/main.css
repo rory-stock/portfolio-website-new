@@ -32,6 +32,10 @@
   --animate-menu-item-fade: menu-item-fade 1.5s ease-in-out;
   /****************************************************/
 
+  /************** CUSTOM BREAKPOINTS **************/
+  --breakpoint-xs: 17rem;
+  /****************************************************/
+
   /************* CUSTOM ANIMATION KEYFRAMES **************/
   @keyframes menu-drop {
     0% {

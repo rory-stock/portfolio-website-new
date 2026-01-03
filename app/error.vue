@@ -35,9 +35,9 @@ const errorMessage = computed(() =>
 );
 
 const errorTitle = computed(() => {
-  if (statusCode.value === 404) return ["Page", "not found"];
-  if (statusCode.value === 403) return ["Access", "Denied"];
-  if (statusCode.value >= 500) return ["Something", "went wrong"];
+  if (statusCode.value === 404) return "Page not found";
+  if (statusCode.value === 403) return "Access Denied";
+  if (statusCode.value >= 500) return "Something went wrong";
   return "Unexpected Error";
 });
 

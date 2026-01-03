@@ -153,11 +153,10 @@ export function useErrorPage() {
           : "font-ghost text-black fixed right-0 bottom-0 text-[8rem] leading-30 md:text-[15rem] md:leading-60 lg:text-[18rem] lg:leading-70 xl:text-[22rem] xl:leading-80",
         title: isDark
           ? "text-neutral-200 font-ibm-plex-sans flex gap-4 text-3xl md:text-4xl"
-          : "font-ghost text-black fixed flex flex-col left-5 top-2 lg:top-3 text-5xl md:text-8xl",
-        titleItalic: isDark ? "font-ibm-plex-sans" : "font-ghost-italic",
+          : "font-ghost text-black fixed flex flex-col left-5 top-2 xs:text-4xl lg:top-3 sm:text-5xl md:text-8xl",
         message: isDark
           ? "font-ibm-plex-sans text-neutral-400 text-lg md:text-xl"
-          : "font-ghost text-black fixed left-5 top-22 md:top-38 text-lg md:text-2xl",
+          : "font-ghost text-black fixed left-5 top-22 md:top-38 text-lg md:text-2xl xl:text-4xl",
       },
       // ErrorActions classes
       actions: {
@@ -171,7 +170,7 @@ export function useErrorPage() {
       },
       // RecoveryHint classes
       recovery: {
-        text: isDark ? "text-neutral-400" : "text-neutral-980 fixed left-5 top-32 md:top-54",
+        text: isDark ? "text-neutral-400" : "text-neutral-980 fixed left-5 top-32 md:top-54 xl:text-xl",
       },
     };
   }
