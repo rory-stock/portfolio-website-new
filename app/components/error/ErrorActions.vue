@@ -2,7 +2,6 @@
 import type { IconName } from "~/components/icons/iconData";
 
 interface Action {
-  number: string;
   label: string;
   icon: IconName;
   onClick?: () => void;
@@ -14,44 +13,26 @@ const props = defineProps<{
   isDark?: boolean;
 }>();
 
-const actionClass = computed(() =>
-  props.isDark ? "" : "fixed left-5 top-40 md:top-68"
-);
-const textColorClass = computed(() =>
-  props.isDark ? "text-neutral-200" : "text-neutral-800"
-);
-const numberColorClass = computed(() =>
-  props.isDark ? "text-neutral-600" : "text-neutral-400"
-);
-const iconColorClass = computed(() =>
-  props.isDark
-    ? "text-neutral-600 group-hover:text-neutral-200"
-    : "text-neutral-400 group-hover:text-neutral-800"
-);
-const borderColorClass = computed(() =>
-  props.isDark ? "border-neutral-700" : "border-neutral-800"
-);
+const { getThemeClasses } = useErrorPage();
+const theme = computed(() => getThemeClasses(props.isDark).actions);
 </script>
 
 <template>
-  <div class="actions-list space-y-3 pt-8" :class="actionClass">
+  <div class="actions-list space-y-3 pt-8" :class="theme.container">
     <component
-      v-for="action in actions"
-      :key="action.number"
+      v-for="(action, index) in actions"
+      :key="action.label"
       :is="action.href ? 'a' : 'button'"
       :href="action.href"
       @click="action.onClick"
-      class="action-item group cursor-pointer hover:translate-x-1 px-2 border flex w-full items-center justify-between gap-4 rounded-xl py-2 text-left transition-all"
-      :class="borderColorClass"
+      class="action-item group flex w-full cursor-pointer items-center justify-between gap-4 rounded-xl border px-2 py-2 text-left transition-all hover:translate-x-1"
+      :class="theme.border"
     >
-      <span
-        class="flex items-center gap-4"
-        :class="borderColorClass"
-      >
-        <span class="text-sm" :class="numberColorClass">
-          {{ action.number }}
+      <span class="flex items-center gap-4">
+        <span class="text-sm" :class="theme.number">
+          {{ String(index + 1).padStart(2, "0") }}
         </span>
-        <span class="text-lg" :class="textColorClass">
+        <span class="text-lg" :class="theme.label">
           {{ action.label }}
         </span>
       </span>
@@ -59,7 +40,7 @@ const borderColorClass = computed(() =>
         :name="action.icon"
         :size="20"
         class="transition-colors"
-        :class="[iconColorClass, action.icon === 'back' ? 'rotate-180' : '']"
+        :class="[theme.icon, { 'rotate-180': action.icon === 'back' }]"
       />
     </component>
   </div>

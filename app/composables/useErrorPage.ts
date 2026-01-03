@@ -1,3 +1,5 @@
+import type { IconName } from "~/components/icons/iconData";
+
 export function useErrorPage() {
   const route = useRoute();
   const { loggedIn } = useUserSession();
@@ -38,7 +40,6 @@ export function useErrorPage() {
     for (const validPath of validPaths) {
       const distance = levenshteinDistance(cleanPath, validPath);
       if (distance <= 2) {
-        // Allow 2-character difference
         return validPath;
       }
     }
@@ -51,7 +52,6 @@ export function useErrorPage() {
       .fill(null)
       .map(() => Array(a.length + 1).fill(0));
 
-    // Initialize the first column and row
     for (let i = 0; i <= b.length; i++) {
       matrix[i]![0] = i;
     }
@@ -60,7 +60,6 @@ export function useErrorPage() {
       matrix[0]![j] = j;
     }
 
-    // Calculate distances
     for (let i = 1; i <= b.length; i++) {
       for (let j = 1; j <= a.length; j++) {
         if (b.charAt(i - 1) === a.charAt(j - 1)) {
@@ -87,6 +86,96 @@ export function useErrorPage() {
     return "An unexpected error occurred";
   }
 
+  // Action builder types
+  interface Action {
+    label: string;
+    icon: IconName;
+    onClick?: () => void;
+    href?: string;
+  }
+
+  interface ErrorActionHandlers {
+    goBack: () => void;
+    retry: () => void;
+    goHome: () => void;
+    goAdmin: () => void;
+    reportIssue: () => void;
+  }
+
+  // Build actions based on context
+  function buildActions(
+    statusCode: number,
+    isAdmin: boolean,
+    handlers: ErrorActionHandlers
+  ): Action[] {
+    const actions: Action[] = [
+      { label: "Go Back", icon: "back", onClick: handlers.goBack },
+    ];
+
+    if (statusCode >= 500) {
+      actions.push({
+        label: "Try Again",
+        icon: "refresh",
+        onClick: handlers.retry,
+      });
+    }
+
+    if (isAdmin) {
+      actions.push({
+        label: "Admin Dashboard",
+        icon: "back",
+        onClick: handlers.goAdmin,
+      });
+    }
+
+    actions.push({
+      label: "Home",
+      icon: "back",
+      onClick: handlers.goHome,
+    });
+
+    actions.push({
+      label: "Report Issue",
+      icon: "back",
+      onClick: handlers.reportIssue,
+    });
+
+    return actions;
+  }
+
+  // Theme class utilities
+  function getThemeClasses(isDark: boolean) {
+    return {
+      // ErrorHeader classes
+      header: {
+        code: isDark
+          ? "text-neutral-200 font-ibm-plex-sans text-[8rem] leading-33 lg:text-[12rem] lg:leading-50"
+          : "font-ghost text-black fixed right-0 bottom-0 text-[8rem] leading-30 md:text-[15rem] md:leading-60 lg:text-[18rem] lg:leading-70 xl:text-[22rem] xl:leading-80",
+        title: isDark
+          ? "text-neutral-200 font-ibm-plex-sans flex gap-4 text-3xl md:text-4xl"
+          : "font-ghost text-black fixed flex flex-col left-5 top-2 lg:top-3 text-5xl md:text-8xl",
+        titleItalic: isDark ? "font-ibm-plex-sans" : "font-ghost-italic",
+        message: isDark
+          ? "font-ibm-plex-sans text-neutral-400 text-lg md:text-xl"
+          : "font-ghost text-black fixed left-5 top-22 md:top-38 text-lg md:text-2xl",
+      },
+      // ErrorActions classes
+      actions: {
+        container: isDark ? "" : "fixed left-5 top-36 md:top-60",
+        number: isDark ? "text-neutral-600" : "text-neutral-400",
+        label: isDark ? "text-neutral-200" : "text-neutral-800",
+        icon: isDark
+          ? "text-neutral-600 group-hover:text-neutral-200"
+          : "text-neutral-400 group-hover:text-neutral-800",
+        border: isDark ? "border-neutral-700" : "border-neutral-800",
+      },
+      // RecoveryHint classes
+      recovery: {
+        text: isDark ? "text-neutral-400" : "text-neutral-980 fixed left-5 top-32 md:top-54",
+      },
+    };
+  }
+
   return {
     isAdminPage,
     isLoginPage,
@@ -94,5 +183,7 @@ export function useErrorPage() {
     loggedIn,
     getSuggestedPage,
     getErrorMessage,
+    buildActions,
+    getThemeClasses,
   };
 }

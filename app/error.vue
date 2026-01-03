@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { reloadNuxtApp } from "#app";
 import { logger } from "~/utils/logger";
-import type { IconName } from "~/components/icons/iconData";
 import RecoveryHint from "~/components/error/RecoveryHint.vue";
 import TechnicalDetails from "~/components/error/TechnicalDetails.vue";
 
@@ -21,7 +20,12 @@ const {
   loggedIn,
   getSuggestedPage,
   getErrorMessage,
+  buildActions,
 } = useErrorPage();
+
+const pageClass = computed(() =>
+  isAdminPage.value ? "flex flex-col" : "flex"
+);
 
 // Error details
 const statusCode = computed(() => props.error?.statusCode || 500);
@@ -36,10 +40,6 @@ const errorTitle = computed(() => {
   if (statusCode.value >= 500) return ["Something", "went wrong"];
   return "Unexpected Error";
 });
-
-const pageClass = computed(() =>
-  isAdminPage.value ? "flex flex-col" : "flex"
-);
 
 // Stack trace
 const showTechnicalDetails = ref(false);
@@ -96,7 +96,7 @@ onMounted(() => {
   });
 });
 
-// Actions
+// Action handlers
 function handleGoBack() {
   window.history.back();
 }
@@ -113,88 +113,20 @@ function handleGoAdmin() {
   navigateTo("/admin");
 }
 
-// Public actions
-const publicActions = computed(() => {
-  const actions: Array<{
-    number: string;
-    label: string;
-    icon: IconName;
-    onClick?: () => void;
-    href?: string;
-  }> = [
-    { number: "01", label: "Go Back", icon: "back", onClick: handleGoBack },
-  ];
+function handleReportIssue() {
+  window.location.href = reportEmail.value;
+}
 
-  if (statusCode.value >= 500) {
-    actions.push({
-      number: "02",
-      label: "Try Again",
-      icon: "refresh",
-      onClick: handleRetry,
-    });
-  }
-
-  actions.push({
-    number: statusCode.value >= 500 ? "03" : "02",
-    label: "Home",
-    icon: "back",
-    onClick: handleGoHome,
-  });
-
-  actions.push({
-    number: statusCode.value >= 500 ? "04" : "03",
-    label: "Report Issue",
-    icon: "back",
-    onClick: () => (window.location.href = reportEmail.value), // Use onClick instead
-  });
-
-  return actions;
-});
-
-// Admin actions
-const adminActions = computed(() => {
-  const actions: Array<{
-    number: string;
-    label: string;
-    icon: IconName;
-    onClick?: () => void;
-    href?: string;
-  }> = [
-    { number: "01", label: "Go Back", icon: "back", onClick: handleGoBack },
-  ];
-
-  if (statusCode.value >= 500) {
-    actions.push({
-      number: "02",
-      label: "Try Again",
-      icon: "refresh",
-      onClick: handleRetry,
-    });
-  }
-
-  actions.push(
-    {
-      number: statusCode.value >= 500 ? "03" : "02",
-      label: "Admin Dashboard",
-      icon: "back",
-      onClick: handleGoAdmin,
-    },
-    {
-      number: statusCode.value >= 500 ? "04" : "03",
-      label: "Home",
-      icon: "back",
-      onClick: handleGoHome,
-    },
-    {
-      number: statusCode.value >= 500 ? "05" : "04",
-      label: "Report Issue",
-      icon: "back",
-      onClick: () => (window.location.href = reportEmail.value),
-    }
-  );
-
-  return actions;
-});
+// Build actions
+const actions = computed(() =>
+  buildActions(statusCode.value, isAdminPage.value && loggedIn.value, {
+    goBack: handleGoBack,
+    retry: handleRetry,
+    goHome: handleGoHome,
+    goAdmin: handleGoAdmin,
+    reportIssue: handleReportIssue,
+  })
+);
 </script>
 
 <template>
@@ -213,7 +145,7 @@ const adminActions = computed(() => {
           <RecoveryHint v-if="suggestedPage" :suggested-page="suggestedPage" />
         </ErrorHeader>
 
-        <ErrorActions :actions="publicActions" />
+        <ErrorActions :actions="actions" />
       </div>
     </div>
 
@@ -245,7 +177,7 @@ const adminActions = computed(() => {
             />
           </ErrorHeader>
 
-          <ErrorActions :actions="adminActions" is-dark />
+          <ErrorActions :actions="actions" is-dark />
         </div>
       </div>
     </NuxtLayout>
