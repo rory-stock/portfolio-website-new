@@ -1,12 +1,12 @@
 <template>
   <div class="mx-auto max-w-6xl space-y-4 p-6 md:mt-6 md:space-y-8">
     <h1 class="text-2xl font-bold text-white md:text-3xl">
-      Journal Page Admin
+      Personal Page Admin
     </h1>
     <div>
-      <ContentSection table="journal" title="Journal" :fields="contentFields" />
+      <ContentSection table="personal" title="Personal" :fields="contentFields" />
       <hr class="my-4" />
-      <ImageSection context="journal" title="Journal" :fields="imageFields" />
+      <ImageSection context="personal" title="Personal" :fields="imageFields" />
     </div>
     <Toast />
   </div>

@@ -30,13 +30,13 @@ const pages: PageConfig[] = [
     context: "events",
   },
   {
-    label: "Journal",
-    publicPath: "/journal",
-    publicRouteName: "journal",
-    adminPath: "/admin/journal",
+    label: "Personal",
+    publicPath: "/personal",
+    publicRouteName: "personal",
+    adminPath: "/admin/personal",
     icon: "journal",
     isPublic: true,
-    context: "journal",
+    context: "personal",
   },
   {
     label: "Info",

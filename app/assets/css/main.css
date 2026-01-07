@@ -20,51 +20,21 @@
 
   --font-ghost: "Ghost", serif;
   --font-ghost-italic: "Ghost Italic", serif;
+
+  --font-animo-condensed: "Animo Condensed Regular", sans-serif;
   /****************************************************/
 
   /**************** CUSTOM COLORS **************/
   --color-neutral-980: oklch(0.125 0 0);
   /****************************************************/
 
-  /************** CUSTOM ANIMATIONS **************/
-  --animate-menu-drop: menu-drop 0.3s ease-in-out;
-  --animate-menu-drop-reverse: menu-drop-reverse 0.3s ease-in-out;
-  --animate-menu-item-fade: menu-item-fade 1.5s ease-in-out;
-  /****************************************************/
-
   /************** CUSTOM BREAKPOINTS **************/
   --breakpoint-xs: 17rem;
-  /****************************************************/
-
-  /************* CUSTOM ANIMATION KEYFRAMES **************/
-  @keyframes menu-drop {
-    0% {
-      height: 0;
-    }
-    100% {
-      height: 100%;
-    }
-  }
-  @keyframes menu-drop-reverse {
-    0% {
-      height: 100%;
-    }
-    100% {
-      height: 0;
-    }
-  }
-  @keyframes menu-item-fade {
-    0% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
   /****************************************************/
 }
 
 /********************************************************/
+
 @layer base {
   html,
   body,
@@ -105,6 +75,13 @@
     font-family: "Ghost Italic";
     src: url("/fonts/ghost-italic.woff2") format("woff2");
     font-style: italic;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Animo Condensed Regular";
+    src: url("/fonts/animo-condensed-regular.woff2") format("woff2");
+    font-style: normal;
     font-display: swap;
   }
 }

@@ -2,19 +2,19 @@
 import { getOgImageUrl, getTwitterImageUrl } from "~/utils/meta";
 
 useHead({
-  title: "Journal",
+  title: "Personal",
 });
 
 useSeoMeta({
   ogImage: getOgImageUrl("journal"),
-  twitterImage: getTwitterImageUrl("journal"),
+  twitterImage: getTwitterImageUrl("Personal"),
 });
 
 const { data: imageData } = await useFetch("/api/images", {
-  query: { context: "journal" },
+  query: { context: "personal" },
 });
 
-const { data: journal } = await useContentData("journal");
+const { data: personal } = await useContentData("personal");
 
 const images = computed(() => imageData.value?.images || []);
 const selectedImage = ref<(typeof images.value)[0] | null>(null);
@@ -25,7 +25,7 @@ const selectedImage = ref<(typeof images.value)[0] | null>(null);
     <h1
       class="mt-2 ml-3 font-ghost text-xl selection:bg-black selection:text-white md:mt-3 md:ml-0 md:flex md:justify-center md:text-2xl lg:mt-4 lg:text-3xl"
     >
-      {{ journal?.subtitle }}
+      {{ personal?.subtitle }}
     </h1>
 
     <div
@@ -44,7 +44,7 @@ const selectedImage = ref<(typeof images.value)[0] | null>(null);
     <ImageLightbox
       :is-open="!!selectedImage"
       :image-path="selectedImage?.r2_path ?? ''"
-      :alt="selectedImage?.alt ?? 'Journal Image'"
+      :alt="selectedImage?.alt ?? 'Image from a personal project'"
       :description="selectedImage?.description ?? ''"
       @close="selectedImage = null"
     />
