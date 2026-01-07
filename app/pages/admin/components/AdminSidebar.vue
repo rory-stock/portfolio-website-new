@@ -182,7 +182,7 @@ const actionClass = [
         </button>
 
         <NuxtLink to="/" :class="actionClass" class="mb-2">
-          <Icon name="back" :size="18" />
+          <Icon name="back" class="rotate-180" :size="18" />
           Home
         </NuxtLink>
       </div>

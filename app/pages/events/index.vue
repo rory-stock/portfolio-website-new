@@ -5,6 +5,10 @@ useHead({
   title: "Events",
 });
 
+definePageMeta({
+  layout: "events"
+});
+
 useSeoMeta({
   ogImage: getOgImageUrl("events"),
   twitterImage: getTwitterImageUrl("events"),

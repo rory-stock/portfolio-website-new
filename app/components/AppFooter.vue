@@ -1,10 +1,24 @@
 <script setup lang="ts">
-const { data: footer } = await useContentData("footer");
+interface FooterData {
+  email: string;
+  location: string;
+  instagram: string;
+  copyright: string;
+}
+
+const { data } = await useContentData("footer");
+const footer = data as Ref<FooterData | undefined>;
 const { loggedIn } = useUserSession();
 
 const authLink = computed(() => {
-  return loggedIn.value ? '/admin' : '/login';
+  return loggedIn.value ? "/admin" : "/login";
 });
+
+function handleEmail() {
+  if (footer.value?.email) {
+    window.open(`mailto:${footer.value.email}`);
+  }
+}
 </script>
 
 <template>
@@ -17,13 +31,14 @@ const authLink = computed(() => {
         <!----------------- EMAIL ----------------->
         <div class="flex">
           <p>Email:&nbsp;</p>
-          <NuxtLink
-            :to="`mailto:${footer?.email}`"
-            target="_blank"
+          <p
+            @click="handleEmail"
+            role="link"
             aria-label="Email link"
-            class="lowercase underline transition-opacity duration-100 hover:opacity-80"
-            >{{ footer?.email }}
-          </NuxtLink>
+            class="cursor-pointer lowercase underline transition-opacity duration-100 hover:opacity-80"
+          >
+            {{ footer?.email }}
+          </p>
         </div>
         <!----------------------------------------->
         <p>{{ footer?.location }}</p>
@@ -35,6 +50,7 @@ const authLink = computed(() => {
           <p>Instagram:&nbsp;</p>
           <NuxtLink
             :to="`https://www.instagram.com/${footer?.instagram}/`"
+            :external="true"
             target="_blank"
             aria-label="Instagram profile link"
             class="lowercase underline transition-opacity duration-100 hover:opacity-80"

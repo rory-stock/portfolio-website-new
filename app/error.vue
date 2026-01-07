@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { reloadNuxtApp } from "#app";
 import { logger } from "~/utils/logger";
 import RecoveryHint from "~/components/error/RecoveryHint.vue";
 import TechnicalDetails from "~/components/error/TechnicalDetails.vue";
@@ -15,23 +14,19 @@ const props = defineProps({
 });
 
 const route = useRoute();
-const {
-  isAdminPage,
-  loggedIn,
-  getSuggestedPage,
-  getErrorMessage,
-  buildActions,
-} = useErrorPage();
+
+const { isAdminPage, loggedIn, getSuggestedPage, getErrorMessage } =
+  useErrorPage();
 
 const pageClass = computed(() =>
-  isAdminPage.value ? "flex flex-col" : "flex"
+  isAdminPage.value ? "" : "min-h-screen"
 );
 
 // Error details
 const statusCode = computed(() => props.error?.statusCode || 500);
 const statusMessage = computed(() => props.error?.statusMessage || "");
 const errorMessage = computed(() =>
-  getErrorMessage(statusCode.value, props.error?.message)
+  getErrorMessage(statusCode.value, route.fullPath, props.error?.message)
 );
 
 const errorTitle = computed(() => {
@@ -95,46 +90,14 @@ onMounted(() => {
     timestamp: new Date().toISOString(),
   });
 });
-
-// Action handlers
-function handleGoBack() {
-  window.history.back();
-}
-
-function handleRetry() {
-  reloadNuxtApp({ path: route.fullPath });
-}
-
-function handleGoHome() {
-  navigateTo("/");
-}
-
-function handleGoAdmin() {
-  navigateTo("/admin");
-}
-
-function handleReportIssue() {
-  window.location.href = reportEmail.value;
-}
-
-// Build actions
-const actions = computed(() =>
-  buildActions(statusCode.value, isAdminPage.value && loggedIn.value, {
-    goBack: handleGoBack,
-    retry: handleRetry,
-    goHome: handleGoHome,
-    goAdmin: handleGoAdmin,
-    reportIssue: handleReportIssue,
-  })
-);
 </script>
 
 <template>
-  <div :class="pageClass">
+  <div class="flex flex-col" :class="pageClass">
     <!-- Public Error -->
     <div
       v-if="!isAdminPage || !loggedIn"
-      class="mt-8 flex min-h-screen flex-col items-start bg-white px-6 selection:bg-black selection:text-white md:px-12 lg:px-24"
+      class="mt-2 flex flex-col items-start bg-white px-2 selection:bg-black selection:text-white md:px-4 lg:px-6"
     >
       <div class="flex w-full flex-col justify-center">
         <ErrorHeader
@@ -143,9 +106,8 @@ const actions = computed(() =>
           :message="errorMessage"
         >
           <RecoveryHint v-if="suggestedPage" :suggested-page="suggestedPage" />
+          <ErrorActions :email="reportEmail" />
         </ErrorHeader>
-
-        <ErrorActions :actions="actions" />
       </div>
     </div>
 
@@ -161,23 +123,15 @@ const actions = computed(() =>
             :message="errorMessage"
             is-dark
           >
-            <RecoveryHint
-              v-if="suggestedPage"
-              :suggested-page="suggestedPage"
-              is-dark
-            />
-
             <TechnicalDetails
               v-model="showTechnicalDetails"
               :status-code="statusCode"
               :status-message="statusMessage"
               :full-path="route.fullPath"
               :stack-trace="stackTrace"
-              :is-logged-in="!!loggedIn"
+              :is-logged-in="loggedIn"
             />
           </ErrorHeader>
-
-          <ErrorActions :actions="actions" is-dark />
         </div>
       </div>
     </NuxtLayout>

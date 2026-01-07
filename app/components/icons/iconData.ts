@@ -26,10 +26,15 @@ interface BaseIconData {
   viewBox: string;
   fill?: string;
   fillRule?: "nonzero" | "evenodd" | "inherit";
+  fillOpacity?: string | number;
   stroke?: string;
   strokeLinecap?: "round" | "butt" | "square" | "inherit";
   strokeLinejoin?: "round" | "inherit" | "bevel" | "miter";
-  strokeWidth?: string;
+  strokeWidth?: string | number;
+  strokeOpacity?: string | number;
+  strokeMiterlimit?: string | number;
+  clipRule?: "nonzero" | "evenodd" | "inherit";
+  opacity?: string | number;
 }
 
 interface SinglePathIcon extends BaseIconData {
@@ -79,8 +84,11 @@ export const iconData: Record<IconName, IconData> = {
   },
   back: {
     viewBox: "0 0 24 24",
-    fill: "currentColor",
-    path: "m7.825 13l4.9 4.9q.3.3.288.7t-.313.7q-.3.275-.7.288t-.7-.288l-6.6-6.6q-.15-.15-.213-.325T4.426 12t.063-.375t.212-.325l6.6-6.6q.275-.275.688-.275t.712.275q.3.3.3.713t-.3.712L7.825 11H19q.425 0 .713.288T20 12t-.288.713T19 13z",
+    fill: "none",
+    stroke: "currentColor",
+    strokeLinecap: "square",
+    strokeWidth: "2",
+    path: "m13 17.5l5.5-5.5L13 6.5m4.25 5.5h-13",
   },
   smile: {
     viewBox: "0 0 496 512",
@@ -150,7 +158,7 @@ export const iconData: Record<IconName, IconData> = {
     strokeLinecap: "round",
     strokeLinejoin: "round",
     strokeWidth: "2",
-    path:"M10 11v6m4-6v6m5-11v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+    path: "M10 11v6m4-6v6m5-11v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
   },
   refresh: {
     viewBox: "0 0 24 24",

@@ -5,7 +5,7 @@
   >
     <div class="flex flex-col align-middle">
       <div
-        class="md:pt2.5 flex items-center justify-between pt-1.5 pb-1.5 select-none md:pb-2.5"
+        class="flex items-center justify-between pt-1.5 pb-1.5 select-none md:pb-2.5"
       >
         <h1
           class="pt-0.5 pl-3 font-animo-condensed tracking-tight text-4xl font-light uppercase transition-colors duration-300 md:pt-1.5 md:pl-6 lg:text-5xl"

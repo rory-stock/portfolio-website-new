@@ -5,43 +5,46 @@ interface Action {
   label: string;
   icon: IconName;
   onClick?: () => void;
-  href?: string;
 }
 
 const props = defineProps<{
-  actions: Action[];
-  isDark?: boolean;
+  email: string;
 }>();
 
-const { getThemeClasses } = useErrorPage();
-const theme = computed(() => getThemeClasses(props.isDark).actions);
+function handleGoHome() {
+  navigateTo("/");
+}
+
+function handleReportIssue() {
+  window.open(props.email);
+}
+
+const actions: Action[] = [
+  {
+    label: "Back to home",
+    icon: "back",
+    onClick: handleGoHome,
+  },
+  {
+    label: "Report Issue",
+    icon: "back",
+    onClick: handleReportIssue,
+  },
+];
 </script>
 
 <template>
-  <div class="actions-list space-y-3 pt-8" :class="theme.container">
-    <component
-      v-for="(action, index) in actions"
+  <div
+    class="actions-list mt-6 flex flex-col gap-1 font-ghost lg:mt-8 lg:gap-2"
+  >
+    <p
+      v-for="action in actions"
       :key="action.label"
-      :is="action.href ? 'a' : 'button'"
-      :href="action.href"
       @click="action.onClick"
-      class="action-item group flex w-full cursor-pointer items-center justify-between gap-4 rounded-xl border px-2 py-2 text-left transition-all hover:translate-x-1"
-      :class="theme.border"
+      class="group underline-slide flex w-fit cursor-pointer items-center gap-1 text-left text-xl select-none md:text-3xl"
     >
-      <span class="flex items-center gap-4">
-        <span class="text-sm" :class="theme.number">
-          {{ String(index + 1).padStart(2, "0") }}
-        </span>
-        <span class="text-lg" :class="theme.label">
-          {{ action.label }}
-        </span>
-      </span>
-      <Icon
-        :name="action.icon"
-        :size="20"
-        class="transition-colors"
-        :class="[theme.icon, { 'rotate-180': action.icon === 'back' }]"
-      />
-    </component>
+      {{ action.label }}
+      <Icon :name="action.icon" class="mt-1 w-8.75 rotate-315 text-black" />
+    </p>
   </div>
 </template>

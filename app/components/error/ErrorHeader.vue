@@ -5,28 +5,48 @@ const props = defineProps<{
   message: string;
   isDark?: boolean;
 }>();
-
-const { getThemeClasses } = useErrorPage();
-const theme = computed(() => getThemeClasses(props.isDark).header);
 </script>
 
 <template>
-  <div class="space-y-8">
-    <!-- Error Code -->
-    <div>
-      <h1 class="font-semibold" :class="theme.code">
-        {{ statusCode }}
-      </h1>
-      <h2 class="mt-1" :class="theme.title">
+  <div class="">
+    <!-- Error Title -->
+    <div class="flex flex-col gap-4 lg:gap-8">
+      <h1
+        :class="
+          isDark
+            ? 'md:text-4x flex flex-col font-ibm-plex-sans text-3xl text-neutral-200'
+            : 'font-ghost text-black text-2xl xs:text-4xl sm:text-5xl md:text-8xl'
+        "
+      >
+        <span v-if="isDark">Error: {{ statusCode }}</span>
         <span>{{ title }}</span>
-      </h2>
+      </h1>
+
+      <!-- Error Message -->
+      <div class="flex flex-col gap-1 md:gap-2">
+        <p
+          :class="
+            isDark
+              ? 'font-ibm-plex-sans text-lg text-neutral-400 md:text-xl'
+              : 'font-ghost text-lg text-black md:text-2xl xl:text-4xl'
+          "
+        >
+          {{ message }}
+        </p>
+
+        <!-- Recovery hint and error actions slot -->
+        <div>
+          <slot />
+        </div>
+      </div>
     </div>
 
-    <!-- Message -->
-    <p :class="theme.message">
-      {{ message }}
-    </p>
-
-    <slot />
+    <!-- Error Code -->
+    <h2
+      v-if="!isDark"
+      class="fixed right-0 bottom-0 font-ghost text-[8rem] leading-30 font-semibold text-black md:text-[15rem] md:leading-50 lg:text-[18rem] lg:leading-60 xl:text-[22rem] xl:leading-70"
+    >
+      {{ statusCode }}
+    </h2>
   </div>
 </template>

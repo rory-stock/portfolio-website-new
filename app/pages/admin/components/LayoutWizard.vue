@@ -7,9 +7,9 @@
       <!-- Current Layout Display (when layout exists and wizard closed) -->
       <div
         v-if="props.currentImage.layout_type && !showWizard"
-        class="flex items-center justify-between"
+        class="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-0"
       >
-        <div>
+        <div class="flex flex-col gap-1 md:gap-0">
           <p class="text-sm text-neutral-400">Current Layout</p>
           <p class="font-medium text-neutral-100">
             {{ getLayoutLabel(props.currentImage.layout_type) }}
@@ -21,7 +21,7 @@
             Group ID: {{ props.currentImage.layout_group_id }}
           </p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-col gap-2 md:flex-row">
           <AppButton
             variant="secondary"
             @click="showWizard = true"
@@ -34,7 +34,7 @@
             @click="handleRemoveLayout"
             :disabled="removingLayout"
             :loading="removingLayout"
-            class="px-3 py-1.5 text-xs"
+            class="px-3 py-1.5 text-sm"
           >
             Remove
           </AppButton>
@@ -44,7 +44,7 @@
       <!-- No Layout State (when no layout and wizard closed) -->
       <div
         v-if="!props.currentImage.layout_type && !showWizard"
-        class="flex items-center gap-4"
+        class="flex flex-col gap-4 md:flex-row md:items-center"
       >
         <span class="text-sm text-neutral-400">Layout: None</span>
         <AppButton
@@ -239,8 +239,7 @@ const imagesInLayouts = computed(() => {
     props.allImages
       .filter(
         (img) =>
-          img.layout_type !== null &&
-          img.layout_group_id !== currentGroupId
+          img.layout_type !== null && img.layout_group_id !== currentGroupId
       )
       .map((img) => img.id)
   );
