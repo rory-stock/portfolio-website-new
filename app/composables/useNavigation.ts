@@ -26,7 +26,7 @@ const pages: PageConfig[] = [
     publicRouteName: "events",
     adminPath: "/admin/events",
     icon: "event",
-    isPublic: true,
+    isPublic: false,
     context: "events",
   },
   {

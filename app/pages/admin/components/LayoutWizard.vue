@@ -136,7 +136,7 @@
               @click="goToStep1"
               class="flex w-full justify-center hover:bg-neutral-700 md:w-min"
             >
-              <Icon name="back" :size="18" class="mt-0.5 mr-0.5" />
+              <Icon name="back" :size="18" class="mt-0.5 rotate-180 mr-0.5" />
               Back
             </AppButton>
             <div class="flex flex-col gap-2 md:flex-row">
