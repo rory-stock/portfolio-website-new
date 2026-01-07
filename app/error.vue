@@ -18,10 +18,6 @@ const route = useRoute();
 const { isAdminPage, loggedIn, getSuggestedPage, getErrorMessage } =
   useErrorPage();
 
-const pageClass = computed(() =>
-  isAdminPage.value ? "" : "min-h-screen"
-);
-
 // Error details
 const statusCode = computed(() => props.error?.statusCode || 500);
 const statusMessage = computed(() => props.error?.statusMessage || "");
@@ -93,7 +89,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col" :class="pageClass">
+  <div class="flex flex-col min-h-screen">
     <!-- Public Error -->
     <div
       v-if="!isAdminPage || !loggedIn"
