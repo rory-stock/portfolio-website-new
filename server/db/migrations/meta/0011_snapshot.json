@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "952d87aa-2059-4fc6-a0cd-cb8860e6935c",
-  "prevId": "073ed9b4-6950-422a-b24f-1e1ac3dfcb83",
+  "id": "19585dd8-0d2d-4aa3-88d0-41d26f6daa78",
+  "prevId": "952d87aa-2059-4fc6-a0cd-cb8860e6935c",
   "tables": {
     "content": {
       "name": "content",
@@ -53,7 +53,10 @@
       "indexes": {
         "content_context_key_unique": {
           "name": "content_context_key_unique",
-          "columns": ["context", "key"],
+          "columns": [
+            "context",
+            "key"
+          ],
           "isUnique": true
         }
       },
@@ -133,12 +136,16 @@
       "indexes": {
         "events_metadata_event_name_unique": {
           "name": "events_metadata_event_name_unique",
-          "columns": ["event_name"],
+          "columns": [
+            "event_name"
+          ],
           "isUnique": true
         },
         "events_metadata_event_slug_unique": {
           "name": "events_metadata_event_slug_unique",
-          "columns": ["event_slug"],
+          "columns": [
+            "event_slug"
+          ],
           "isUnique": true
         }
       },
@@ -192,14 +199,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "display_order": {
-          "name": "display_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": 0
-        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -218,12 +217,17 @@
       "indexes": {
         "event_subpages_event_idx": {
           "name": "event_subpages_event_idx",
-          "columns": ["event_id"],
+          "columns": [
+            "event_id"
+          ],
           "isUnique": false
         },
         "events_subpages_event_id_subpage_slug_unique": {
           "name": "events_subpages_event_id_subpage_slug_unique",
-          "columns": ["event_id", "subpage_slug"],
+          "columns": [
+            "event_id",
+            "subpage_slug"
+          ],
           "isUnique": true
         }
       },
@@ -232,8 +236,12 @@
           "name": "events_subpages_event_id_events_metadata_id_fk",
           "tableFrom": "events_subpages",
           "tableTo": "events_metadata",
-          "columnsFrom": ["event_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -335,12 +343,16 @@
       "indexes": {
         "context_idx": {
           "name": "context_idx",
-          "columns": ["context"],
+          "columns": [
+            "context"
+          ],
           "isUnique": false
         },
         "r2_path_idx": {
           "name": "r2_path_idx",
-          "columns": ["r2_path"],
+          "columns": [
+            "r2_path"
+          ],
           "isUnique": false
         }
       },
@@ -391,12 +403,16 @@
       "indexes": {
         "images_events_metadata_idx": {
           "name": "images_events_metadata_idx",
-          "columns": ["event_id"],
+          "columns": [
+            "event_id"
+          ],
           "isUnique": false
         },
         "images_events_metadata_subpage_idx": {
           "name": "images_events_metadata_subpage_idx",
-          "columns": ["event_subpage_id"],
+          "columns": [
+            "event_subpage_id"
+          ],
           "isUnique": false
         }
       },
@@ -405,8 +421,12 @@
           "name": "images_events_metadata_image_id_images_id_fk",
           "tableFrom": "images_events_metadata",
           "tableTo": "images",
-          "columnsFrom": ["image_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "image_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -414,8 +434,12 @@
           "name": "images_events_metadata_event_id_events_metadata_id_fk",
           "tableFrom": "images_events_metadata",
           "tableTo": "events_metadata",
-          "columnsFrom": ["event_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -423,8 +447,12 @@
           "name": "images_events_metadata_event_subpage_id_events_subpages_id_fk",
           "tableFrom": "images_events_metadata",
           "tableTo": "events_subpages",
-          "columnsFrom": ["event_subpage_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "event_subpage_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -479,8 +507,12 @@
           "name": "images_info_metadata_image_id_images_id_fk",
           "tableFrom": "images_info_metadata",
           "tableTo": "images",
-          "columnsFrom": ["image_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "image_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -556,8 +588,12 @@
           "name": "images_overview_metadata_image_id_images_id_fk",
           "tableFrom": "images_overview_metadata",
           "tableTo": "images",
-          "columnsFrom": ["image_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "image_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -612,8 +648,12 @@
           "name": "images_personal_metadata_image_id_images_id_fk",
           "tableFrom": "images_personal_metadata",
           "tableTo": "images",
-          "columnsFrom": ["image_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "image_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -628,9 +668,7 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {
-      "\"content\".\"table\"": "\"content\".\"context\""
-    }
+    "columns": {}
   },
   "internal": {
     "indexes": {}

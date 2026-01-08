@@ -1,0 +1,1 @@
+ALTER TABLE `events_subpages` DROP COLUMN `display_order`;

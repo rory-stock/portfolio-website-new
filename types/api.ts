@@ -4,6 +4,16 @@
  */
 
 import type { ImageBase } from "./imageTypes";
+import type {
+  EventBase,
+  EventCreateData,
+  EventSubpage,
+  EventUpdateData,
+  EventWithDetails,
+  EventWithSubpages,
+  SubpageCreateData,
+  SubpageUpdateData,
+} from "~~/types/eventTypes";
 
 // ==================== Content API ====================
 
@@ -188,4 +198,76 @@ export interface MetaCachePurgeResponse {
   success: boolean;
   purged: boolean;
   url?: string;
+}
+
+// ==================== Events API ====================
+
+export interface EventListResponse {
+  events: EventWithSubpages[];
+  total: number;
+}
+
+export interface EventDetailResponse {
+  event: EventWithDetails;
+}
+
+export interface EventCreateRequest extends EventCreateData {}
+
+export interface EventCreateResponse {
+  success: boolean;
+  event: EventBase;
+}
+
+export interface EventUpdateRequest extends EventUpdateData {}
+
+export interface EventUpdateResponse {
+  success: boolean;
+  event: EventBase;
+}
+
+export interface EventDeleteResponse {
+  success: boolean;
+  id: number;
+}
+
+export interface SubpageListResponse {
+  subpages: EventSubpage[];
+  total: number;
+}
+
+export interface SubpageCreateRequest extends SubpageCreateData {}
+
+export interface SubpageCreateResponse {
+  success: boolean;
+  subpage: EventSubpage;
+}
+
+export interface SubpageUpdateRequest extends SubpageUpdateData {}
+
+export interface SubpageUpdateResponse {
+  success: boolean;
+  subpage: EventSubpage;
+}
+
+export interface SubpageDeleteResponse {
+  success: boolean;
+  id: number;
+}
+
+export interface EventCoverImageRequest {
+  image_id: number | null;
+}
+
+export interface EventCoverImageResponse {
+  success: boolean;
+  event: EventBase;
+}
+
+export interface SubpageCoverImageRequest {
+  image_id: number | null;
+}
+
+export interface SubpageCoverImageResponse {
+  success: boolean;
+  subpage: EventSubpage;
 }
