@@ -132,8 +132,13 @@ export const events_subpages = sqliteTable(
     subpage_slug: text("subpage_slug").notNull(),
     subpage_date: text("subpage_date").notNull(),
     subpage_cover_image_id: integer("subpage_cover_image_id"),
-    created_at: integer("created_at", { mode: "timestamp" }),
-    updated_at: integer("updated_at", { mode: "timestamp" }),
+    display_order: integer("display_order").default(0),
+    created_at: integer("created_at", { mode: "timestamp" }).$defaultFn(
+      () => new Date()
+    ),
+    updated_at: integer("updated_at", { mode: "timestamp" }).$onUpdate(
+      () => new Date()
+    ),
   },
   (table) => [
     unique("events_subpages_event_id_subpage_slug_unique").on(
@@ -158,8 +163,12 @@ export const images_events_metadata = sqliteTable(
       () => events_subpages.id,
       { onDelete: "cascade" }
     ),
-    created_at: integer("created_at", { mode: "timestamp" }),
-    updated_at: integer("updated_at", { mode: "timestamp" }),
+    created_at: integer("created_at", { mode: "timestamp" }).$defaultFn(
+      () => new Date()
+    ),
+    updated_at: integer("updated_at", { mode: "timestamp" }).$onUpdate(
+      () => new Date()
+    ),
   },
   (table) => [
     index("images_events_metadata_idx").on(table.event_id),

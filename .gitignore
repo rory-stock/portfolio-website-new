@@ -25,6 +25,4 @@ wrangler.toml
 .env.*
 !.env.example
 
-# Database backups and seed data
 /server/db/local_backup/
-/server/db/seed_data/
