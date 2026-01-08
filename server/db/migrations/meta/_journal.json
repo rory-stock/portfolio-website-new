@@ -71,6 +71,13 @@
       "when": 1767757033686,
       "tag": "0009_rename_journal_context",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1767822446096,
+      "tag": "0010_wise_metal_master",
+      "breakpoints": true
     }
   ]
 }

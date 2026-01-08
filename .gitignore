@@ -24,3 +24,5 @@ logs
 wrangler.toml
 .env.*
 !.env.example
+
+/server/db/local_backup/
