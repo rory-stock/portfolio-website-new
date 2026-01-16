@@ -20,6 +20,7 @@
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.5.0",
     "drizzle-orm": "^0.44.7",
+    "exif-parser": "^0.1.12",
     "image-size": "^2.0.2",
     "nuxt": "^4.2.0",
     "nuxt-auth-utils": "^0.5.25",
