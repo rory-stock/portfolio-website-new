@@ -136,7 +136,7 @@
               @click="goToStep1"
               class="flex w-full justify-center hover:bg-neutral-700 md:w-min"
             >
-              <Icon name="back" :size="18" class="mt-0.5 rotate-180 mr-0.5" />
+              <Icon name="back" :size="18" class="mt-0.5 mr-0.5 rotate-180" />
               Back
             </AppButton>
             <div class="flex flex-col gap-2 md:flex-row">
@@ -165,14 +165,14 @@
 </template>
 
 <script setup lang="ts">
-import type { ImageBase } from "~~/types/imageTypes";
+import type { DisplayImage } from "~~/types/imageTypes";
 import type { LayoutTypeId, LayoutType } from "~/utils/layouts";
 import { LAYOUT_TYPES } from "~/utils/layouts";
 import { useScroll } from "@vueuse/core";
 
 interface Props {
-  currentImage: ImageBase;
-  allImages: ImageBase[];
+  currentImage: DisplayImage;
+  allImages: DisplayImage[];
   context: string;
 }
 
@@ -229,7 +229,9 @@ const showScrollbar = computed(() => {
 
 // Get current image index
 const currentImageIndex = computed(() => {
-  return props.allImages.findIndex((img) => img.id === props.currentImage.id);
+  return props.allImages.findIndex(
+    (img) => img.instanceId === props.currentImage.instanceId
+  );
 });
 
 // Get images already in layouts (excluding current image's group)
@@ -279,7 +281,7 @@ const availableLayoutTypes = computed(() => {
 });
 
 // Check if an image can be selected
-const canSelectImage = (image: ImageBase): boolean => {
+const canSelectImage = (image: DisplayImage): boolean => {
   if (!selectedLayoutType.value) return false;
 
   const layoutConfig = LAYOUT_TYPES[selectedLayoutType.value];
@@ -384,9 +386,11 @@ const canSubmit = computed(() => {
 });
 
 // Get the position label for an image
-const getPositionLabel = (image: ImageBase): string => {
+const getPositionLabel = (image: DisplayImage): string => {
   const currentIdx = currentImageIndex.value;
-  const imageIdx = props.allImages.findIndex((img) => img.id === image.id);
+  const imageIdx = props.allImages.findIndex(
+    (img) => img.instanceId === image.instanceId
+  );
   const diff = imageIdx - currentIdx;
 
   if (diff > 0) return `+${diff}`;
@@ -399,16 +403,16 @@ const getLayoutLabel = (layoutType: string): string => {
 };
 
 // Toggle image selection
-const toggleImageSelection = (image: ImageBase) => {
+const toggleImageSelection = (image: DisplayImage) => {
   if (!canSelectImage(image)) return;
 
-  if (image.id === props.currentImage.id) return;
+  if (image.instanceId === props.currentImage.instanceId) return;
 
-  const index = selectedImages.value.indexOf(image.id);
+  const index = selectedImages.value.indexOf(image.instanceId);
   if (index > -1) {
     selectedImages.value.splice(index, 1);
   } else {
-    selectedImages.value.push(image.id);
+    selectedImages.value.push(image.instanceId);
   }
 };
 
@@ -420,7 +424,7 @@ const selectLayoutType = (layoutType: LayoutTypeId) => {
 // Navigation
 const goToStep2 = () => {
   currentStep.value = 2;
-  selectedImages.value = [props.currentImage.id];
+  selectedImages.value = [props.currentImage.instanceId];
 
   nextTick(() => {
     if (scrollContainer.value) {
@@ -481,13 +485,16 @@ const handleRemoveLayout = async () => {
   removingLayout.value = true;
 
   try {
-    const response = await $fetch(`/api/images/${props.currentImage.id}`, {
-      method: "PATCH",
-      body: {
-        remove_layout: true,
-      },
-      headers: useRequestHeaders(["cookie"]),
-    });
+    const response = await $fetch(
+      `/api/images/${props.currentImage.instanceId}`,
+      {
+        method: "PATCH",
+        body: {
+          remove_layout: true,
+        },
+        headers: useRequestHeaders(["cookie"]),
+      }
+    );
 
     if (response.success) {
       emit("layout-removed");

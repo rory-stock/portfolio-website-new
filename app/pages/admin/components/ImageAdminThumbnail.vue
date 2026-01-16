@@ -48,10 +48,10 @@
 </template>
 
 <script setup lang="ts">
-import type { ImageBase } from "~~/types/imageTypes";
+import type { DisplayImage } from "~~/types/imageTypes";
 
 interface Props {
-  image: ImageBase;
+  image: DisplayImage;
 }
 
 const props = defineProps<Props>();
@@ -60,7 +60,7 @@ defineEmits<{
   togglePrimary: [];
 }>();
 
-const imageLoaded = ref(false)
+const imageLoaded = ref(false);
 
 // Computed class for primary button
 const primaryButtonClass = computed(() => {

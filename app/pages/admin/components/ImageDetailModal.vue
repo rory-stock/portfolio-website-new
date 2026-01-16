@@ -68,7 +68,7 @@
               <div>
                 <span class="text-neutral-400">Uploaded:</span>
                 <span class="ml-2 text-neutral-100">{{
-                  formatDate(image.uploaded_at)
+                  formatDate(image.created_at)
                 }}</span>
               </div>
             </div>
@@ -112,15 +112,15 @@
 </template>
 
 <script setup lang="ts">
-import type { ImageBase, ImageField } from "~~/types/imageTypes";
+import type { DisplayImage, ImageField } from "~~/types/imageTypes";
 import { onKeyStroke } from "@vueuse/core";
 import { formatFileSize, formatDate, formatDimensions } from "~/utils/format";
 
 interface Props {
   open: boolean;
-  image: ImageBase | null;
+  image: DisplayImage | null;
   fields: ImageField[];
-  allImages: ImageBase[];
+  allImages: DisplayImage[];
   context: string;
   showLayoutWizard?: boolean;
 }
@@ -308,7 +308,7 @@ const handleSave = async () => {
 
     const removedCurrentContext = toRemove.includes(props.image.context);
 
-    await $fetch(`/api/images/${props.image.id}`, {
+    await $fetch(`/api/images/${props.image.instanceId}`, {
       method: "PATCH",
       body,
     });
@@ -350,7 +350,7 @@ const handleDelete = async () => {
   deleting.value = true;
 
   try {
-    await $fetch(`/api/images/${props.image.id}`, {
+    await $fetch(`/api/images/${props.image.instanceId}`, {
       method: "DELETE",
     });
 
@@ -366,14 +366,14 @@ const handleDelete = async () => {
 
 // Refetch image data after layout operations
 const refetchImage = async () => {
-  if (!props.image?.id) return;
+  if (!props.image?.instanceId) return;
 
   try {
     const response = await $fetch<{
-      image: ImageBase;
+      image: DisplayImage;
       layout_removed?: boolean;
       group_was_removed?: boolean;
-    }>(`/api/images/${props.image.id}`, {
+    }>(`/api/images/${props.image.instanceId}`, {
       headers: useRequestHeaders(["cookie"]),
     });
 

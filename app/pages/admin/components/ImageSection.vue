@@ -35,13 +35,13 @@
       >
         <div
           v-for="element in organizedItems"
-          :key="(element as ImageBase).id"
+          :key="(element as DisplayImage).id"
           class="h-fit w-fit"
         >
           <ImageAdminThumbnail
-            :image="element as ImageBase"
-            @click="openModal(element as ImageBase)"
-            @toggle-primary="handleTogglePrimary(element as ImageBase)"
+            :image="element as DisplayImage"
+            @click="openModal(element as DisplayImage)"
+            @toggle-primary="handleTogglePrimary(element as DisplayImage)"
           />
         </div>
       </VueDraggable>
@@ -147,7 +147,7 @@
 import { VueDraggable } from "vue-draggable-plus";
 import { onKeyStroke } from "@vueuse/core";
 import { getHeroType, isImageGroup, isImageHero } from "~/utils/imageGroups";
-import type { ImageBase, ImageField } from "~~/types/imageTypes";
+import type { DisplayImage, ImageField } from "~~/types/imageTypes";
 import { useImageData } from "~/composables/useImageData";
 
 interface Props {
@@ -179,7 +179,7 @@ const {
 
 // Modal state
 const modalOpen = ref(false);
-const selectedImage = ref<ImageBase | null>(null);
+const selectedImage = ref<DisplayImage | null>(null);
 
 // Event handlers
 const handleUploadComplete = () => {
@@ -193,7 +193,7 @@ const onSaveOrder = async () => {
   }
 };
 
-const openModal = (image: ImageBase) => {
+const openModal = (image: DisplayImage) => {
   selectedImage.value = image;
   modalOpen.value = true;
 };
@@ -203,7 +203,7 @@ const handleImageUpdated = async () => {
 
   if (selectedImage.value) {
     const updated = images.value.find(
-      (img) => img.id === selectedImage.value!.id
+      (img) => img.instanceId === selectedImage.value!.instanceId
     );
     if (updated) {
       selectedImage.value = updated;
@@ -215,9 +215,9 @@ const handleImageDeleted = () => {
   fetchImages();
 };
 
-const handleTogglePrimary = async (image: ImageBase) => {
+const handleTogglePrimary = async (image: DisplayImage) => {
   try {
-    await $fetch(`/api/images/${image.id}`, {
+    await $fetch(`/api/images/${image.instanceId}`, {
       method: "PATCH",
       body: {
         is_primary: !image.is_primary,
@@ -236,7 +236,7 @@ const isGroup = isImageGroup;
 const isHero = isImageHero;
 const heroType = getHeroType;
 
-const heroLabel = (item: ImageBase) => {
+const heroLabel = (item: DisplayImage) => {
   const type = heroType(item);
   if (type == "fullscreen-hero") {
     return "Fullscreen Hero";

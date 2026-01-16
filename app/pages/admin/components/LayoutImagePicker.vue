@@ -25,22 +25,23 @@
       >
         <button
           v-for="image in allImages"
-          :key="image.id"
+          :key="image.instanceId"
           type="button"
           @click="emit('toggle', image)"
           :disabled="!canSelect(image)"
           class="relative flex h-32 w-48 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border transition-colors duration-300"
           :class="{
-            'border-none': selectedImages.includes(image.id),
+            'border-none': selectedImages.includes(image.instanceId),
             'border border-neutral-300':
-              image.id === currentImageId && !selectedImages.includes(image.id),
+              image.instanceId === currentImageId &&
+              !selectedImages.includes(image.instanceId),
             'border-neutral-700 hover:border-neutral-500':
               canSelect(image) &&
-              !selectedImages.includes(image.id) &&
-              image.id !== currentImageId,
+              !selectedImages.includes(image.instanceId) &&
+              image.instanceId !== currentImageId,
             'cursor-not-allowed border-transparent opacity-40 grayscale':
               !canSelect(image),
-            'opacity-60': imagesInLayouts.has(image.id),
+            'opacity-60': imagesInLayouts.has(image.instanceId),
           }"
         >
           <NuxtPicture
@@ -53,13 +54,13 @@
           <span
             class="absolute top-2 left-2 rounded bg-black/70 px-2 py-1 text-xs text-neutral-100"
           >
-            <span v-if="image.id === currentImageId">Current</span>
+            <span v-if="image.instanceId === currentImageId">Current</span>
             <span v-else>{{ getPositionLabel(image) }}</span>
           </span>
 
           <!-- In layout badge -->
           <span
-            v-if="imagesInLayouts.has(image.id)"
+            v-if="imagesInLayouts.has(image.instanceId)"
             class="absolute top-2 right-2 rounded bg-black/70 px-2 py-1 text-xs text-neutral-100"
           >
             In Layout
@@ -67,7 +68,7 @@
 
           <!-- Selected state - just border -->
           <span
-            v-if="selectedImages.includes(image.id)"
+            v-if="selectedImages.includes(image.instanceId)"
             class="pointer-events-none absolute inset-0 rounded-lg border-2 border-neutral-100"
           ></span>
         </button>
@@ -85,24 +86,24 @@
 </template>
 
 <script setup lang="ts">
-import type { ImageBase } from "~~/types/imageTypes";
+import type { DisplayImage } from "~~/types/imageTypes";
 import { useScroll } from "@vueuse/core";
 
 interface Props {
-  allImages: ImageBase[];
+  allImages: DisplayImage[];
   currentImageId: number;
   selectedImages: number[];
   imagesInLayouts: Set<number>;
   neededCount: number;
   validationMessage: string;
-  canSelect: (image: ImageBase) => boolean;
-  getPositionLabel: (image: ImageBase) => string;
+  canSelect: (image: DisplayImage) => boolean;
+  getPositionLabel: (image: DisplayImage) => string;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  toggle: [image: ImageBase];
+  toggle: [image: DisplayImage];
   "update:scrollContainer": [element: HTMLElement];
 }>();
 

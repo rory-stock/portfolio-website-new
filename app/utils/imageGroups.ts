@@ -34,9 +34,9 @@ export function organizeImagesForAdmin(
 
       // Create the group object with the images array
       const group: ImageGroup = {
-        group_id: image.layout_group_id, // TypeScript now knows this is not undefined
+        group_id: image.layout_group_id,
         layout_type: layoutType,
-        images: groupImages as any, // Cast to ImageBase for compatibility
+        images: groupImages,
         display_order: image.group_display_order ?? 0,
       };
 
@@ -44,7 +44,7 @@ export function organizeImagesForAdmin(
       processedGroups.add(image.layout_group_id);
     } else {
       // Individual image
-      result.push(image as any); // Cast to ImageBase for compatibility
+      result.push(image);
     }
   }
 
@@ -96,10 +96,10 @@ export function flattenImagesForApi(
   for (const item of items) {
     if (isImageGroup(item)) {
       // Add all group member instance IDs in their current order
-      instanceIds.push(...item.images.map((img: any) => img.instanceId));
+      instanceIds.push(...item.images.map((img) => img.instanceId));
     } else {
       // Individual image - use instanceId
-      instanceIds.push((item as any).instanceId);
+      instanceIds.push(item.instanceId);
     }
   }
 

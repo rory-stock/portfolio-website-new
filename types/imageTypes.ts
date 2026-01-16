@@ -27,6 +27,8 @@ export interface DisplayImage {
   description?: string | null;
   width: number;
   height: number;
+  file_size: number;
+  original_filename: string;
   is_public: boolean;
   is_primary: boolean;
   order?: number | null;
@@ -99,7 +101,7 @@ export interface SnapSection {
 export interface ImageGroup {
   group_id: number;
   layout_type: LayoutTypeId;
-  images: ImageBase[];
+  images: DisplayImage[];
   display_order: number;
 }
 

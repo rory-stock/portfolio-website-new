@@ -70,6 +70,8 @@ export function toDisplayImage(
     description: metadata?.description || null,
     width: base.width,
     height: base.height,
+    file_size: base.fileSize,
+    original_filename: base.originalFilename,
     is_public: instance.isPublic,
     is_primary: instance.isPrimary,
     order: instance.order,

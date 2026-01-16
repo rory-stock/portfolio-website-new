@@ -16,11 +16,11 @@
       :animation="150"
       ghost-class="opacity-50"
       drag-class="cursor-grabbing"
-      class="flex gap-2 justify-around"
+      class="flex justify-around gap-2"
     >
       <div
         v-for="img in localImages"
-        :key="img.id"
+        :key="img.instanceId"
         class="h-fit w-fit cursor-move"
       >
         <ImageAdminThumbnail
@@ -35,21 +35,21 @@
 
 <script setup lang="ts">
 import { VueDraggable } from "vue-draggable-plus";
-import type { ImageBase } from "~~/types/imageTypes";
+import type { DisplayImage } from "~~/types/imageTypes";
 import { LAYOUT_TYPES } from "~/utils/layouts";
 import type { LayoutTypeId } from "~/utils/layouts";
 
 interface Props {
-  groupImages: ImageBase[];
+  groupImages: DisplayImage[];
   layoutType: LayoutTypeId;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  update: [images: ImageBase[]];
-  openModal: [image: ImageBase];
-  togglePrimary: [image: ImageBase];
+  update: [images: DisplayImage[]];
+  openModal: [image: DisplayImage];
+  togglePrimary: [image: DisplayImage];
 }>();
 
 // Local copy of images for v-model
