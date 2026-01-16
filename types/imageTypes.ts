@@ -1,7 +1,45 @@
 // Shared types for images across client and server
 
-import type { LayoutTypeId } from "~/utils/layouts"
+import type { LayoutTypeId } from "~/utils/layouts";
+import type {
+  BaseImage,
+  ImageInstance,
+  ImageMetadata,
+  ImageLayout,
+} from "./database";
 
+// ==================== Core Combined Interface ====================
+export interface ImageWithInstance {
+  base: BaseImage;
+  instance: ImageInstance;
+  metadata?: ImageMetadata | null;
+  layout?: ImageLayout | null;
+}
+
+// ==================== Display Interface for Frontend ====================
+export interface DisplayImage {
+  id: number;
+  instanceId: number;
+  context: string;
+  r2_path: string;
+  url: string;
+  alt: string;
+  description?: string | null;
+  width: number;
+  height: number;
+  is_public: boolean;
+  is_primary: boolean;
+  order?: number | null;
+  layout_type?: LayoutTypeId | null;
+  layout_group_id?: number | null;
+  group_display_order?: number | null;
+  captured_at?: Date | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+// ==================== Legacy/Compatibility Types ====================
+// TODO: Remove after full migration
 export interface ImageBase {
   id: number;
   context: string;
@@ -31,9 +69,9 @@ export interface ImageWithContext extends ImageBase {
   is_primary: boolean;
 }
 
-// Field definition for UI forms
+// ==================== UI Form Fields ====================
 export interface ImageField {
-  key: keyof ImageBase;
+  key: string;
   label: string;
   type?: "text" | "textarea" | "email" | "url";
   rows?: number;
@@ -41,6 +79,7 @@ export interface ImageField {
   editable?: boolean;
 }
 
+// ==================== Snap/Layout Display Types ====================
 export interface SnapImage {
   id: string | number;
   url: string;

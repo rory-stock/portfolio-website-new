@@ -3,7 +3,7 @@
  * Shared types between client and server for type safety
  */
 
-import type { ImageBase } from "./imageTypes";
+import type { DisplayImage, ImageBase } from "./imageTypes";
 
 // ==================== Content API ====================
 
@@ -156,6 +156,45 @@ export interface LoginResponse {
 
 export interface LogoutResponse {
   success: boolean;
+}
+
+// ==================== Events API ====================
+
+export interface EventCreateRequest {
+  name: string;
+  start_date: string;
+  end_date?: string;
+  location: string;
+  description?: string;
+  external_url?: string;
+}
+
+export interface EventUpdateRequest extends Partial<EventCreateRequest> {
+  id: number;
+}
+
+export interface EventResponse {
+  id: number;
+  name: string;
+  slug: string;
+  start_date: string;
+  end_date?: string | null;
+  location: string;
+  description?: string | null;
+  external_url?: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface EventWithImagesResponse extends EventResponse {
+  cover_image?: DisplayImage | null;
+  images: DisplayImage[];
+  image_count: number;
+}
+
+export interface EventListResponse {
+  events: EventWithImagesResponse[];
+  total: number;
 }
 
 // ==================== Meta Images API ====================
