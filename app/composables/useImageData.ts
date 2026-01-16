@@ -1,7 +1,7 @@
-import type { ImageBase } from "~~/types/imageTypes";
+import type { DisplayImage } from "~~/types/imageTypes";
 
 export function useImageData(context: string) {
-  const images = ref<ImageBase[]>([]);
+  const images = ref<DisplayImage[]>([]);
   const isLoading = ref(false);
   const fetchError = ref<string | null>(null);
   const { error: showError } = useToast();
@@ -11,7 +11,7 @@ export function useImageData(context: string) {
     fetchError.value = null;
 
     try {
-      const response = await $fetch<{ images: ImageBase[]; total: number }>(
+      const response = await $fetch<{ images: DisplayImage[]; total: number }>(
         `/api/images?context=${context}`,
         {
           headers: useRequestHeaders(["cookie"]),

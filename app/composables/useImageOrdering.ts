@@ -1,15 +1,18 @@
-import type { ImageBase, ImageGroup } from "~~/types/imageTypes";
-import { flattenImagesForApi, organizeImagesForAdmin, } from "~/utils/imageGroups";
+import type { DisplayImage, ImageGroup } from "~~/types/imageTypes";
+import {
+  flattenImagesForApi,
+  organizeImagesForAdmin,
+} from "~/utils/imageGroups";
 
 export function useImageOrdering(
   context: string,
-  images: Ref<ImageBase[]>,
+  images: Ref<DisplayImage[]>,
   hasLayouts: boolean
 ) {
   const { success, error } = useToast();
 
   // Transform images based on whether layouts are enabled
-  const organizedItems = ref<(ImageBase | ImageGroup)[]>([]);
+  const organizedItems = ref<(DisplayImage | ImageGroup)[]>([]);
 
   // CRITICAL: Snapshot of original order taken ONCE when images load
   const originalOrderSnapshot = ref<number[]>([]);
@@ -27,10 +30,10 @@ export function useImageOrdering(
         ? organizeImagesForAdmin(newImages)
         : [...newImages];
 
-      // Take snapshot of original order
+      // Take snapshot of original order using instanceId
       originalOrderSnapshot.value = hasLayouts
         ? flattenImagesForApi(organizeImagesForAdmin(newImages))
-        : newImages.map((img) => img.id);
+        : newImages.map((img) => img.instanceId);
     },
     { immediate: true }
   );
@@ -39,7 +42,7 @@ export function useImageOrdering(
   const currentOrder = computed(() => {
     return hasLayouts
       ? flattenImagesForApi(organizedItems.value)
-      : (organizedItems.value as ImageBase[]).map((img) => img.id);
+      : (organizedItems.value as DisplayImage[]).map((img) => img.instanceId);
   });
 
   const orderChanged = computed(() => {

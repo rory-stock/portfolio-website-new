@@ -354,6 +354,7 @@ export function useFileUpload(options: UseFileUploadOptions) {
         file: null,
       });
 
+      // Return instance IDs
       return images.map((img) => img.id);
     } catch (error: any) {
       // Check if it was a cancellation

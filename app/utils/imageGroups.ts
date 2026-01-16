@@ -1,4 +1,4 @@
-import type { ImageBase, ImageGroup } from "~~/types/imageTypes";
+import type { DisplayImage, ImageGroup } from "~~/types/imageTypes";
 import { isValidLayoutType, type LayoutTypeId } from "~/utils/layouts";
 
 /**
@@ -6,14 +6,14 @@ import { isValidLayoutType, type LayoutTypeId } from "~/utils/layouts";
  * Returns an array of groups and individual images in display order
  */
 export function organizeImagesForAdmin(
-  images: ImageBase[]
-): (ImageBase | ImageGroup)[] {
-  const result: (ImageBase | ImageGroup)[] = [];
+  images: DisplayImage[]
+): (DisplayImage | ImageGroup)[] {
+  const result: (DisplayImage | ImageGroup)[] = [];
   const processedGroups = new Set<number>();
 
   for (const image of images) {
     // If the image is in a group
-    if (image.layout_group_id !== null) {
+    if (image.layout_group_id !== null && image.layout_group_id !== undefined) {
       // Skip if we already processed this group
       if (processedGroups.has(image.layout_group_id)) {
         continue;
@@ -34,9 +34,9 @@ export function organizeImagesForAdmin(
 
       // Create the group object with the images array
       const group: ImageGroup = {
-        group_id: image.layout_group_id,
+        group_id: image.layout_group_id, // TypeScript now knows this is not undefined
         layout_type: layoutType,
-        images: groupImages,
+        images: groupImages as any, // Cast to ImageBase for compatibility
         display_order: image.group_display_order ?? 0,
       };
 
@@ -44,7 +44,7 @@ export function organizeImagesForAdmin(
       processedGroups.add(image.layout_group_id);
     } else {
       // Individual image
-      result.push(image);
+      result.push(image as any); // Cast to ImageBase for compatibility
     }
   }
 
@@ -54,44 +54,54 @@ export function organizeImagesForAdmin(
 /**
  * Check if the item is an ImageGroup
  */
-export function isImageGroup(item: ImageBase | ImageGroup): item is ImageGroup {
+export function isImageGroup(
+  item: DisplayImage | ImageGroup
+): item is ImageGroup {
   return "group_id" in item && "images" in item;
 }
 
-/*
+/**
  * Check if the item is in a fullscreen or single hero layout
  */
-export function isImageHero(item: ImageBase | ImageGroup): boolean {
-  return item.layout_type === "fullscreen-hero" || item.layout_type === "single-hero";
+export function isImageHero(item: DisplayImage | ImageGroup): boolean {
+  return (
+    item.layout_type === "fullscreen-hero" || item.layout_type === "single-hero"
+  );
 }
 
-/*
+/**
  * Check hero type
  */
-export function getHeroType(item: ImageBase | ImageGroup): LayoutTypeId | null {
-    if (item.layout_type === "fullscreen-hero" || item.layout_type === "single-hero") {
-      return item.layout_type;
-    }
+export function getHeroType(
+  item: DisplayImage | ImageGroup
+): LayoutTypeId | null {
+  if (
+    item.layout_type === "fullscreen-hero" ||
+    item.layout_type === "single-hero"
+  ) {
+    return item.layout_type;
+  }
   return null;
 }
 
 /**
  * Flatten groups back to individual images for API submission
+ * Returns instance IDs
  */
 export function flattenImagesForApi(
-  items: (ImageBase | ImageGroup)[]
+  items: (DisplayImage | ImageGroup)[]
 ): number[] {
-  const imageIds: number[] = [];
+  const instanceIds: number[] = [];
 
   for (const item of items) {
     if (isImageGroup(item)) {
-      // Add all group member IDs in their current order
-      imageIds.push(...item.images.map((img) => img.id));
+      // Add all group member instance IDs in their current order
+      instanceIds.push(...item.images.map((img: any) => img.instanceId));
     } else {
-      // Individual image
-      imageIds.push(item.id);
+      // Individual image - use instanceId
+      instanceIds.push((item as any).instanceId);
     }
   }
 
-  return imageIds;
+  return instanceIds;
 }
