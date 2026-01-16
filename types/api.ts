@@ -70,8 +70,8 @@ export interface ImageUpdateRequest {
 
 export interface ImageUpdateResponse {
   success: boolean;
-  image: ImageBase;
-  all_contexts?: ImageBase[];
+  image: DisplayImage;
+  all_contexts?: DisplayImage[];
   layout_removed?: boolean;
   group_was_removed?: boolean;
 }
@@ -84,7 +84,7 @@ export interface ImageListRequest {
 }
 
 export interface ImageListResponse {
-  images: ImageBase[];
+  images: DisplayImage[];
   total: number;
 }
 
@@ -100,7 +100,7 @@ export interface ImageReorderRequest {
 
 export interface ImageReorderResponse {
   success: boolean;
-  images: ImageBase[];
+  images: DisplayImage[];
 }
 
 // ==================== Layout API ====================
@@ -113,7 +113,7 @@ export interface LayoutAssignRequest {
 
 export interface LayoutAssignResponse {
   success: boolean;
-  images: ImageBase[];
+  images: DisplayImage[];
   group_id: number | null;
 }
 

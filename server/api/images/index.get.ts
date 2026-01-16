@@ -1,9 +1,14 @@
-import { eq, and, desc, asc, count } from "drizzle-orm";
-
-import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import type { ImageListResponse } from "~~/types/api";
-import { toImageBaseArray } from "~~/server/utils/imageTransform";
+import {
+  getImagesForContext,
+  getPrimaryImageForContext,
+} from "~~/server/utils/queries";
+import {
+  imageWithInstanceArrayToDisplay,
+  imageWithInstanceToDisplay,
+} from "~~/server/utils/imageTransform";
+import { isValidContext } from "~/utils/context";
 
 export default defineEventHandler(async (event): Promise<ImageListResponse> => {
   const db = useDB(event);
@@ -12,56 +17,91 @@ export default defineEventHandler(async (event): Promise<ImageListResponse> => {
 
   // Parse query params
   const context = query.context as string | undefined;
-  const isPrimary =
-    query.is_primary === "true"
-      ? true
-      : query.is_primary === "false"
-        ? false
-        : undefined;
+  const isPrimary = query.is_primary === "true";
   const r2Path = query.r2_path as string | undefined;
-  const includeLayouts = query.include_layouts === "true"; // opt-in for layout sorting
+  const includeLayouts = query.include_layouts === "true";
 
-  // Build where conditions
-  const conditions = [];
-  if (!session?.user) {
-    conditions.push(eq(images.is_public, true));
+  // Validate context if provided
+  if (context && !isValidContext(context)) {
+    throw createError({
+      statusCode: 400,
+      message: "Invalid context",
+    });
   }
-  if (context) {
-    conditions.push(eq(images.context, context));
+
+  // Handle primary image request
+  if (isPrimary && context) {
+    const primaryData = await getPrimaryImageForContext(db, context);
+
+    if (!primaryData) {
+      return { images: [], total: 0 };
+    }
+
+    // Check auth for non-public
+    if (!primaryData.instance.isPublic && !session?.user) {
+      throw createError({ statusCode: 403, message: "Forbidden" });
+    }
+
+    const displayImage = imageWithInstanceToDisplay({
+      base: primaryData.base,
+      instance: primaryData.instance,
+      metadata: null,
+      layout: null,
+    });
+
+    return {
+      images: [displayImage],
+      total: 1,
+    };
   }
-  if (isPrimary !== undefined) {
-    conditions.push(eq(images.is_primary, isPrimary));
-  }
+
+  // Handle r2_path request (get all contexts for an image)
   if (r2Path) {
-    conditions.push(eq(images.r2_path, r2Path));
+    const { getImagesByR2Path } = await import("~~/server/utils/queries");
+    const result = await getImagesByR2Path(db, r2Path);
+
+    if (!result) {
+      return { images: [], total: 0 };
+    }
+
+    // Convert instances to the display format
+    const displayImages = result.instances.map((instance) =>
+      imageWithInstanceToDisplay({
+        base: result.base,
+        instance,
+        metadata: null,
+        layout: null,
+      })
+    );
+
+    // Filter by auth if needed
+    const filteredImages = displayImages.filter((img) => {
+      return img.is_public || session?.user;
+    });
+
+    return {
+      images: filteredImages,
+      total: filteredImages.length,
+    };
   }
 
-  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+  // Handle context-based listing
+  if (!context) {
+    throw createError({
+      statusCode: 400,
+      message: "context or r2_path required",
+    });
+  }
 
-  // Choose sorting strategy based on includeLayouts flag
-  const orderBy = includeLayouts
-    ? [
-        asc(images.group_display_order), // Groups first
-        asc(images.order), // Then individual order
-        desc(images.uploaded_at), // Then upload date
-      ]
-    : [
-        asc(images.order), // Individual order
-        desc(images.uploaded_at), // Then upload date
-      ];
+  const imagesData = await getImagesForContext(db, context, {
+    isPublic: !session?.user ? true : undefined,
+    includeLayouts,
+  });
 
-  // Query with conditions
-  const [imageResults, [countResult]] = await Promise.all([
-    db
-      .select()
-      .from(images)
-      .where(whereClause)
-      .orderBy(...orderBy),
-    db.select({ count: count() }).from(images).where(whereClause),
-  ]);
+  const displayImages = imageWithInstanceArrayToDisplay(imagesData);
 
   return {
-    images: toImageBaseArray(imageResults),
-    total: countResult.count,
+    images: displayImages,
+    total: displayImages.length,
   };
 });

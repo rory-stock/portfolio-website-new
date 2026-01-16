@@ -1,154 +1,225 @@
 import { eq, inArray, and, asc } from "drizzle-orm";
-import { images } from "~~/server/db/schema";
+import * as schema from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
-import { getNextLayoutGroupId } from "~/utils/layoutGroups";
 import { isValidLayoutType, LAYOUT_TYPES } from "~/utils/layouts";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { logger } from "~/utils/logger";
 import type { LayoutAssignRequest, LayoutAssignResponse } from "~~/types/api";
-import { toImageBaseArray } from "~~/server/utils/imageTransform";
 
-export default defineEventHandler(async (event): Promise<LayoutAssignResponse> => {
-  await requireAuth(event);
+export default defineEventHandler(
+  async (event): Promise<LayoutAssignResponse> => {
+    await requireAuth(event);
 
-  const db = useDB(event);
-  const body = await readBody<LayoutAssignRequest>(event);
+    const db = useDB(event);
+    const body = await readBody<LayoutAssignRequest>(event);
 
-  const { image_ids, layout_type, context } = body as {
-    image_ids: number[];
-    layout_type: string;
-    context: string;
-  };
+    const { image_ids, layout_type, context } = body as {
+      image_ids: number[];
+      layout_type: string;
+      context: string;
+    };
 
-  // Validation
-  if (!image_ids || !Array.isArray(image_ids) || !layout_type || !context) {
-    throw createError({
-      statusCode: 400,
-      message: "image_ids, layout_type, and context required",
+    // Validation
+    if (!image_ids || !Array.isArray(image_ids) || !layout_type || !context) {
+      throw createError({
+        statusCode: 400,
+        message: "image_ids, layout_type, and context required",
+      });
+    }
+
+    if (!isValidLayoutType(layout_type)) {
+      throw createError({
+        statusCode: 400,
+        message: `Invalid layout_type: ${layout_type}`,
+      });
+    }
+
+    const layoutConfig = LAYOUT_TYPES[layout_type];
+    if (!layoutConfig) {
+      throw createError({
+        statusCode: 400,
+        message: `Invalid layout_type: ${layout_type}`,
+      });
+    }
+
+    if (image_ids.length !== layoutConfig.imageCount) {
+      throw createError({
+        statusCode: 400,
+        message: `Layout ${layout_type} requires exactly ${layoutConfig.imageCount} images, got ${image_ids.length}`,
+      });
+    }
+
+    // Fetch instances to validate they exist and belong to context
+    const selectedInstances = await db
+      .select()
+      .from(schema.imageInstances)
+      .where(
+        and(
+          inArray(schema.imageInstances.id, image_ids),
+          eq(schema.imageInstances.context, context as any)
+        )
+      );
+
+    if (selectedInstances.length !== image_ids.length) {
+      throw createError({
+        statusCode: 404,
+        message: "One or more images not found in this context",
+      });
+    }
+
+    // Check if any selected images are already in a layout
+    // If so, remove those old layouts first
+    const instancesWithLayouts = await db
+      .select()
+      .from(schema.imageLayouts)
+      .where(inArray(schema.imageLayouts.imageInstanceId, image_ids));
+
+    if (instancesWithLayouts.length > 0) {
+      const oldGroupIds = instancesWithLayouts
+        .map((il) => il.layoutGroupId)
+        .filter((id): id is number => id !== null);
+
+      const uniqueGroupIds = [...new Set(oldGroupIds)];
+
+      // Delete old layout groups and their image_layouts
+      for (const groupId of uniqueGroupIds) {
+        await db
+          .delete(schema.imageLayouts)
+          .where(eq(schema.imageLayouts.layoutGroupId, groupId));
+
+        await db
+          .delete(schema.layoutGroups)
+          .where(eq(schema.layoutGroups.id, groupId));
+
+        logger.info("Removed old layout group", { groupId, context });
+      }
+    }
+
+    // Sort instances by their current display order
+    const sortedInstances = selectedInstances.sort((a, b) => {
+      const orderA = a.order ?? Infinity;
+      const orderB = b.order ?? Infinity;
+      if (orderA !== orderB) return orderA - orderB;
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
-  }
 
-  if (!isValidLayoutType(layout_type)) {
-    throw createError({
-      statusCode: 400,
-      message: `Invalid layout_type: ${layout_type}`,
-    });
-  }
+    // Validate images are consecutive (strict)
+    for (let i = 1; i < sortedInstances.length; i++) {
+      const prevOrder = sortedInstances[i - 1].order;
+      const currOrder = sortedInstances[i].order;
 
-  const layoutConfig = LAYOUT_TYPES[layout_type];
-  if (!layoutConfig) {
-    throw createError({
-      statusCode: 400,
-      message: `Invalid layout_type: ${layout_type}`,
-    });
-  }
+      // Both must have order set
+      if (prevOrder === null || currOrder === null) {
+        throw createError({
+          statusCode: 400,
+          message: "All selected images must have display order set",
+        });
+      }
 
-  if (image_ids.length !== layoutConfig.imageCount) {
-    throw createError({
-      statusCode: 400,
-      message: `Layout ${layout_type} requires exactly ${layoutConfig.imageCount} images, got ${image_ids.length}`,
-    });
-  }
+      // Check if consecutive (no gaps)
+      if (currOrder - prevOrder !== 1) {
+        throw createError({
+          statusCode: 400,
+          message:
+            "Selected images must be consecutive in display order (no gaps allowed)",
+        });
+      }
+    }
 
-  // Fetch images to validate they exist and belong to context
-  const selectedImages = await db
-    .select()
-    .from(images)
-    .where(and(inArray(images.id, image_ids), eq(images.context, context)));
+    // Create a layout group (for multi-image layouts) or single layout
+    const isGroupLayout = layoutConfig.imageCount > 1;
+    const groupDisplayOrder = sortedInstances[0].order ?? 0;
 
-  if (selectedImages.length !== image_ids.length) {
-    throw createError({
-      statusCode: 404,
-      message: "One or more images not found in this context",
-    });
-  }
+    let layoutGroupId: number | null = null;
 
-  // Check if any selected images are already in a layout group
-  // If so, remove the layout from all members of those old groups
-  const oldGroupIds = selectedImages
-    .map((img) => img.layout_group_id)
-    .filter((id) => id !== null);
-
-  if (oldGroupIds.length > 0) {
-    // Get unique group IDs
-    const uniqueGroupIds = [...new Set(oldGroupIds)];
-
-    // Remove layout from all members of these groups
-    for (const groupId of uniqueGroupIds) {
-      await db
-        .update(images)
-        .set({
-          layout_type: null,
-          layout_group_id: null,
-          group_display_order: null,
+    if (isGroupLayout) {
+      // Create a layout group
+      const [layoutGroup] = await db
+        .insert(schema.layoutGroups)
+        .values({
+          context,
+          layoutType: layout_type as any,
+          groupDisplayOrder,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         })
-        .where(eq(images.layout_group_id, groupId));
-      logger.info("Removed layout from group", { groupId, context });
+        .returning();
+
+      layoutGroupId = layoutGroup.id;
     }
-  }
 
-  // Sort images by their current display order
-  const sortedImages = selectedImages.sort((a, b) => {
-    const orderA = a.order ?? Infinity;
-    const orderB = b.order ?? Infinity;
-    if (orderA !== orderB) return orderA - orderB;
-    return (
-      new Date(a.uploaded_at).getTime() - new Date(b.uploaded_at).getTime()
-    );
-  });
+    // Create image_layouts for each instance
+    for (let i = 0; i < image_ids.length; i++) {
+      const instanceId = image_ids[i];
 
-  // Validate images are consecutive (strict)
-  for (let i = 1; i < sortedImages.length; i++) {
-    const prevOrder = sortedImages[i - 1].order;
-    const currOrder = sortedImages[i].order;
-
-    // Both must have order set
-    if (prevOrder === null || currOrder === null) {
-      throw createError({
-        statusCode: 400,
-        message: "All selected images must have display order set",
+      await db.insert(schema.imageLayouts).values({
+        imageInstanceId: instanceId,
+        layoutGroupId: layoutGroupId,
+        positionInGroup: isGroupLayout ? i : null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
     }
 
-    // Check if consecutive (no gaps)
-    if (currOrder - prevOrder !== 1) {
-      throw createError({
-        statusCode: 400,
-        message:
-          "Selected images must be consecutive in display order (no gaps allowed)",
-      });
-    }
-  }
+    // Get updated images
+    const updatedImagesData = await db
+      .select()
+      .from(schema.imageInstances)
+      .where(inArray(schema.imageInstances.id, image_ids))
+      .orderBy(asc(schema.imageInstances.order));
 
-  // Generate group ID for multi-image layouts
-  const isGroupLayout = layoutConfig.imageCount > 1;
-  const groupId = isGroupLayout ? await getNextLayoutGroupId(db) : null;
+    // Transform to display format
+    const displayImages = await Promise.all(
+      updatedImagesData.map(async (instance) => {
+        const [base] = await db
+          .select()
+          .from(schema.baseImages)
+          .where(eq(schema.baseImages.id, instance.imageId));
 
-  // Use the first image's order as group_display_order
-  const groupDisplayOrder = isGroupLayout ? sortedImages[0].order : null;
+        const [metadata] = await db
+          .select()
+          .from(schema.imageMetadata)
+          .where(eq(schema.imageMetadata.imageInstanceId, instance.id))
+          .limit(1);
 
-  // Update all images with a layout assignment
-  for (const imageId of image_ids) {
-    await db
-      .update(images)
-      .set({
-        layout_type,
-        layout_group_id: groupId,
-        group_display_order: groupDisplayOrder,
+        const [layout] = await db
+          .select()
+          .from(schema.imageLayouts)
+          .where(eq(schema.imageLayouts.imageInstanceId, instance.id))
+          .limit(1);
+
+        let layoutGroup = null;
+        if (layout && layout.layoutGroupId) {
+          [layoutGroup] = await db
+            .select()
+            .from(schema.layoutGroups)
+            .where(eq(schema.layoutGroups.id, layout.layoutGroupId));
+        }
+
+        const { imageWithInstanceToDisplay } =
+          await import("~~/server/utils/imageTransform");
+
+        return imageWithInstanceToDisplay(
+          {
+            base,
+            instance,
+            metadata: metadata || null,
+            layout: layout || null,
+          },
+          layoutGroup
+            ? {
+                layoutType: layoutGroup.layoutType,
+                groupDisplayOrder: layoutGroup.groupDisplayOrder,
+              }
+            : null
+        );
       })
-      .where(eq(images.id, imageId));
+    );
+
+    return {
+      success: true,
+      images: displayImages,
+      group_id: layoutGroupId,
+    };
   }
-
-  // Return updated images
-  const updatedImages = await db
-    .select()
-    .from(images)
-    .where(inArray(images.id, image_ids))
-    .orderBy(asc(images.order));
-
-  return {
-    success: true,
-    images: toImageBaseArray(updatedImages),
-    group_id: groupId,
-  };
-});
+);

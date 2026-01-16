@@ -1,24 +1,31 @@
-import { eq } from "drizzle-orm";
-
-import { images } from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
-import type { ImageBase } from "~~/types/imageTypes";
-import { toImageBase } from "~~/server/utils/imageTransform";
+import { getImageWithInstance } from "~~/server/utils/queries";
+import { imageWithInstanceToDisplay } from "~~/server/utils/imageTransform";
+import type { DisplayImage } from "~~/types/imageTypes";
 
-export default defineEventHandler(async (event): Promise<{ image: ImageBase }> => {
-  const db = useDB(event);
-  const id = Number(getRouterParam(event, "id"));
-  const session = await getUserSession(event);
+export default defineEventHandler(
+  async (event): Promise<{ image: DisplayImage }> => {
+    const db = useDB(event);
+    const id = Number(getRouterParam(event, "id"));
+    const session = await getUserSession(event);
 
-  const [image] = await db.select().from(images).where(eq(images.id, id));
+    if (!id || isNaN(id)) {
+      throw createError({ statusCode: 400, message: "Invalid image ID" });
+    }
 
-  if (!image) {
-    throw createError({ statusCode: 404, message: "Image not found" });
+    const imageData = await getImageWithInstance(db, id);
+
+    if (!imageData) {
+      throw createError({ statusCode: 404, message: "Image not found" });
+    }
+
+    // Check auth for non-public
+    if (!imageData.instance.isPublic && !session?.user) {
+      throw createError({ statusCode: 403, message: "Forbidden" });
+    }
+
+    const displayImage = imageWithInstanceToDisplay(imageData);
+
+    return { image: displayImage };
   }
-
-  if (!image.is_public && !session?.user) {
-    throw createError({ statusCode: 403, message: "Forbidden" });
-  }
-
-  return { image: toImageBase(image) };
-});
+);
