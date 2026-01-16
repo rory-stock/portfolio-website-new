@@ -1,5 +1,5 @@
 import { useDB } from "~~/server/db/client";
-import { images } from "~~/server/db/schema";
+import { baseImages } from "~~/server/db/schema";
 import { listR2Objects, deleteR2Object } from "~/utils/r2";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { logger } from "~/utils/logger";
@@ -13,10 +13,10 @@ export default defineEventHandler(async (event): Promise<CleanupResponse> => {
   // Get all R2 files
   const r2Files = await listR2Objects();
 
-  // Get all unique r2_paths from DB
+  // Get all unique r2_paths from base_images
   const dbRecords = await db
-    .selectDistinct({ r2_path: images.r2_path })
-    .from(images);
+    .selectDistinct({ r2_path: baseImages.r2Path })
+    .from(baseImages);
 
   const dbPaths = new Set(dbRecords.map((r) => r.r2_path));
 
