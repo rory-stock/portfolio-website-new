@@ -165,7 +165,8 @@ const { success, error: showError } = useToast();
 
 // Data fetching
 const { images, isLoading, fetchError, fetchImages } = useImageData(
-  props.context
+  props.context,
+  props.showLayoutWizard
 );
 
 // Drag & drop ordering
