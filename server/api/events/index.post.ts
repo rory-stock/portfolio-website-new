@@ -1,7 +1,7 @@
 import { useDB } from "~~/server/db/client";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import type { EventCreateRequest, EventResponse } from "~~/types/api";
-import { createEvent } from "~~/server/utils/mutations";
+import { createEventRecord } from "~~/server/utils/mutations";
 import { validateDate } from "~~/server/utils/validation";
 import { eventToResponse } from "~~/server/utils/eventTransform";
 
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event): Promise<EventResponse> => {
     });
   }
 
-  const newEvent = await createEvent(db, {
+  const newEvent = await createEventRecord(db, {
     name: body.name,
     startDate: body.start_date,
     endDate: body.end_date,

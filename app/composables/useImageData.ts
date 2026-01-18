@@ -1,6 +1,6 @@
 import type { DisplayImage } from "~~/types/imageTypes";
 
-export function useImageData(context: string) {
+export function useImageData(context: string, includeLayouts: boolean = false) {
   const images = ref<DisplayImage[]>([]);
   const isLoading = ref(false);
   const fetchError = ref<string | null>(null);
@@ -11,8 +11,13 @@ export function useImageData(context: string) {
     fetchError.value = null;
 
     try {
+      const params = new URLSearchParams({ context });
+      if (includeLayouts) {
+        params.append("include_layouts", "true");
+      }
+
       const response = await $fetch<{ images: DisplayImage[]; total: number }>(
-        `/api/images?context=${context}`,
+        `/api/images?${params.toString()}`,
         {
           headers: useRequestHeaders(["cookie"]),
         }

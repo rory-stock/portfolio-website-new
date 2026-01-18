@@ -3,7 +3,7 @@
  * Shared types between client and server for type safety
  */
 
-import type { DisplayImage, ImageBase } from "./imageTypes";
+import type { DisplayImage } from "./imageTypes";
 
 // ==================== Content API ====================
 

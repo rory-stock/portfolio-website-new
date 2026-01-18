@@ -6,8 +6,6 @@ import { imageWithInstanceToDisplay } from "~~/server/utils/imageTransform";
 import { eventWithImagesToResponse } from "~~/server/utils/eventTransform";
 
 export default defineEventHandler(async (event): Promise<EventListResponse> => {
-  await requireAuth(event);
-
   const db = useDB(event);
 
   // Get all events

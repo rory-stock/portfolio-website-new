@@ -117,30 +117,3 @@ export const eventImages = sqliteTable("event_images", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
-
-// ==================== TEMPORARY - Old Schema for Compatibility ====================
-// TODO: Remove this after all endpoints are updated
-export const images = sqliteTable("images", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  context: text("context").notNull(),
-  r2_path: text("r2_path").notNull(),
-  url: text("url").notNull(),
-  alt: text("alt").default(""),
-  width: integer("width").notNull(),
-  height: integer("height").notNull(),
-  file_size: integer("file_size").notNull(),
-  original_filename: text("original_filename").notNull(),
-  is_primary: integer("is_primary", { mode: "boolean" })
-    .notNull()
-    .default(true),
-  is_public: integer("is_public", { mode: "boolean" }).notNull().default(true),
-  order: integer("order"),
-  uploaded_at: integer("uploaded_at", { mode: "timestamp" }).notNull(),
-  description: text("description").default(""),
-  event_name: text("event_name").default(""),
-  event_date: text("event_date").default(""),
-  event_location: text("event_location").default(""),
-  layout_type: text("layout_type").default(""),
-  layout_group_id: integer("layout_group_id"),
-  group_display_order: integer("group_display_order"),
-});

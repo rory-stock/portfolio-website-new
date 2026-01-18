@@ -40,37 +40,6 @@ export interface DisplayImage {
   updated_at: Date;
 }
 
-// ==================== Legacy/Compatibility Types ====================
-// TODO: Remove after full migration
-export interface ImageBase {
-  id: number;
-  context: string;
-  r2_path: string;
-  url: string;
-  alt: string | null;
-  description: string | null;
-  event_name: string | null;
-  event_date: string | null;
-  event_location: string | null;
-  width: number;
-  height: number;
-  file_size: number;
-  original_filename: string;
-  uploaded_at: string | Date;
-  is_public: boolean;
-  is_primary: boolean;
-  order: number | null;
-  layout_type: LayoutTypeId | null;
-  layout_group_id: number | null;
-  group_display_order: number | null;
-}
-
-// Extended interface for records that include context
-export interface ImageWithContext extends ImageBase {
-  context: string;
-  is_primary: boolean;
-}
-
 // ==================== UI Form Fields ====================
 export interface ImageField {
   key: string;
@@ -102,13 +71,5 @@ export interface ImageGroup {
   group_id: number;
   layout_type: LayoutTypeId;
   images: DisplayImage[];
-  display_order: number;
-}
-
-// Lightweight proxy for vuedraggable compatibility
-export interface ImageGroupProxy {
-  type: "group-proxy";
-  group_id: number;
-  layout_type: string;
   display_order: number;
 }

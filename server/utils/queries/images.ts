@@ -94,12 +94,22 @@ export async function getImagesForContext(
         .limit(1);
 
       let layout = null;
+      let layoutGroup = null;
       if (options.includeLayouts) {
         [layout] = await db
           .select()
           .from(schema.imageLayouts)
           .where(eq(schema.imageLayouts.imageInstanceId, instance.id))
           .limit(1);
+
+        // If the layout exists and has a group, fetch the group
+        if (layout && layout.layoutGroupId) {
+          [layoutGroup] = await db
+            .select()
+            .from(schema.layoutGroups)
+            .where(eq(schema.layoutGroups.id, layout.layoutGroupId))
+            .limit(1);
+        }
       }
 
       return {
@@ -107,6 +117,7 @@ export async function getImagesForContext(
         instance,
         metadata: metadata || null,
         layout: layout || null,
+        layoutGroup: layoutGroup || null,
       };
     })
   );

@@ -7,6 +7,7 @@ import type {
   NewImageInstance,
   NewImageMetadata,
 } from "~~/types/database";
+// @ts-expect-error - exif-parser has no type definitions
 import ExifParser from "exif-parser";
 
 /**

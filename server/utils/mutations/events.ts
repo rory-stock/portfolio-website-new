@@ -7,7 +7,7 @@ import type { NewEvent, NewEventImage } from "~~/types/database";
 /**
  * Create an event record
  */
-export async function createEvent(
+export async function createEventRecord(
   db: DrizzleD1Database<typeof schema>,
   data: {
     name: string;
