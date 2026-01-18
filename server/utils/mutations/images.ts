@@ -7,7 +7,7 @@ import type {
   NewImageInstance,
   NewImageMetadata,
 } from "~~/types/database";
-const ExifParser = require("exif-parser");
+import ExifParser from "exif-parser";
 
 /**
  * Extract EXIF metadata from image buffer

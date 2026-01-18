@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getOgImageUrl, getTwitterImageUrl } from "~/utils/meta";
+import type { DisplayImage } from "~~/types/imageTypes";
 
 useHead({
   title: "Personal",
@@ -10,14 +11,17 @@ useSeoMeta({
   twitterImage: getTwitterImageUrl("Personal"),
 });
 
-const { data: imageData } = await useFetch("/api/images", {
+const { data: imageData } = await useFetch<{
+  images: DisplayImage[];
+  total: number;
+}>("/api/images", {
   query: { context: "personal" },
 });
 
 const { data: personal } = await useContentData("personal");
 
 const images = computed(() => imageData.value?.images || []);
-const selectedImage = ref<(typeof images.value)[0] | null>(null);
+const selectedImage = ref<DisplayImage | null>(null);
 </script>
 
 <template>
@@ -33,7 +37,7 @@ const selectedImage = ref<(typeof images.value)[0] | null>(null);
     >
       <ImageGridItem
         v-for="image in images"
-        :key="image.id"
+        :key="image.instanceId"
         :image="image"
         @click="selectedImage = image"
         class="cursor-pointer"

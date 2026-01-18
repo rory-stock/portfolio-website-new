@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getOgImageUrl, getTwitterImageUrl } from "~/utils/meta";
+import type { DisplayImage } from "~~/types/imageTypes";
 
 useHead({ title: "Info" });
 
@@ -8,7 +9,10 @@ useSeoMeta({
   twitterImage: getTwitterImageUrl("info"),
 });
 
-const { data: imageData } = await useFetch("/api/images", {
+const { data: imageData } = await useFetch<{
+  images: DisplayImage[];
+  total: number;
+}>("/api/images", {
   query: { context: "info", is_primary: true },
 });
 
