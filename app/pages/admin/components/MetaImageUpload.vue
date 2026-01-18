@@ -27,7 +27,7 @@
         @click="handleDelete"
         :disabled="deleting || !imageExists"
         :loading="deleting"
-        class="absolute top-2 right-2 z-50 hover:text-neutral-300"
+        class="absolute top-2 right-2 z-30 hover:text-neutral-300"
       >
         <template #loading>Deleting...</template>
         <Icon name="bin" :size="20" />
