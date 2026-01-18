@@ -4,7 +4,12 @@
     <div>
       <ContentSection table="info" title="Info" :fields="contentFields" />
       <hr class="my-4" />
-      <ImageSection context="info" title="Info" :fields="imageFields" />
+      <ImageSection
+        context="info"
+        title="Info"
+        :showPrimaryToggle="true"
+        :fields="imageFields"
+      />
     </div>
     <Toast />
   </div>

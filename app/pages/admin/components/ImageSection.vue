@@ -40,6 +40,7 @@
         >
           <ImageAdminThumbnail
             :image="element as DisplayImage"
+            :showPrimaryToggle="props.showPrimaryToggle"
             @click="openModal(element as DisplayImage)"
             @toggle-primary="handleTogglePrimary(element as DisplayImage)"
           />
@@ -80,6 +81,7 @@
             </div>
             <ImageAdminThumbnail
               :image="element"
+              :showPrimaryToggle="props.showPrimaryToggle"
               @click="openModal(element)"
               @toggle-primary="handleTogglePrimary(element)"
             />
@@ -89,6 +91,7 @@
           <div v-else class="h-fit w-fit">
             <ImageAdminThumbnail
               :image="element"
+              :showPrimaryToggle="props.showPrimaryToggle"
               @click="openModal(element)"
               @toggle-primary="handleTogglePrimary(element)"
             />
@@ -155,10 +158,12 @@ interface Props {
   title: string;
   fields: ImageField[];
   showLayoutWizard?: boolean;
+  showPrimaryToggle?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showLayoutWizard: false,
+  showPrimaryToggle: false,
 });
 
 const { success, error: showError } = useToast();

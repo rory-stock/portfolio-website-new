@@ -24,6 +24,7 @@
 
     <!-- Primary indicator (clickable, shows on hover) -->
     <button
+      v-if="showPrimaryToggle"
       class="absolute top-2 right-2 cursor-pointer rounded p-1.5 shadow-lg transition-all duration-200 focus:ring-2 focus:ring-neutral-100 focus:ring-offset-2 focus:ring-offset-neutral-900 focus:outline-none"
       :class="primaryButtonClass"
       :aria-label="
@@ -52,9 +53,12 @@ import type { DisplayImage } from "~~/types/imageTypes";
 
 interface Props {
   image: DisplayImage;
+  showPrimaryToggle?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  showPrimaryToggle: false,
+});
 defineEmits<{
   click: [];
   togglePrimary: [];
