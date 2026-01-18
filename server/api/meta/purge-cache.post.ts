@@ -26,7 +26,7 @@ export default defineEventHandler(
     const fileUrl = `${config.r2PublicUrl}/${r2Path}`;
 
     // Check if Cloudflare credentials are configured
-    if (!config.cloudflareApiToken || !config.cloudflareZoneId) {
+    if (!config.cloudflarePurgeCacheToken || !config.cloudflareZoneId) {
       logger.warn(
         "Cloudflare cache purge attempted but credentials not configured"
       );
@@ -44,7 +44,7 @@ export default defineEventHandler(
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${config.cloudflareApiToken}`,
+            Authorization: `Bearer ${config.cloudflarePurgeCacheToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

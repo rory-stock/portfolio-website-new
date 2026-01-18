@@ -52,7 +52,7 @@ export default defineNuxtConfig({
     r2SecretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
     r2BucketName: process.env.R2_BUCKET_NAME,
     r2PublicUrl: process.env.R2_PUBLIC_URL,
-    cloudflareApiToken: process.env.CLOUDFLARE_API_TOKEN,
+    cloudflarePurgeCacheToken: process.env.CLOUDFLARE_PURGE_CACHE_TOKEN,
     cloudflareZoneId: process.env.CLOUDFLARE_ZONE_ID,
   },
   routeRules: {
