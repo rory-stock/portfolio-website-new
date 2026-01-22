@@ -228,3 +228,33 @@ export interface MetaCachePurgeResponse {
   purged: boolean;
   url?: string;
 }
+
+// ==================== Multi-Select Operations ====================
+
+export interface MultiDeleteRequest {
+  instance_ids: number[];
+}
+
+export interface MultiDeleteResponse {
+  success: boolean;
+  deleted: number;
+  failed: number;
+  errors?: Array<{ id: number; error: string }>;
+}
+
+export interface MultiUpdateRequest {
+  instance_ids: number[];
+  updates: {
+    is_public?: boolean;
+    add_contexts?: string[];
+    remove_contexts?: string[];
+    remove_layout?: boolean;
+  };
+}
+
+export interface MultiUpdateResponse {
+  success: boolean;
+  updated: number;
+  failed: number;
+  errors?: Array<{ id: number; error: string }>;
+}
