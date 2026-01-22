@@ -22,9 +22,12 @@ export function useMultiActions(context: string) {
 
     // Check each group
     for (const [groupId, groupImages] of layoutGroups) {
-      const layoutType = groupImages[0].layout_type;
-      if (!layoutType) continue;
+      const firstImage = groupImages[0];
 
+      // Skip if no images or no layout type
+      if (!firstImage?.layout_type) continue;
+
+      const layoutType = firstImage.layout_type;
       const requiredCount = LAYOUT_TYPES[layoutType]?.imageCount || 0;
 
       // Not all group members selected = will break the layout
