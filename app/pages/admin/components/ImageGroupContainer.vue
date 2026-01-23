@@ -25,7 +25,9 @@
       >
         <ImageAdminThumbnail
           :image="img"
-          @click="$emit('openModal', img)"
+          :isSelectionMode="isSelectionMode"
+          :isSelected="isSelected(img.instanceId)"
+          @click="handleClick($event, img)"
           @toggle-primary="$emit('togglePrimary', img)"
         />
       </div>
@@ -42,14 +44,20 @@ import type { LayoutTypeId } from "~/utils/layouts";
 interface Props {
   groupImages: DisplayImage[];
   layoutType: LayoutTypeId;
+  isSelectionMode?: boolean;
+  isSelected?: (instanceId: number) => boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  isSelectionMode: false,
+  isSelected: () => false,
+});
 
 const emit = defineEmits<{
   update: [images: DisplayImage[]];
   openModal: [image: DisplayImage];
   togglePrimary: [image: DisplayImage];
+  imageClick: [event: MouseEvent, image: DisplayImage];
 }>();
 
 // Local copy of images for v-model
@@ -61,4 +69,14 @@ const localImages = computed({
 const layoutLabel = computed(
   () => LAYOUT_TYPES[props.layoutType]?.label || props.layoutType
 );
+
+function handleClick(event: MouseEvent, image: DisplayImage) {
+  if (props.isSelectionMode) {
+    // In selection mode, emit the click event for parent to handle
+    emit("imageClick", event, image);
+  } else {
+    // Not in selection mode, open modal
+    emit("openModal", image);
+  }
+}
 </script>

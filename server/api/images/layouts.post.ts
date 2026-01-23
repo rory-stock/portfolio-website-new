@@ -126,27 +126,22 @@ export default defineEventHandler(
       }
     }
 
-    // Create a layout group (for multi-image layouts) or single layout
-    const isGroupLayout = layoutConfig.imageCount > 1;
+    // Create a layout group for ALL layouts (single or multi-image)
     const groupDisplayOrder = sortedInstances[0].order ?? 0;
 
-    let layoutGroupId: number | null = null;
+    const [layoutGroup] = await db
+      .insert(schema.layoutGroups)
+      .values({
+        context,
+        layoutType: layout_type as any,
+        groupDisplayOrder,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
 
-    if (isGroupLayout) {
-      // Create a layout group
-      const [layoutGroup] = await db
-        .insert(schema.layoutGroups)
-        .values({
-          context,
-          layoutType: layout_type as any,
-          groupDisplayOrder,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
-
-      layoutGroupId = layoutGroup.id;
-    }
+    const layoutGroupId = layoutGroup.id;
+    const isGroupLayout = layoutConfig.imageCount > 1;
 
     // Create image_layouts for each instance
     for (let i = 0; i < image_ids.length; i++) {
