@@ -1,8 +1,8 @@
 <template>
-  <Transition name="slide-up">
+  <Transition name="slide">
     <div
       v-if="selectedCount > 0"
-      class="fixed right-0 bottom-0 left-0 z-50 border-t border-neutral-700 bg-neutral-900 p-3 md:p-4"
+      class="fixed right-0 bottom-2 lg:bottom-6 left-0 z-30 mx-2 rounded-2xl border border-neutral-700 bg-neutral-900 p-3 md:p-4 lg:mx-auto lg:w-1/3"
     >
       <div class="flex items-center justify-between">
         <!-- Selection info -->
@@ -10,12 +10,11 @@
           <span class="text-xs text-neutral-300 md:text-sm">
             {{ selectedCount }} selected
           </span>
-          <button
+          <AppButton
             @click="emit('clearSelection')"
-            class="text-xs text-neutral-400 transition-colors hover:text-neutral-200 md:text-sm"
           >
             Clear
-          </button>
+          </AppButton>
         </div>
 
         <!-- Actions -->
@@ -25,7 +24,7 @@
             :key="action.id"
             :variant="action.variant"
             @click="handleAction(action)"
-            class="px-2 py-1 text-xs md:px-4 md:py-2 md:text-sm"
+            class="flex flex-row items-center px-2 py-1 text-xs md:px-4 md:py-2 md:text-sm"
           >
             <Icon :name="action.icon" :size="14" class="md:mr-1" />
             <span class="hidden md:inline">{{ action.label }}</span>
@@ -58,15 +57,3 @@ function handleAction(action: MultiAction) {
   emit("action", action);
 }
 </script>
-
-<style scoped>
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: transform 0.3s ease;
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(100%);
-}
-</style>
