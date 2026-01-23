@@ -91,8 +91,8 @@ export function useMultiActions(context: string) {
       }),
 
       execute: async (images) => {
-        await $fetch("/api/images/multi", {
-          method: "DELETE",
+        await $fetch("/api/images/multi-delete", {
+          method: "POST",
           body: { instance_ids: images.map((img) => img.instanceId) },
         });
       },
