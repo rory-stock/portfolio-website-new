@@ -10,8 +10,8 @@
     tabindex="0"
     :aria-label="`View image: ${image.alt || 'Untitled'}`"
     @click="handleClick"
-    @keydown.enter.prevent="handleClick"
-    @keydown.space.prevent="handleClick"
+    @keydown.enter.prevent="handleKeydown"
+    @keydown.space.prevent="handleKeydown"
   >
     <!-- Selection overlay and indicator -->
     <div
@@ -78,6 +78,7 @@ const props = withDefaults(defineProps<Props>(), {
   isSelectionMode: false,
   isSelected: false,
 });
+
 const emit = defineEmits<{
   click: [event: MouseEvent];
   togglePrimary: [];
@@ -95,5 +96,13 @@ const primaryButtonClass = computed(() => {
 
 function handleClick(event: MouseEvent) {
   emit("click", event);
+}
+
+function handleKeydown() {
+  const syntheticEvent = new MouseEvent("click", {
+    bubbles: true,
+    cancelable: true,
+  });
+  emit("click", syntheticEvent);
 }
 </script>
