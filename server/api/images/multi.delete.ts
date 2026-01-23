@@ -26,6 +26,7 @@ export default defineEventHandler(
 
     const db = useDB(event);
 
+<<<<<<< Updated upstream
     let deleted = 0;
     let failed = 0;
     const errors: Array<{ id: number; error: string }> = [];
@@ -33,6 +34,11 @@ export default defineEventHandler(
     // Process each instance deletion
     for (const instanceId of instance_ids) {
       try {
+=======
+    // Process all deletions in parallel
+    const results = await Promise.allSettled(
+      instance_ids.map(async (instanceId) => {
+>>>>>>> Stashed changes
         // Delete instance (may also delete base image if last instance)
         const result = await deleteImageInstance(db, instanceId);
 
@@ -41,7 +47,10 @@ export default defineEventHandler(
           try {
             await deleteR2Object(result.r2Path);
           } catch (r2Error: any) {
+<<<<<<< Updated upstream
             // Log R2 error but don't fail the operation since DB is already cleaned up
+=======
+>>>>>>> Stashed changes
             logger.error(
               `R2 deletion failed for ${result.r2Path} (DB record already deleted)`,
               r2Error
@@ -49,6 +58,7 @@ export default defineEventHandler(
           }
         }
 
+<<<<<<< Updated upstream
         deleted++;
       } catch (error: any) {
         failed++;
@@ -59,6 +69,32 @@ export default defineEventHandler(
         logger.error(`Failed to delete instance ${instanceId}`, error);
       }
     }
+=======
+        return { instanceId, success: true };
+      })
+    );
+
+    // Count successes and failures
+    let deleted = 0;
+    let failed = 0;
+    const errors: Array<{ id: number; error: string }> = [];
+
+    results.forEach((result, index) => {
+      if (result.status === "fulfilled") {
+        deleted++;
+      } else {
+        failed++;
+        errors.push({
+          id: instance_ids[index],
+          error: result.reason?.message || "Unknown error",
+        });
+        logger.error(
+          `Failed to delete instance ${instance_ids[index]}`,
+          result.reason
+        );
+      }
+    });
+>>>>>>> Stashed changes
 
     return {
       success: true,
