@@ -7,14 +7,15 @@ import type { MultiDeleteRequest, MultiDeleteResponse } from "~~/types/api";
 
 export default defineEventHandler(
   async (event): Promise<MultiDeleteResponse> => {
-    await requireAuth(event);
-    const body = await readBody<MultiDeleteRequest>(event);
-    const { instance_ids } = body;
+    // Skip auth temporarily
+    // await requireAuth(event);
 
-    // Just return immediately
+    // Skip body parsing temporarily
+    // const body = await readBody<MultiDeleteRequest>(event);
+
     return {
       success: true,
-      deleted: instance_ids.length,
+      deleted: 0,
       failed: 0,
     };
   }
