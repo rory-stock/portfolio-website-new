@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 import { onKeyStroke } from "@vueuse/core";
 
 export interface DelayedOperationOptions {
@@ -12,10 +12,11 @@ export function useDelayedOperation(options: DelayedOperationOptions = {}) {
     id: string;
     label: string;
     timeout: NodeJS.Timeout;
+    toastId: number;
     cancel: () => void;
   } | null>(null);
 
-  const { info, success, error: showError } = useToast();
+  const { info, success, error: showError, remove: removeToast } = useToast();
 
   /**
    * Schedule an operation to execute after a delay
@@ -55,6 +56,13 @@ export function useDelayedOperation(options: DelayedOperationOptions = {}) {
       if (!isCancelled && pendingOperation.value?.id === id) {
         isCancelled = true;
         clearTimeout(pendingOperation.value.timeout);
+
+        // Remove the original toast after a short delay (500ms)
+        const originalToastId = pendingOperation.value.toastId;
+        setTimeout(() => {
+          removeToast(originalToastId);
+        }, 800);
+
         pendingOperation.value = null;
         success("Operation cancelled");
       }
@@ -69,10 +77,10 @@ export function useDelayedOperation(options: DelayedOperationOptions = {}) {
     }, delay);
 
     // Store pending operation
-    pendingOperation.value = { id, label, timeout, cancel };
+    pendingOperation.value = { id, label, timeout, toastId: 0, cancel };
 
-    // Show toast with the cancel action and countdown
-    info(label, delay, {
+    // Update the stored toastId
+    pendingOperation.value.toastId = info(label, delay, {
       action: {
         label: "Cancel",
         handler: cancel,

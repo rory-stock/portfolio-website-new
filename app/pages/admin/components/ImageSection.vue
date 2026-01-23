@@ -27,7 +27,7 @@
       <!-- Header Controls -->
       <div
         v-if="organizedItems.length > 0"
-        class="mb-4 flex items-center gap-3"
+        class="mb-4 flex flex-col w-full md:items-center gap-3 md:flex-row"
       >
         <!-- Selection Mode Controls -->
         <template v-if="!isSelectionMode">
@@ -102,7 +102,7 @@
             @open-modal="(image) => openModal(image)"
             @image-click="handleImageClick"
             @toggle-primary="handleTogglePrimary"
-            class="col-span-3"
+            :class="element.images.length > 1 ? 'col-span-3' : ''"
           />
 
           <!-- Hero Image (1 column) -->
@@ -126,7 +126,7 @@
             />
           </div>
 
-          <!-- Individual Image (1 column) -->
+          <!-- Individual Image -->
           <div v-else class="h-fit w-fit">
             <ImageAdminThumbnail
               :image="element"
@@ -195,8 +195,9 @@
     />
 
     <MultiOperationConfirm
+      v-if="pendingAction"
       :open="showConfirmModal"
-      :action="pendingAction!"
+      :action="pendingAction"
       :selectedImages="selectedImages"
       :warnings="pendingWarnings"
       :confirmation="confirmationContent"
@@ -368,7 +369,7 @@ const handleCancelConfirmation = () => {
 
 const executeAction = async (action: MultiAction) => {
   const count = selectedCount.value;
-  const label = `${action.label} ${count} image${count > 1 ? "s" : ""}`;
+  const label = `${action.message} ${count} image${count > 1 ? "s" : ""}`;
 
   const proceed = scheduleOperation(
     label,
@@ -379,7 +380,7 @@ const executeAction = async (action: MultiAction) => {
         await fetchImages();
         exitSelectionMode();
         success(
-          `Successfully ${action.label.toLowerCase()} ${count} image${count > 1 ? "s" : ""}`
+          `Successfully ${action.message.toLowerCase()} ${count} image${count > 1 ? "s" : ""}`
         );
       } catch (error: any) {
         showError(

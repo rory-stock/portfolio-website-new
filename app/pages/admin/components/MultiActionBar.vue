@@ -26,7 +26,7 @@
             @click="handleAction(action)"
             class="flex flex-row items-center px-2 py-1 text-xs md:px-4 md:py-2 md:text-sm"
           >
-            <Icon :name="action.icon" :size="14" class="md:mr-1" />
+            <Icon :name="action.icon" :size="17" class="md:mr-1" />
             <span class="hidden md:inline">{{ action.label }}</span>
           </AppButton>
         </div>

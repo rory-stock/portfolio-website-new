@@ -68,7 +68,8 @@ export function useMultiActions(context: string) {
   const actions: MultiAction[] = [
     {
       id: "delete",
-      label: "Deleting",
+      message: "Deleting",
+      label: "Delete",
       icon: "bin",
       variant: "danger",
       needsConfirmation: true,
@@ -99,8 +100,9 @@ export function useMultiActions(context: string) {
 
     {
       id: "toggle-visibility",
-      label: "Toggling visibility",
-      icon: "globe",
+      message: "Toggling visibility",
+      label: "Toggle visibility",
+      icon: "openEye",
       variant: "secondary",
       needsConfirmation: false,
       breaksLayouts: false,

@@ -18,6 +18,7 @@ export const iconNames = [
   "info",
   "bin",
   "refresh",
+  "openEye",
 ] as const;
 
 export type IconName = (typeof iconNames)[number];
@@ -164,5 +165,10 @@ export const iconData: Record<IconName, IconData> = {
     viewBox: "0 0 24 24",
     fill: "currentColor",
     path: "M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z",
+  },
+  openEye: {
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    path: "M12 9a3 3 0 0 1 3 3a3 3 0 0 1-3 3a3 3 0 0 1-3-3a3 3 0 0 1 3-3m0-4.5c5 0 9.27 3.11 11 7.5c-1.73 4.39-6 7.5-11 7.5S2.73 16.39 1 12c1.73-4.39 6-7.5 11-7.5M3.18 12a9.821 9.821 0 0 0 17.64 0a9.821 9.821 0 0 0-17.64 0"
   },
 } as const;

@@ -1,9 +1,10 @@
-import type { IconName } from "../app/components/icons/iconData";
+import type { IconName } from "~/components/icons/iconData";
 import type { DisplayImage } from "./imageTypes";
 
 export interface MultiAction {
   id: string;
-  label: string; // Present continuous format for toast (e.g. "Deleting", "Toggling visibility")
+  message: string; // Present continuous format for toast (e.g. "Deleting", "Toggling visibility")
+  label: string;
   icon: IconName;
   variant?: "primary" | "secondary" | "danger";
   needsConfirmation: boolean;
