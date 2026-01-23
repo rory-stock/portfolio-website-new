@@ -7,10 +7,9 @@ import type { MultiDeleteRequest, MultiDeleteResponse } from "~~/types/api";
 
 export default defineEventHandler(
   async (event): Promise<MultiDeleteResponse> => {
-    // Skip auth temporarily
-    // await requireAuth(event);
+    await requireAuth(event);
 
-    // Skip body parsing temporarily
+    // Skip body parsing
     // const body = await readBody<MultiDeleteRequest>(event);
 
     return {
