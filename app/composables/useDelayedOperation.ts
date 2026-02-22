@@ -57,7 +57,7 @@ export function useDelayedOperation(options: DelayedOperationOptions = {}) {
         isCancelled = true;
         clearTimeout(pendingOperation.value.timeout);
 
-        // Remove the original toast after a short delay (500ms)
+        // Remove the original toast after a short delay
         const originalToastId = pendingOperation.value.toastId;
         setTimeout(() => {
           removeToast(originalToastId);

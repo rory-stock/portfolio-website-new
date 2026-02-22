@@ -90,11 +90,41 @@ export const imageLayouts = sqliteTable("image_layouts", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
 
+// ==================== Image Folders - Generic Container for Organized Images ====================
+export const imageFolders = sqliteTable("image_folders", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  parentFolderId: integer("parent_folder_id"),
+  folderType: text("folder_type", {
+    enum: ["event", "client_gallery", "project"],
+  }).notNull(),
+  isPublic: integer("is_public", { mode: "boolean" }).notNull().default(false),
+  coverImageId: integer("cover_image_id"),
+  imageCount: integer("image_count").notNull().default(0),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+// ==================== Folder Images - Links Folders to Image Instances ====================
+export const folderImages = sqliteTable("folder_images", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  folderId: integer("folder_id")
+    .notNull()
+    .references(() => imageFolders.id, { onDelete: "cascade" }),
+  imageInstanceId: integer("image_instance_id")
+    .notNull()
+    .references(() => imageInstances.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
 // ==================== Events - Event Records ====================
 export const events = sqliteTable("events", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
+  parentEventId: integer("parent_event_id"),
+  folderId: integer("folder_id").references(() => imageFolders.id),
   startDate: text("start_date").notNull(),
   endDate: text("end_date"),
   location: text("location").notNull(),
