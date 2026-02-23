@@ -1,5 +1,5 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { desc, eq, and } from "drizzle-orm";
+import { asc, desc, eq, and, isNull } from "drizzle-orm";
 import * as schema from "~~/server/db/schema";
 import { getImageWithInstance } from "./images";
 
@@ -65,7 +65,8 @@ export async function getEventBySlug(
 }
 
 /**
- * Get all events with optional images
+ * Get all top-level events (no parent) with optional images
+ * Sorted by: start_date DESC → created_at DESC → name ASC
  */
 export async function getAllEvents(
   db: DrizzleD1Database<typeof schema>,
@@ -76,13 +77,17 @@ export async function getAllEvents(
   const events = await db
     .select()
     .from(schema.events)
-    .orderBy(desc(schema.events.startDate), desc(schema.events.createdAt));
+    .where(isNull(schema.events.parentEventId))
+    .orderBy(
+      desc(schema.events.startDate),
+      desc(schema.events.createdAt),
+      asc(schema.events.name)
+    );
 
   if (!options.includeImages) {
     return events.map((event) => ({ event, images: [] }));
   }
 
-  // Get images for each event
   const results = await Promise.all(
     events.map(async (event) => {
       return await getEventById(db, event.id, true);
@@ -90,6 +95,55 @@ export async function getAllEvents(
   );
 
   return results.filter((r) => r !== null);
+}
+
+/**
+ * Get sub-events for a parent event
+ * Sorted by: start_date ASC → created_at ASC → name ASC
+ */
+export async function getSubEvents(
+  db: DrizzleD1Database<typeof schema>,
+  parentEventId: number,
+  options: {
+    includeImages?: boolean;
+  } = {}
+) {
+  const events = await db
+    .select()
+    .from(schema.events)
+    .where(eq(schema.events.parentEventId, parentEventId))
+    .orderBy(
+      asc(schema.events.startDate),
+      asc(schema.events.createdAt),
+      asc(schema.events.name)
+    );
+
+  if (!options.includeImages) {
+    return events.map((event) => ({ event, images: [] }));
+  }
+
+  const results = await Promise.all(
+    events.map(async (event) => {
+      return await getEventById(db, event.id, true);
+    })
+  );
+
+  return results.filter((r) => r !== null);
+}
+
+/**
+ * Count sub-events for a parent event
+ */
+export async function getSubEventCount(
+  db: DrizzleD1Database<typeof schema>,
+  parentEventId: number
+): Promise<number> {
+  const subEvents = await db
+    .select({ id: schema.events.id })
+    .from(schema.events)
+    .where(eq(schema.events.parentEventId, parentEventId));
+
+  return subEvents.length;
 }
 
 /**
@@ -127,4 +181,26 @@ export async function getEventCoverImage(
   }
 
   return null;
+}
+
+/**
+ * Get the folder linked to an event
+ */
+export async function getEventFolder(
+  db: DrizzleD1Database<typeof schema>,
+  eventId: number
+) {
+  const [event] = await db
+    .select({ folderId: schema.events.folderId })
+    .from(schema.events)
+    .where(eq(schema.events.id, eventId));
+
+  if (!event?.folderId) return null;
+
+  const [folder] = await db
+    .select()
+    .from(schema.imageFolders)
+    .where(eq(schema.imageFolders.id, event.folderId));
+
+  return folder || null;
 }

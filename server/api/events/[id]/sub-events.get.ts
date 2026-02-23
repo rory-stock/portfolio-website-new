@@ -1,38 +1,39 @@
 import { useDB } from "~~/server/db/client";
-import type { EventListResponse } from "~~/types/api";
 import {
-  getAllEvents,
+  getSubEvents,
   getEventCoverImage,
   getSubEventCount,
 } from "~~/server/utils/queries";
 import { imageWithInstanceToDisplay } from "~~/server/utils/imageTransform";
 import { eventWithImagesToResponse } from "~~/server/utils/eventTransform";
 
-export default defineEventHandler(async (event): Promise<EventListResponse> => {
+export default defineEventHandler(async (event) => {
   const db = useDB(event);
+  const parentId = Number(getRouterParam(event, "id"));
 
-  // Get top-level events only (parentEventId IS NULL)
-  const eventsData = await getAllEvents(db, { includeImages: true });
+  if (!parentId || isNaN(parentId)) {
+    throw createError({ statusCode: 400, message: "Invalid event ID" });
+  }
 
-  // Transform to API format
+  const subEventsData = await getSubEvents(db, parentId, {
+    includeImages: true,
+  });
+
   const transformedEvents = await Promise.all(
-    eventsData.map(async (eventData) => {
+    subEventsData.map(async (eventData) => {
       if (!eventData) return null;
 
       const { event: eventRecord, images } = eventData;
 
-      // Get cover image
       const coverImageData = await getEventCoverImage(db, eventRecord.id);
       const coverImage = coverImageData
         ? imageWithInstanceToDisplay(coverImageData)
         : null;
 
-      // Transform images to display format
       const displayImages = images.map((img) =>
         imageWithInstanceToDisplay(img)
       );
 
-      // Get sub-event count
       const subEventCount = await getSubEventCount(db, eventRecord.id);
 
       const response = eventWithImagesToResponse(

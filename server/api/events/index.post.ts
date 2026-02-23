@@ -9,7 +9,9 @@ export default defineEventHandler(async (event): Promise<EventResponse> => {
   await requireAuth(event);
 
   const db = useDB(event);
-  const body = await readBody<EventCreateRequest>(event);
+  const body = await readBody<
+    EventCreateRequest & { parent_event_id?: number }
+  >(event);
 
   // Validation
   if (!body.name || !body.start_date || !body.location) {
@@ -33,6 +35,24 @@ export default defineEventHandler(async (event): Promise<EventResponse> => {
     });
   }
 
+  // If parent_event_id provided, validate it exists
+  if (body.parent_event_id) {
+    const { eq } = await import("drizzle-orm");
+    const schema = await import("~~/server/db/schema");
+
+    const [parent] = await db
+      .select({ id: schema.events.id })
+      .from(schema.events)
+      .where(eq(schema.events.id, body.parent_event_id));
+
+    if (!parent) {
+      throw createError({
+        statusCode: 400,
+        message: "Parent event not found",
+      });
+    }
+  }
+
   const newEvent = await createEventRecord(db, {
     name: body.name,
     startDate: body.start_date,
@@ -40,6 +60,7 @@ export default defineEventHandler(async (event): Promise<EventResponse> => {
     location: body.location,
     description: body.description,
     externalUrl: body.external_url,
+    parentEventId: body.parent_event_id ?? null,
   });
 
   return eventToResponse(newEvent);
