@@ -130,11 +130,7 @@ const folderTypeOptions = [
 </script>
 
 <template>
-  <div class="rounded-lg border border-neutral-800 bg-neutral-900 p-5">
-    <h3 class="mb-4 text-base font-medium text-neutral-100">
-      {{ isEditing ? "Edit Folder" : "New Folder" }}
-    </h3>
-
+  <div class="p-5">
     <!-- Error -->
     <div
       v-if="error"
