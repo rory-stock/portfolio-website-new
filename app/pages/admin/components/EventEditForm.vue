@@ -1,25 +1,33 @@
 <script setup lang="ts">
-const props = withDefaults(
-  defineProps<{
-    parentEventId?: number | null;
-  }>(),
-  {
-    parentEventId: null,
-  }
-);
+interface EventDetail {
+  id: number;
+  name: string;
+  slug: string;
+  start_date: string;
+  end_date: string | null;
+  location: string;
+  description: string | null;
+  external_url: string | null;
+}
+
+const props = defineProps<{
+  event: EventDetail;
+}>();
 
 const emit = defineEmits<{
-  created: [];
+  updated: [];
+  deleted: [];
   cancel: [];
 }>();
 
-const name = ref("");
-const startDate = ref("");
-const endDate = ref("");
-const location = ref("");
-const description = ref("");
-const externalUrl = ref("");
+const name = ref(props.event.name);
+const startDate = ref(props.event.start_date);
+const endDate = ref(props.event.end_date || "");
+const location = ref(props.event.location);
+const description = ref(props.event.description || "");
+const externalUrl = ref(props.event.external_url || "");
 const saving = ref(false);
+const deleting = ref(false);
 const error = ref<string | null>(null);
 
 async function handleSubmit() {
@@ -32,23 +40,43 @@ async function handleSubmit() {
   error.value = null;
 
   try {
-    await $fetch("/api/events", {
-      method: "POST",
+    await $fetch(`/api/events/${props.event.id}`, {
+      method: "PATCH",
       body: {
         name: name.value.trim(),
         start_date: startDate.value,
-        end_date: endDate.value || undefined,
+        end_date: endDate.value || null,
         location: location.value.trim(),
-        description: description.value.trim() || undefined,
-        external_url: externalUrl.value.trim() || undefined,
-        parent_event_id: props.parentEventId || undefined,
+        description: description.value.trim() || null,
+        external_url: externalUrl.value.trim() || null,
       },
     });
-    emit("created");
+    emit("updated");
   } catch (err: any) {
-    error.value = err.data?.message || "Failed to create event";
+    error.value = err.data?.message || "Failed to update event";
   } finally {
     saving.value = false;
+  }
+}
+
+async function handleDelete() {
+  const confirmed = window.confirm(
+    `Delete "${props.event.name}"? This will also delete all sub-events, folders, and image links.`
+  );
+  if (!confirmed) return;
+
+  deleting.value = true;
+  error.value = null;
+
+  try {
+    await $fetch(`/api/events/${props.event.id}`, {
+      method: "DELETE",
+    });
+    emit("deleted");
+  } catch (err: any) {
+    error.value = err.data?.message || "Failed to delete event";
+  } finally {
+    deleting.value = false;
   }
 }
 </script>
@@ -70,7 +98,6 @@ async function handleSubmit() {
         v-model="name"
         type="text"
         class="w-full rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-neutral-500 focus:outline-none"
-        placeholder="e.g. Cable Bay Enduro 2025"
       />
     </div>
 
@@ -101,7 +128,6 @@ async function handleSubmit() {
         v-model="location"
         type="text"
         class="w-full rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-neutral-500 focus:outline-none"
-        placeholder="e.g. Cable Bay Adventure Park, Nelson"
       />
     </div>
 
@@ -112,7 +138,6 @@ async function handleSubmit() {
         v-model="description"
         rows="3"
         class="w-full resize-none rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-neutral-500 focus:outline-none"
-        placeholder="Optional description"
       />
     </div>
 
@@ -123,25 +148,34 @@ async function handleSubmit() {
         v-model="externalUrl"
         type="url"
         class="w-full rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-neutral-500 focus:outline-none"
-        placeholder="https://..."
       />
     </div>
 
     <!-- Actions -->
-    <div class="flex justify-end gap-2 pt-2">
+    <div class="flex items-center justify-between pt-2">
       <button
-        class="rounded border border-neutral-700 px-3 py-1.5 text-xs text-neutral-200 hover:border-neutral-500"
-        @click="emit('cancel')"
+        :disabled="deleting"
+        class="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-950/50 hover:text-red-300 disabled:opacity-50"
+        @click="handleDelete"
       >
-        Cancel
+        {{ deleting ? "Deleting..." : "Delete event" }}
       </button>
-      <button
-        :disabled="saving || !name.trim() || !startDate || !location.trim()"
-        class="rounded bg-neutral-100 px-4 py-1.5 text-xs font-medium text-neutral-950 hover:bg-white disabled:opacity-30"
-        @click="handleSubmit"
-      >
-        {{ saving ? "Creating..." : "Create event" }}
-      </button>
+
+      <div class="flex gap-2">
+        <button
+          class="rounded border border-neutral-700 px-3 py-1.5 text-xs text-neutral-200 hover:border-neutral-500"
+          @click="emit('cancel')"
+        >
+          Cancel
+        </button>
+        <button
+          :disabled="saving || !name.trim() || !startDate || !location.trim()"
+          class="rounded bg-neutral-100 px-4 py-1.5 text-xs font-medium text-neutral-950 hover:bg-white disabled:opacity-30"
+          @click="handleSubmit"
+        >
+          {{ saving ? "Saving..." : "Save" }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
