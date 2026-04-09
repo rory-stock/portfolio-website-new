@@ -22,6 +22,7 @@ useSchemaOrg([
       "https://www.instagram.com/rorystockphoto",
       "https://www.linkedin.com/in/rorystock",
     ],
+    jobTitle: "Photographer",
     contactPoint: [
       {
         "@type": "ContactPoint",

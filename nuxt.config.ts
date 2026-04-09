@@ -32,6 +32,14 @@ export default defineNuxtConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: [
+        "@vue/devtools-core",
+        "@vue/devtools-kit",
+        "@unhead/schema-org/vue",
+        "@vueuse/core",
+      ],
+    },
   },
   nitro: {
     preset: "cloudflare-pages",
@@ -107,7 +115,6 @@ export default defineNuxtConfig({
   sitemap: {
     xslTips: false,
     xslColumns: [{ label: "URL", width: "50%" }],
-    zeroRuntime: true,
   },
   robots: {
     blockAiBots: true,
