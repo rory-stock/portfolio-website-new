@@ -13,7 +13,7 @@ export default defineEventHandler(
     await requireAuth(event);
 
     const db = useDB(event);
-    const slug = getRouterParam(event, "slug");
+    const slug = getRouterParam(event, "id");
 
     if (!slug) {
       throw createError({
@@ -33,13 +33,11 @@ export default defineEventHandler(
 
     const { event: eventRecord, images } = eventData;
 
-    // Get cover image
     const coverImageData = await getEventCoverImage(db, eventRecord.id);
     const coverImage = coverImageData
       ? imageWithInstanceToDisplay(coverImageData)
       : null;
 
-    // Transform images to display format
     const displayImages = images.map((img) => imageWithInstanceToDisplay(img));
 
     return eventWithImagesToResponse(eventRecord, coverImage, displayImages);

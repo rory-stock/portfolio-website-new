@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import LazyImage from "~/components/LazyImage.vue";
-
 interface DisplayImage {
   id: number;
-  instance_id: number;
+  instanceId: number;
   url: string;
   alt: string;
   width: number;
@@ -22,7 +20,7 @@ const props = defineProps<{
   loadingMore?: boolean;
   hasMore?: boolean;
   selectedIds?: Set<number>;
-  coverImageId?: number | null;
+  coverImageInstanceId?: number | null;
 }>();
 
 const emit = defineEmits<{
@@ -33,10 +31,10 @@ const emit = defineEmits<{
 }>();
 
 const isSelected = (image: DisplayImage) =>
-  props.selectedIds?.has(image.instance_id) ?? false;
+  props.selectedIds?.has(image.instanceId) ?? false;
 
 const isCover = (image: DisplayImage) =>
-  props.coverImageId === image.instance_id;
+  props.coverImageInstanceId === image.instanceId;
 </script>
 
 <template>
@@ -61,7 +59,7 @@ const isCover = (image: DisplayImage) =>
     >
       <div
         v-for="image in images"
-        :key="image.instance_id"
+        :key="image.instanceId"
         class="group relative aspect-4/3 cursor-pointer overflow-hidden rounded border border-neutral-800 bg-neutral-900 transition-all hover:border-neutral-600"
         :class="{
           'ring-2 ring-blue-500 ring-offset-1 ring-offset-neutral-950':
@@ -70,7 +68,7 @@ const isCover = (image: DisplayImage) =>
         @click="emit('image-click', image)"
       >
         <!-- Image -->
-        <LazyImage
+        <ProgressiveImage
           :src="image.url"
           :alt="image.alt"
           :width="image.width"
@@ -106,7 +104,7 @@ const isCover = (image: DisplayImage) =>
               ? 'opacity-100'
               : 'opacity-0 group-hover:opacity-100'
           "
-          @click.stop="emit('image-select', image.instance_id)"
+          @click.stop="emit('image-select', image.instanceId)"
         >
           <div
             class="flex h-5 w-5 items-center justify-center rounded border text-xs"
@@ -120,11 +118,11 @@ const isCover = (image: DisplayImage) =>
           </div>
         </div>
 
-        <!-- Set as cover button (hover only) -->
+        <!-- Set as cover button (hover only, hidden if already cover) -->
         <button
           v-if="!isCover(image)"
           class="absolute right-1.5 bottom-1.5 rounded bg-neutral-800/90 px-1.5 py-0.5 text-[10px] text-neutral-300 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-700 hover:text-white"
-          @click.stop="emit('set-cover', image.instance_id)"
+          @click.stop="emit('set-cover', image.instanceId)"
         >
           Set cover
         </button>

@@ -2,6 +2,7 @@ import type { Ref } from "vue";
 
 interface FolderCoverImage {
   id: number;
+  instanceId: number;
   url: string;
   alt: string;
   width: number;
@@ -55,7 +56,6 @@ export function useFolder(folderId: Ref<number | null> | number) {
       });
 
       if (folder.value) {
-        // Refresh to get updated cover image data
         await fetchFolder();
       }
     } catch (err: any) {
@@ -79,7 +79,6 @@ export function useFolder(folderId: Ref<number | null> | number) {
     }
   }
 
-  // Auto-fetch when folderId changes
   if (isRef(folderId)) {
     watch(
       folderId,

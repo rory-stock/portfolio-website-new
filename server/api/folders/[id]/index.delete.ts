@@ -1,7 +1,7 @@
-import { useDB } from "~~/server/db/client";
-import { requireAuth } from "~~/server/utils/requireAuth";
-import { getFolderById } from "~~/server/utils/queries/folders";
-import { deleteFolder } from "~~/server/utils/mutations/folders";
+import { useDB } from "#server/db/client";
+import { requireAuth } from "#server/utils/requireAuth";
+import { getFolderById } from "#server/utils/queries/folders";
+import { deleteFolder } from "#server/utils/mutations/folders";
 import { deleteR2Object } from "~/utils/r2";
 import { logger } from "~/utils/logger";
 

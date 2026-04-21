@@ -21,6 +21,15 @@ export default defineEventHandler(async (event) => {
 
   const { folder, coverImage } = result;
 
+  const coverDisplay = coverImage
+    ? imageWithInstanceToDisplay({
+        base: coverImage.base,
+        instance: coverImage.instance,
+        metadata: null,
+        layout: null,
+      })
+    : null;
+
   return {
     folder: {
       id: folder.id,
@@ -30,14 +39,7 @@ export default defineEventHandler(async (event) => {
       folder_type: folder.folderType,
       is_public: folder.isPublic,
       image_count: folder.imageCount,
-      cover_image: coverImage
-        ? imageWithInstanceToDisplay({
-            base: coverImage.base,
-            instance: coverImage.instance,
-            metadata: null,
-            layout: null,
-          })
-        : null,
+      cover_image: coverDisplay,
       created_at: folder.createdAt,
       updated_at: folder.updatedAt,
     },

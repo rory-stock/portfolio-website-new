@@ -15,6 +15,8 @@ export function eventToResponse(event: Event): EventResponse {
     location: event.location,
     description: event.description,
     external_url: event.externalUrl,
+    folder_id: event.folderId,
+    parent_event_id: event.parentEventId,
     created_at: event.createdAt,
     updated_at: event.updatedAt,
   };

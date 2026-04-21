@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import FolderImageDetailModal from "~/pages/admin/components/FolderImageDetailModal.vue";
-import FolderImageGrid from "~/pages/admin/components/FolderImageGrid.vue";
-import FolderUploadZone from "~/pages/admin/components/FolderUploadZone.vue";
-import { useFolderImages } from "~/composables/useFolderImages";
-import { useFolder } from "~/composables/useFolder";
-
 const route = useRoute();
 
-// Injected from the parent layout ([slug]/index.vue)
-const eventData = inject<Ref>("eventData");
+// Injected from parent layout
+const eventData = inject<Ref<any>>("eventData");
 const subEvents = inject<Ref<any[]>>("subEvents");
 const refreshEvent = inject<() => Promise<void>>("refreshEvent");
 
@@ -28,14 +22,12 @@ const activeFolderId = computed<number | null>(() => {
   return sub?.folder_id ?? null;
 });
 
-const activeEventName = computed(() => {
-  if (!activeSubSlug.value) {
-    return eventData?.value?.name ?? "Event";
-  }
-  const sub = subEvents?.value?.find(
-    (s: any) => s.slug === activeSubSlug.value
+// Active sub-event (for edit/delete)
+const activeSubEvent = computed(() => {
+  if (!activeSubSlug.value) return null;
+  return (
+    subEvents?.value?.find((s: any) => s.slug === activeSubSlug.value) ?? null
   );
-  return sub?.name ?? activeSubSlug.value;
 });
 
 // Folder images composable
@@ -57,8 +49,12 @@ const {
 const { folder, fetchFolder, updateCover } = useFolder(folderIdRef);
 
 // Selection state
-const selectedIds = ref<Set<number>>(new Set());
+const selectedIds = ref(new Set<number>());
 const selectedImage = ref<any>(null);
+
+// Sub-event edit/delete
+const showEditSubEventModal = ref(false);
+const deletingSubEvent = ref(false);
 
 function toggleSelect(instanceId: number) {
   const newSet = new Set(selectedIds.value);
@@ -84,17 +80,13 @@ function closeImageDetail() {
 }
 
 async function onImageRemoved(instanceId: number) {
-  // Remove from local selection if selected
   if (selectedIds.value.has(instanceId)) {
     const newSet = new Set(selectedIds.value);
     newSet.delete(instanceId);
     selectedIds.value = newSet;
   }
 
-  // Refresh folder data (image count, cover)
   void fetchFolder();
-
-  // Refresh parent event data
   if (refreshEvent) void refreshEvent();
 }
 
@@ -107,15 +99,12 @@ async function onSetCover(instanceId: number) {
 }
 
 async function onUploadComplete() {
-  // Refresh images and folder data
   await fetchImages(1);
   void fetchFolder();
-
-  // Refresh parent event data (image counts)
   if (refreshEvent) void refreshEvent();
 }
 
-// Bulk delete
+// Bulk remove
 const bulkDeleting = ref(false);
 
 async function bulkRemove() {
@@ -144,6 +133,40 @@ async function bulkRemove() {
   if (refreshEvent) void refreshEvent();
 }
 
+// Sub-event edit
+async function onSubEventUpdated() {
+  showEditSubEventModal.value = false;
+  if (refreshEvent) void refreshEvent();
+}
+
+async function deleteSubEvent() {
+  if (!activeSubEvent.value) return;
+
+  const confirmed = window.confirm(
+    `Delete sub-event "${activeSubEvent.value.name}"? This will also delete its folder and image links.`
+  );
+  if (!confirmed) return;
+
+  deletingSubEvent.value = true;
+
+  try {
+    await $fetch(`/api/events/${activeSubEvent.value.id}`, {
+      method: "DELETE",
+    });
+
+    // Navigate back to parent event root
+    const parentSlug = route.params.slug as string;
+    await navigateTo(`/admin/events/${parentSlug}`);
+
+    if (refreshEvent) void refreshEvent();
+  } catch (err: any) {
+    console.error("Failed to delete sub-event:", err);
+    alert(err.data?.message || "Failed to delete sub-event");
+  } finally {
+    deletingSubEvent.value = false;
+  }
+}
+
 // Not found state
 const notFound = computed(() => {
   if (!activeSubSlug.value) return false;
@@ -169,6 +192,28 @@ const notFound = computed(() => {
 
     <!-- Folder content -->
     <div v-else>
+      <!-- Sub-event actions (only shown when viewing a sub-event) -->
+      <div v-if="activeSubEvent" class="mb-4 flex items-center justify-between">
+        <h2 class="text-lg font-medium text-neutral-200">
+          {{ activeSubEvent.name }}
+        </h2>
+        <div class="flex items-center gap-2">
+          <button
+            class="rounded border border-neutral-700 px-2 py-1 text-xs text-neutral-300 hover:border-neutral-500 hover:text-white"
+            @click="showEditSubEventModal = true"
+          >
+            Edit
+          </button>
+          <button
+            :disabled="deletingSubEvent"
+            class="rounded border border-red-800 px-2 py-1 text-xs text-red-400 hover:bg-red-950/50 disabled:opacity-50"
+            @click="deleteSubEvent"
+          >
+            {{ deletingSubEvent ? "Deleting..." : "Delete" }}
+          </button>
+        </div>
+      </div>
+
       <!-- Toolbar -->
       <div class="mb-4 flex items-center justify-between">
         <div class="text-sm text-neutral-400">
@@ -216,7 +261,7 @@ const notFound = computed(() => {
         :loading-more="loadingMore"
         :has-more="hasMore"
         :selected-ids="selectedIds"
-        :cover-image-id="folder?.cover_image?.id ?? null"
+        :cover-image-instance-id="folder?.cover_image?.instanceId ?? null"
         @image-click="openImageDetail"
         @image-select="toggleSelect"
         @load-more="loadMore"
@@ -237,11 +282,29 @@ const notFound = computed(() => {
       v-if="activeFolderId"
       :image="selectedImage"
       :folder-id="activeFolderId"
-      :is-cover="selectedImage?.instance_id === folder?.cover_image?.id"
+      :is-cover="selectedImage?.instanceId === folder?.cover_image?.instanceId"
       @close="closeImageDetail"
       @removed="onImageRemoved"
       @set-cover="onSetCover"
       @updated="fetchImages(1)"
     />
+
+    <!-- Edit sub-event modal -->
+    <BaseModal
+      :open="showEditSubEventModal"
+      title="Edit Sub-Event"
+      max-width="lg"
+      @close="showEditSubEventModal = false"
+    >
+      <div class="p-5">
+        <EventEditForm
+          v-if="activeSubEvent"
+          :event="activeSubEvent"
+          @updated="onSubEventUpdated"
+          @deleted="deleteSubEvent"
+          @cancel="showEditSubEventModal = false"
+        />
+      </div>
+    </BaseModal>
   </div>
 </template>

@@ -2,7 +2,7 @@ import type { Ref } from "vue";
 
 interface DisplayImage {
   id: number;
-  instance_id: number;
+  instanceId: number;
   url: string;
   alt: string;
   width: number;
@@ -106,9 +106,9 @@ export function useFolderImages(
         method: "DELETE",
       });
 
-      // Remove from the local state immediately
+      // Remove from local state immediately
       images.value = images.value.filter(
-        (img) => img.instance_id !== imageInstanceId
+        (img) => img.instanceId !== imageInstanceId
       );
       total.value = Math.max(0, total.value - 1);
 

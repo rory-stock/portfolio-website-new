@@ -1,6 +1,6 @@
-import { useDB } from "~~/server/db/client";
-import { requireAuth } from "~~/server/utils/requireAuth";
-import { deleteEvent } from "~~/server/utils/mutations";
+import { useDB } from "#server/db/client";
+import { requireAuth } from "#server/utils/requireAuth";
+import { deleteEvent } from "#server/utils/mutations";
 
 export default defineEventHandler(
   async (event): Promise<{ success: boolean }> => {

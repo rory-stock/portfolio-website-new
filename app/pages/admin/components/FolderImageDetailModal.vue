@@ -1,7 +1,7 @@
 <script setup lang="ts">
 interface DisplayImage {
   id: number;
-  instance_id: number;
+  instanceId: number;
   url: string;
   alt: string;
   width: number;
@@ -33,7 +33,7 @@ const saving = ref(false);
 const removing = ref(false);
 const hasChanges = ref(false);
 
-// Sync form fields when the image changes
+// Sync form fields when image changes
 watch(
   () => props.image,
   (img) => {
@@ -80,10 +80,10 @@ async function removeFromFolder() {
 
   try {
     await $fetch(
-      `/api/folders/${props.folderId}/images/${props.image.instance_id}`,
+      `/api/folders/${props.folderId}/images/${props.image.instanceId}`,
       { method: "DELETE" }
     );
-    emit("removed", props.image.instance_id);
+    emit("removed", props.image.instanceId);
     emit("close");
   } catch (error: any) {
     console.error("Failed to remove:", error);
@@ -188,7 +188,7 @@ onUnmounted(() => {
               <button
                 v-else
                 class="rounded border border-neutral-700 px-2 py-1 text-xs text-neutral-300 hover:border-neutral-500 hover:text-white"
-                @click="emit('set-cover', image.instance_id)"
+                @click="emit('set-cover', image.instanceId)"
               >
                 Set as cover
               </button>

@@ -1,9 +1,9 @@
-import { useDB } from "~~/server/db/client";
-import { requireAuth } from "~~/server/utils/requireAuth";
+import { useDB } from "#server/db/client";
+import { requireAuth } from "#server/utils/requireAuth";
 import type { EventUpdateRequest, EventResponse } from "~~/types/api";
-import { updateEvent } from "~~/server/utils/mutations";
-import { validateDate } from "~~/server/utils/validation";
-import { eventToResponse } from "~~/server/utils/eventTransform";
+import { updateEvent } from "#server/utils/mutations";
+import { validateDate } from "#server/utils/validation";
+import { eventToResponse } from "#server/utils/eventTransform";
 
 export default defineEventHandler(async (event): Promise<EventResponse> => {
   await requireAuth(event);

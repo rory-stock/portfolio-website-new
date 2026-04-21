@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import EventCreateForm from "~/pages/admin/components/EventCreateForm.vue";
-import BaseModal from "~/pages/admin/components/BaseModal.vue";
-import EventEditForm from "~/pages/admin/components/EventEditForm.vue";
-
 definePageMeta({
   middleware: "authenticated",
   layout: "admin",
@@ -38,14 +34,20 @@ interface SubEvent {
   cover_image: { url: string; alt: string } | null;
 }
 
+interface FolderData {
+  id: number;
+  image_count: number;
+}
+
 const loading = ref(true);
 const error = ref<string | null>(null);
 const eventData = ref<EventDetail | null>(null);
 const subEvents = ref<SubEvent[]>([]);
+const rootFolderImageCount = ref(0);
+const subEventFolderCounts = ref<Record<number, number>>({});
 const showEditModal = ref(false);
 const showCreateSubEventModal = ref(false);
 
-// The currently active sub-slug from the child route
 const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 
 async function fetchEvent() {
@@ -58,12 +60,40 @@ async function fetchEvent() {
 
     useHead({ title: `${data.name} — Events Admin` });
 
+    // Fetch root folder image count
+    if (data.folder_id) {
+      try {
+        const folderData = await $fetch<{ folder: FolderData }>(
+          `/api/folders/${data.folder_id}`
+        );
+        rootFolderImageCount.value = folderData.folder.image_count;
+      } catch {
+        rootFolderImageCount.value = 0;
+      }
+    }
+
     // Fetch sub-events
     if (data.id) {
       const subData = await $fetch<{ events: SubEvent[] }>(
         `/api/events/${data.id}/sub-events`
       );
       subEvents.value = subData.events;
+
+      // Fetch folder counts for each sub-event
+      const counts: Record<number, number> = {};
+      for (const sub of subData.events) {
+        if (sub.folder_id) {
+          try {
+            const folderData = await $fetch<{ folder: FolderData }>(
+              `/api/folders/${sub.folder_id}`
+            );
+            counts[sub.id] = folderData.folder.image_count;
+          } catch {
+            counts[sub.id] = 0;
+          }
+        }
+      }
+      subEventFolderCounts.value = counts;
     }
   } catch (err: any) {
     error.value = err.data?.message || "Failed to load event";
@@ -72,15 +102,13 @@ async function fetchEvent() {
   }
 }
 
+function getSubEventImageCount(sub: SubEvent): number {
+  return subEventFolderCounts.value[sub.id] ?? 0;
+}
+
 async function onSubEventCreated() {
   showCreateSubEventModal.value = false;
-  // Refresh sub-events list
-  if (eventData.value) {
-    const subData = await $fetch<{ events: SubEvent[] }>(
-      `/api/events/${eventData.value.id}/sub-events`
-    );
-    subEvents.value = subData.events;
-  }
+  await fetchEvent();
 }
 
 function formatDate(dateStr: string): string {
@@ -168,7 +196,7 @@ provide("refreshEvent", fetchEvent);
           >
             All images
             <span class="ml-1 text-xs text-neutral-600">
-              {{ eventData.image_count }}
+              {{ rootFolderImageCount }}
             </span>
           </NuxtLink>
 
@@ -186,7 +214,7 @@ provide("refreshEvent", fetchEvent);
           >
             {{ sub.name }}
             <span class="ml-1 text-xs text-neutral-600">
-              {{ sub.image_count }}
+              {{ getSubEventImageCount(sub) }}
             </span>
           </NuxtLink>
 
@@ -200,7 +228,7 @@ provide("refreshEvent", fetchEvent);
         </div>
       </div>
 
-      <!-- Child route content (swaps without re-rendering header) -->
+      <!-- Child route content -->
       <NuxtPage />
     </div>
 

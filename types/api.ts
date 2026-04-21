@@ -177,6 +177,8 @@ export interface EventResponse {
   id: number;
   name: string;
   slug: string;
+  folder_id: number | null;
+  parent_event_id: number | null;
   start_date: string;
   end_date?: string | null;
   location: string;
