@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { twMerge } from "tailwind-merge";
 
-type ButtonVariant = "primary" | "secondary" | "danger";
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "secondary-simple"
+  | "danger"
+  | "danger-simple";
 type ButtonType = "button" | "submit" | "reset";
 type ButtonClass = string;
+type TextSize = "sm" | "md" | "lg";
 
 const props = withDefaults(
   defineProps<{
@@ -12,6 +18,7 @@ const props = withDefaults(
     loading?: boolean;
     type?: ButtonType;
     class?: ButtonClass;
+    textSize?: TextSize;
   }>(),
   {
     variant: "primary",
@@ -19,20 +26,30 @@ const props = withDefaults(
     disabled: false,
     loading: false,
     class: "",
+    textSize: "md",
   }
 );
 
 const baseClasses =
-  "cursor-pointer rounded px-2 py-2 text-sm transition-all duration-300 md:px-4 md:text-base disabled:cursor-not-allowed disabled:opacity-50";
+  "cursor-pointer rounded px-2 py-2 transition-all duration-300 md:px-4 disabled:cursor-not-allowed disabled:opacity-50";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-neutral-100 text-neutral-980 hover:bg-neutral-300",
   secondary: "border border-neutral-700 text-neutral-200 hover:bg-neutral-800",
+  "secondary-simple": "md:px-2 text-sm text-neutral-600 hover:text-neutral-400",
   danger: "bg-red-800 text-neutral-100 hover:bg-red-900",
+  "danger-simple":
+    "text-xs border text-red-400 border-red-500 hover:bg-red-950/50 hover:text-red-300 disabled:opacity-50",
 };
 
+const textSize = computed(() => {
+  if (props.textSize === "sm") return "text-sm";
+  if (props.textSize === "md") return "text-base";
+  if (props.textSize === "lg") return "text-lg";
+})
+
 const buttonClass = computed(() => {
-  return twMerge(baseClasses, variantClasses[props.variant], props.class);
+  return twMerge(baseClasses, variantClasses[props.variant], props.class, textSize.value);
 });
 </script>
 

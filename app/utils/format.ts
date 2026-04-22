@@ -17,7 +17,7 @@ export function formatFileSize(bytes: number): string {
 }
 
 /**
- * Format date to human-readable string
+ * Format date to human-readable string with time
  * @param date - Date object or ISO string
  * @returns Formatted string (e.g., "Dec 28, 2025, 2:30 PM")
  */
@@ -28,6 +28,24 @@ export function formatDate(date: Date | string): string {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  });
+}
+
+/**
+ * Format a date string (YYYY-MM-DD) or Date to a short readable format
+ * @param date - Date string (YYYY-MM-DD) or Date object or ISO string
+ * @returns Formatted string (e.g., "28 Dec 2025")
+ */
+export function formatDateShort(date: string | Date): string {
+  const d =
+    typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date)
+      ? new Date(date + "T00:00:00")
+      : new Date(date);
+
+  return d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 }
 

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import BaseModal from "~/pages/admin/components/BaseModal.vue";
 import EventCreateForm from "~/pages/admin/components/EventCreateForm.vue";
+import { formatDateShort } from "~/utils/format";
+import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 
 definePageMeta({
   middleware: "authenticated",
@@ -28,6 +30,9 @@ const error = ref<string | null>(null);
 const events = ref<EventListItem[]>([]);
 const showCreateModal = ref(false);
 
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const isMobile = computed(() => breakpoints.isSmaller("md"));
+
 async function fetchEvents() {
   loading.value = true;
   error.value = null;
@@ -49,14 +54,6 @@ function onEventCreated() {
   void fetchEvents();
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-NZ", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
 void fetchEvents();
 </script>
 
@@ -65,12 +62,13 @@ void fetchEvents();
     <!-- Header -->
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold text-white md:text-3xl">Events</h1>
-      <button
-        class="rounded bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-950 hover:bg-white"
+      <AppButton
+        variant="primary"
+        text-size="sm"
         @click="showCreateModal = true"
       >
         New event
-      </button>
+      </AppButton>
     </div>
 
     <!-- Loading -->
@@ -103,13 +101,11 @@ void fetchEvents();
         v-for="evt in events"
         :key="evt.id"
         :to="`/admin/events/${evt.slug}`"
-        class="group flex items-center gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-neutral-700 hover:bg-neutral-900/80"
+        class="group flex items-center gap-4 px-2 rounded-lg border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-neutral-700 hover:bg-neutral-900/80"
       >
         <!-- Cover image -->
-        <div
-          class="h-16 w-24 shrink-0 overflow-hidden rounded bg-neutral-800"
-        >
-          <img
+        <div class="h-16 w-24 shrink-0 overflow-hidden rounded bg-neutral-800">
+          <ProgressiveImage
             v-if="evt.cover_image"
             :src="evt.cover_image.url"
             :alt="evt.cover_image.alt"
@@ -123,32 +119,36 @@ void fetchEvents();
           </div>
         </div>
 
-        <!-- Info -->
-        <div class="min-w-0 flex-1">
-          <h3
-            class="truncate text-base font-medium text-neutral-100 group-hover:text-white"
-          >
-            {{ evt.name }}
-          </h3>
-          <div class="mt-0.5 flex items-center gap-3 text-xs text-neutral-500">
-            <span>{{ formatDate(evt.start_date) }}</span>
-            <span>{{ evt.location }}</span>
+        <div :class="isMobile ? 'flex flex-col' : ''">
+          <!-- Info -->
+          <div class="min-w-0 flex-1">
+            <h3
+              class="truncate text-base font-medium text-neutral-100 group-hover:text-white"
+            >
+              {{ evt.name }}
+            </h3>
+            <div
+              class="mt-0.5 flex flex-col md:flex-row md:items-center md:gap-3 text-xs text-neutral-500"
+            >
+              <span>{{ formatDateShort(evt.start_date) }}</span>
+              <span>{{ evt.location }}</span>
+            </div>
           </div>
-        </div>
 
-        <!-- Stats -->
-        <div
-          class="flex shrink-0 items-center gap-4 text-xs text-neutral-500"
-        >
-          <span v-if="evt.sub_event_count > 0">
-            {{ evt.sub_event_count }} sub-event{{
-              evt.sub_event_count > 1 ? "s" : ""
-            }}
-          </span>
-          <span>
-            {{ evt.image_count }} image{{ evt.image_count !== 1 ? "s" : "" }}
-          </span>
-          <span class="text-neutral-700 group-hover:text-neutral-500">→</span>
+          <!-- Stats -->
+          <div
+            class="flex shrink-0 items-center gap-2 md:gap-4 text-xs text-neutral-500"
+          >
+            <span v-if="evt.sub_event_count > 0">
+              {{ evt.sub_event_count }} sub-event{{
+                evt.sub_event_count > 1 ? "s" : ""
+              }}
+            </span>
+            <span>
+              {{ evt.image_count }} image{{ evt.image_count !== 1 ? "s" : "" }}
+            </span>
+            <span v-if="!isMobile" class="text-neutral-700 group-hover:text-neutral-500">→</span>
+          </div>
         </div>
       </NuxtLink>
     </div>

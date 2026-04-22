@@ -60,7 +60,7 @@ const isCover = (image: DisplayImage) =>
       <div
         v-for="image in images"
         :key="image.instanceId"
-        class="group relative aspect-4/3 cursor-pointer overflow-hidden rounded border border-neutral-800 bg-neutral-900 transition-all hover:border-neutral-600"
+        class="group relative cursor-pointer overflow-hidden rounded border border-neutral-800 bg-neutral-900 transition-all hover:border-neutral-600"
         :class="{
           'ring-2 ring-blue-500 ring-offset-1 ring-offset-neutral-950':
             isSelected(image),

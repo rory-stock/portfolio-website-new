@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { formatDateShort } from "~/utils/format";
+import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
+
 definePageMeta({
   middleware: "authenticated",
   layout: "admin",
@@ -49,6 +52,9 @@ const showEditModal = ref(false);
 const showCreateSubEventModal = ref(false);
 
 const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
+
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const isMobile = computed(() => breakpoints.isSmaller("md"));
 
 async function fetchEvent() {
   loading.value = true;
@@ -119,14 +125,6 @@ async function onSubEventCreated() {
   await fetchEvent();
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-NZ", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
 void fetchEvent();
 
 // Provide event data to child routes
@@ -170,23 +168,31 @@ provide("refreshEvent", fetchEvent);
             {{ eventData.name }}
           </h1>
           <div class="mt-1 flex items-center gap-3 text-sm text-neutral-500">
-            <span>{{ formatDate(eventData.start_date) }}</span>
-            <span v-if="eventData.end_date">
-              — {{ formatDate(eventData.end_date) }}
-            </span>
-            <span>{{ eventData.location }}</span>
+            <div class="flex flex-col md:flex-row">
+              <div>
+                <span>{{ formatDateShort(eventData.start_date) }}</span>
+                <span v-if="eventData.end_date"
+                  >&nbsp;—&nbsp;{{ formatDateShort(eventData.end_date) }}</span
+                >
+              </div>
+              <span>
+                {{ isMobile ? "" : "&nbsp;&nbsp;|&nbsp;&nbsp;"
+                }}{{ eventData.location }}
+              </span>
+            </div>
           </div>
           <p v-if="eventData.description" class="mt-2 text-sm text-neutral-400">
             {{ eventData.description }}
           </p>
         </div>
 
-        <button
-          class="shrink-0 rounded border border-neutral-700 px-3 py-1.5 text-xs text-neutral-200 hover:border-neutral-500 hover:text-white"
+        <AppButton
+          variant="secondary"
+          :text-size="isMobile ? 'sm' : 'md'"
           @click="showEditModal = true"
         >
           Edit event
-        </button>
+        </AppButton>
       </div>
 
       <!-- Sub-event navigation tabs -->
@@ -227,12 +233,14 @@ provide("refreshEvent", fetchEvent);
           </NuxtLink>
 
           <!-- Add sub-event button -->
-          <button
-            class="shrink-0 border-b-2 border-transparent px-3 py-2 text-sm text-neutral-600 hover:text-neutral-400"
+          <AppButton
+            variant="secondary-simple"
+            text-size="sm"
+            class="border-b-2 border-transparent"
             @click="showCreateSubEventModal = true"
           >
             + Add
-          </button>
+          </AppButton>
         </div>
       </div>
 

@@ -152,29 +152,37 @@ async function handleDelete() {
     </div>
 
     <!-- Actions -->
-    <div class="flex items-center justify-between pt-2">
-      <button
+    <div
+      class="flex flex-col justify-between gap-2 pt-2 md:flex-row md:items-center md:gap-0"
+    >
+      <AppButton
+        variant="danger"
+        text-size="sm"
+        class="py-1.5"
         :disabled="deleting"
-        class="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-950/50 hover:text-red-300 disabled:opacity-50"
         @click="handleDelete"
       >
         {{ deleting ? "Deleting..." : "Delete event" }}
-      </button>
+      </AppButton>
 
-      <div class="flex gap-2">
-        <button
-          class="rounded border border-neutral-700 px-3 py-1.5 text-xs text-neutral-200 hover:border-neutral-500"
+      <div class="mt-2 flex flex-col gap-2 md:mt-0 md:flex-row">
+        <AppButton
+          variant="secondary"
+          text-size="sm"
+          class="py-1.5"
           @click="emit('cancel')"
         >
           Cancel
-        </button>
-        <button
+        </AppButton>
+        <AppButton
+          variant="primary"
+          text-size="sm"
+          class="py-1.5"
           :disabled="saving || !name.trim() || !startDate || !location.trim()"
-          class="rounded bg-neutral-100 px-4 py-1.5 text-xs font-medium text-neutral-950 hover:bg-white disabled:opacity-30"
           @click="handleSubmit"
         >
           {{ saving ? "Saving..." : "Save" }}
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>

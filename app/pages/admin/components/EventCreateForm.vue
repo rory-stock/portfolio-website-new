@@ -70,7 +70,6 @@ async function handleSubmit() {
         v-model="name"
         type="text"
         class="w-full rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-neutral-500 focus:outline-none"
-        placeholder="e.g. Cable Bay Enduro 2025"
       />
     </div>
 
@@ -101,7 +100,6 @@ async function handleSubmit() {
         v-model="location"
         type="text"
         class="w-full rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-neutral-500 focus:outline-none"
-        placeholder="e.g. Cable Bay Adventure Park, Nelson"
       />
     </div>
 
@@ -112,7 +110,6 @@ async function handleSubmit() {
         v-model="description"
         rows="3"
         class="w-full resize-none rounded border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-200 focus:border-neutral-500 focus:outline-none"
-        placeholder="Optional description"
       />
     </div>
 
@@ -128,20 +125,24 @@ async function handleSubmit() {
     </div>
 
     <!-- Actions -->
-    <div class="flex justify-end gap-2 pt-2">
-      <button
-        class="rounded border border-neutral-700 px-3 py-1.5 text-xs text-neutral-200 hover:border-neutral-500"
+    <div class="flex-col flex md:justify-end md:flex-row gap-2 pt-2">
+      <AppButton
+        variant="secondary"
+        text-size="sm"
+        class="py-1.5"
         @click="emit('cancel')"
       >
         Cancel
-      </button>
-      <button
+      </AppButton>
+      <AppButton
+        variant="primary"
+        text-size="sm"
+        class="py-1.5"
         :disabled="saving || !name.trim() || !startDate || !location.trim()"
-        class="rounded bg-neutral-100 px-4 py-1.5 text-xs font-medium text-neutral-950 hover:bg-white disabled:opacity-30"
         @click="handleSubmit"
       >
         {{ saving ? "Creating..." : "Create event" }}
-      </button>
+      </AppButton>
     </div>
   </div>
 </template>

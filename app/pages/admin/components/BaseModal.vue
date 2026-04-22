@@ -68,7 +68,7 @@ onUnmounted(() => {
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+        class="fixed inset-0 z-30 flex items-center justify-center bg-black/70 p-4"
         @click="handleBackdropClick"
       >
         <div
@@ -86,10 +86,10 @@ onUnmounted(() => {
               </h3>
             </slot>
             <button
-              class="text-neutral-500 hover:text-neutral-300"
+              class="text-neutral-500 cursor-pointer hover:text-neutral-300"
               @click="emit('close')"
             >
-              ✕
+              <Icon name="cross" :size="18" />
             </button>
           </div>
 

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatFileSize, formatDateShort } from "~/utils/format";
+
 interface DisplayImage {
   id: number;
   instanceId: number;
@@ -92,23 +94,6 @@ async function removeFromFolder() {
   }
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-NZ", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 function handleBackdropClick(e: MouseEvent) {
   if (e.target === e.currentTarget) emit("close");
 }
@@ -173,7 +158,7 @@ onUnmounted(() => {
                 {{ formatFileSize(image.file_size) }}
               </p>
               <p v-if="image.captured_at">
-                Captured: {{ formatDate(image.captured_at) }}
+                Captured: {{ formatDateShort(image.captured_at) }}
               </p>
             </div>
 

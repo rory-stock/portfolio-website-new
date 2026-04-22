@@ -312,19 +312,23 @@ const notFound = computed(() => {
           {{ activeSubEvent.name }}
         </h2>
         <div class="flex items-center gap-2">
-          <button
-            class="rounded border border-neutral-700 px-2 py-1 text-xs text-neutral-300 hover:border-neutral-500 hover:text-white"
+          <AppButton
+            variant="secondary"
+            text-size="sm"
+            class="py-1.5"
             @click="showEditSubEventModal = true"
           >
             Edit
-          </button>
-          <button
+          </AppButton>
+          <AppButton
+            variant="danger"
+            text-size="sm"
+            class="py-1.5"
             :disabled="deletingSubEvent"
-            class="rounded border border-red-800 px-2 py-1 text-xs text-red-400 hover:bg-red-950/50 disabled:opacity-50"
             @click="deleteSubEvent"
           >
             {{ deletingSubEvent ? "Deleting..." : "Delete" }}
-          </button>
+          </AppButton>
         </div>
       </div>
 
