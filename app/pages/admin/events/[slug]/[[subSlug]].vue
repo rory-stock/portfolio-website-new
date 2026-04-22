@@ -30,25 +30,129 @@ const activeSubEvent = computed(() => {
   );
 });
 
-// Folder images composable
+// Whether we're on the root "All images" tab
+const isRootTab = computed(() => !activeSubSlug.value);
+
+// All folder IDs to aggregate (root + sub-event folders) for "All images"
+const allFolderIds = computed<number[]>(() => {
+  const ids: number[] = [];
+  const rootId = eventData?.value?.folder_id;
+  if (rootId) ids.push(rootId);
+
+  if (subEvents?.value) {
+    for (const sub of subEvents.value) {
+      if (sub.folder_id) ids.push(sub.folder_id);
+    }
+  }
+  return ids;
+});
+
+// Folder images composable (used for single sub-event tabs)
 const folderIdRef = computed(() => activeFolderId.value);
 
 const {
-  images,
-  total,
-  loading,
+  images: singleFolderImages,
+  total: singleFolderTotal,
+  loading: singleFolderLoading,
   loadingMore,
-  error,
+  error: singleFolderError,
   hasMore,
   fetchImages,
   loadMore,
   removeImage,
 } = useFolderImages(folderIdRef, { limit: 50 });
 
-// Folder data for cover image
-const { folder, fetchFolder, updateCover } = useFolder(folderIdRef);
+// Aggregated images for "All images" tab
+const aggregatedImages = ref<any[]>([]);
+const aggregatedLoading = ref(false);
+const aggregatedError = ref<string | null>(null);
 
-// Selection state
+async function fetchAggregatedImages() {
+  if (!isRootTab.value || allFolderIds.value.length === 0) return;
+
+  aggregatedLoading.value = true;
+  aggregatedError.value = null;
+
+  try {
+    const allImages: any[] = [];
+
+    for (const folderId of allFolderIds.value) {
+      const data = await $fetch<{ images: any[]; total: number }>(
+        `/api/folders/${folderId}/images`,
+        { query: { page: 1, limit: 200 } }
+      );
+      allImages.push(...data.images);
+    }
+
+    // Sort by captured_at → created_at → filename
+    allImages.sort((a, b) => {
+      const aCaptured = a.captured_at
+        ? new Date(a.captured_at).getTime()
+        : Infinity;
+      const bCaptured = b.captured_at
+        ? new Date(b.captured_at).getTime()
+        : Infinity;
+      if (aCaptured !== bCaptured) return aCaptured - bCaptured;
+
+      const aCreated = new Date(a.created_at).getTime();
+      const bCreated = new Date(b.created_at).getTime();
+      if (aCreated !== bCreated) return aCreated - bCreated;
+
+      return (a.original_filename || "").localeCompare(
+        b.original_filename || ""
+      );
+    });
+
+    aggregatedImages.value = allImages;
+  } catch (err: any) {
+    aggregatedError.value = err.data?.message || "Failed to load images";
+  } finally {
+    aggregatedLoading.value = false;
+  }
+}
+
+// Computed display values that switch between aggregated and single folder
+const images = computed(() =>
+  isRootTab.value ? aggregatedImages.value : singleFolderImages.value
+);
+const total = computed(() =>
+  isRootTab.value ? aggregatedImages.value.length : singleFolderTotal.value
+);
+const loading = computed(() =>
+  isRootTab.value ? aggregatedLoading.value : singleFolderLoading.value
+);
+const error = computed(() =>
+  isRootTab.value ? aggregatedError.value : singleFolderError.value
+);
+
+// Folder data for cover image (root folder only)
+const { folder, fetchFolder, updateCover } = useFolder(
+  computed(() => eventData?.value?.folder_id ?? null)
+);
+
+// Watch for tab changes to fetch appropriate data
+watch(
+  isRootTab,
+  (root) => {
+    if (root) {
+      void fetchAggregatedImages();
+    }
+  },
+  { immediate: true }
+);
+
+// Also refetch aggregated when subEvents change (new uploads in sub-folders)
+watch(
+  () => subEvents?.value,
+  () => {
+    if (isRootTab.value) {
+      void fetchAggregatedImages();
+    }
+  },
+  { deep: true }
+);
+
+// Selection state — use reactive Map for proper reactivity
 const selectedIds = ref(new Set<number>());
 const selectedImage = ref<any>(null);
 
@@ -86,6 +190,12 @@ async function onImageRemoved(instanceId: number) {
     selectedIds.value = newSet;
   }
 
+  if (isRootTab.value) {
+    aggregatedImages.value = aggregatedImages.value.filter(
+      (img) => img.instanceId !== instanceId
+    );
+  }
+
   void fetchFolder();
   if (refreshEvent) void refreshEvent();
 }
@@ -99,7 +209,11 @@ async function onSetCover(instanceId: number) {
 }
 
 async function onUploadComplete() {
-  await fetchImages(1);
+  if (isRootTab.value) {
+    await fetchAggregatedImages();
+  } else {
+    await fetchImages(1);
+  }
   void fetchFolder();
   if (refreshEvent) void refreshEvent();
 }
@@ -184,7 +298,7 @@ const notFound = computed(() => {
 
     <!-- No folder linked -->
     <div
-      v-else-if="!activeFolderId && !loading"
+      v-else-if="!isRootTab && !activeFolderId && !loading"
       class="py-12 text-center text-neutral-500"
     >
       No folder linked to this event.
@@ -221,10 +335,19 @@ const notFound = computed(() => {
             >{{ total }} image{{ total !== 1 ? "s" : "" }}</span
           >
           <span v-else>No images yet</span>
+          <span
+            v-if="isRootTab && subEvents && subEvents.length > 0"
+            class="ml-1 text-neutral-600"
+          >
+            (across all folders)
+          </span>
         </div>
 
-        <!-- Bulk actions (visible when images selected) -->
-        <div v-if="selectedIds.size > 0" class="flex items-center gap-2">
+        <!-- Bulk actions (only for single folder tabs) -->
+        <div
+          v-if="!isRootTab && selectedIds.size > 0"
+          class="flex items-center gap-2"
+        >
           <span class="text-xs text-neutral-500">
             {{ selectedIds.size }} selected
           </span>
@@ -244,10 +367,9 @@ const notFound = computed(() => {
         </div>
       </div>
 
-      <!-- Upload zone -->
-      <div class="mb-6">
+      <!-- Upload zone (only for single folder tabs, not aggregated view) -->
+      <div v-if="!isRootTab && activeFolderId" class="mb-6">
         <FolderUploadZone
-          v-if="activeFolderId"
           :folder-id="activeFolderId"
           folder-type="event"
           @uploaded="onUploadComplete"
@@ -258,9 +380,9 @@ const notFound = computed(() => {
       <FolderImageGrid
         :images="images"
         :loading="loading"
-        :loading-more="loadingMore"
-        :has-more="hasMore"
-        :selected-ids="selectedIds"
+        :loading-more="isRootTab ? false : loadingMore"
+        :has-more="isRootTab ? false : hasMore"
+        :selected-ids="isRootTab ? undefined : selectedIds"
         :cover-image-instance-id="folder?.cover_image?.instanceId ?? null"
         @image-click="openImageDetail"
         @image-select="toggleSelect"

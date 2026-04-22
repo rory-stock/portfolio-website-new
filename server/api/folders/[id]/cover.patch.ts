@@ -21,26 +21,37 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: "Folder not found" });
   }
 
-  // If setting a specific cover, verify the image is in this folder
+  // If setting a specific cover, verify the image is in this folder or any child folder
   if (body.cover_image_id !== null && body.cover_image_id !== undefined) {
-    const [link] = await db
-      .select()
-      .from(schema.folderImages)
-      .where(eq(schema.folderImages.folderId, id))
-      .limit(1);
-
-    // More thorough check: make sure this specific instance is in the folder
+    // Get this folder's images
     const links = await db
-      .select()
+      .select({ imageInstanceId: schema.folderImages.imageInstanceId })
       .from(schema.folderImages)
       .where(eq(schema.folderImages.folderId, id));
 
-    const instanceIds = links.map((l) => l.imageInstanceId);
+    let allInstanceIds = links.map((l) => l.imageInstanceId);
 
-    if (!instanceIds.includes(body.cover_image_id)) {
+    // Also check child folders
+    const childFolders = await db
+      .select({ id: schema.imageFolders.id })
+      .from(schema.imageFolders)
+      .where(eq(schema.imageFolders.parentFolderId, id));
+
+    for (const child of childFolders) {
+      const childLinks = await db
+        .select({ imageInstanceId: schema.folderImages.imageInstanceId })
+        .from(schema.folderImages)
+        .where(eq(schema.folderImages.folderId, child.id));
+
+      allInstanceIds = allInstanceIds.concat(
+        childLinks.map((l) => l.imageInstanceId)
+      );
+    }
+
+    if (!allInstanceIds.includes(body.cover_image_id)) {
       throw createError({
         statusCode: 400,
-        message: "Image is not in this folder",
+        message: "Image is not in this folder or its sub-folders",
       });
     }
   }

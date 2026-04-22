@@ -78,7 +78,7 @@ const aspectRatio = computed(() => {
     </div>
 
     <!-- Actual image (only rendered when in viewport) -->
-    <img
+    <NuxtPicture
       v-if="isVisible && !hasError"
       :src="src"
       :alt="alt"

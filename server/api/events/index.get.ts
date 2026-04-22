@@ -1,48 +1,55 @@
+import { eq } from "drizzle-orm";
 import { useDB } from "~~/server/db/client";
+import * as schema from "~~/server/db/schema";
 import type { EventListResponse } from "~~/types/api";
-import {
-  getAllEvents,
-  getEventCoverImage,
-  getSubEventCount,
-} from "~~/server/utils/queries";
+import { getAllEvents, getSubEventCount } from "~~/server/utils/queries";
+import { getFolderWithCover } from "~~/server/utils/queries/folders";
 import { imageWithInstanceToDisplay } from "~~/server/utils/imageTransform";
-import { eventWithImagesToResponse } from "~~/server/utils/eventTransform";
+import { eventToResponse } from "~~/server/utils/eventTransform";
 
 export default defineEventHandler(async (event): Promise<EventListResponse> => {
   const db = useDB(event);
 
-  // Get top-level events only (parentEventId IS NULL)
-  const eventsData = await getAllEvents(db, { includeImages: true });
+  // Get top-level events only
+  const eventsData = await getAllEvents(db);
 
-  // Transform to API format
   const transformedEvents = await Promise.all(
     eventsData.map(async (eventData) => {
       if (!eventData) return null;
 
-      const { event: eventRecord, images } = eventData;
+      const { event: eventRecord } = eventData;
 
-      // Get cover image
-      const coverImageData = await getEventCoverImage(db, eventRecord.id);
-      const coverImage = coverImageData
-        ? imageWithInstanceToDisplay(coverImageData)
-        : null;
+      // Get cover image from the linked folder
+      let coverImage = null;
+      if (eventRecord.folderId) {
+        const folderData = await getFolderWithCover(db, eventRecord.folderId);
+        if (folderData?.coverImage) {
+          coverImage = imageWithInstanceToDisplay({
+            base: folderData.coverImage.base,
+            instance: folderData.coverImage.instance,
+            metadata: null,
+            layout: null,
+          });
+        }
+      }
 
-      // Transform images to display format
-      const displayImages = images.map((img) =>
-        imageWithInstanceToDisplay(img)
-      );
+      // Get folder image count
+      let folderImageCount = 0;
+      if (eventRecord.folderId) {
+        const [folder] = await db
+          .select({ imageCount: schema.imageFolders.imageCount })
+          .from(schema.imageFolders)
+          .where(eq(schema.imageFolders.id, eventRecord.folderId));
+        folderImageCount = folder?.imageCount ?? 0;
+      }
 
-      // Get sub-event count
       const subEventCount = await getSubEventCount(db, eventRecord.id);
 
-      const response = eventWithImagesToResponse(
-        eventRecord,
-        coverImage,
-        displayImages
-      );
-
       return {
-        ...response,
+        ...eventToResponse(eventRecord),
+        cover_image: coverImage,
+        images: [],
+        image_count: folderImageCount,
         sub_event_count: subEventCount,
         folder_id: eventRecord.folderId,
       };

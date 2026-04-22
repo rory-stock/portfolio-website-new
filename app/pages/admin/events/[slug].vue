@@ -106,6 +106,14 @@ function getSubEventImageCount(sub: SubEvent): number {
   return subEventFolderCounts.value[sub.id] ?? 0;
 }
 
+const totalImageCount = computed(() => {
+  let total = rootFolderImageCount.value;
+  for (const count of Object.values(subEventFolderCounts.value)) {
+    total += count;
+  }
+  return total;
+});
+
 async function onSubEventCreated() {
   showCreateSubEventModal.value = false;
   await fetchEvent();
@@ -196,7 +204,7 @@ provide("refreshEvent", fetchEvent);
           >
             All images
             <span class="ml-1 text-xs text-neutral-600">
-              {{ rootFolderImageCount }}
+              {{ totalImageCount }}
             </span>
           </NuxtLink>
 

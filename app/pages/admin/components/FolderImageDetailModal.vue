@@ -138,7 +138,7 @@ onUnmounted(() => {
       >
         <!-- Image preview -->
         <div class="flex flex-1 items-center justify-center bg-neutral-900 p-4">
-          <img
+          <NuxtPicture
             :src="image.url"
             :alt="image.alt"
             class="max-h-[50vh] w-auto rounded object-contain md:max-h-[80vh]"
