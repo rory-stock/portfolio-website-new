@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { onKeyStroke, onClickOutside } from "@vueuse/core";
+import { useTemplateRef } from "vue";
+
 const props = withDefaults(
   defineProps<{
     open: boolean;
@@ -23,36 +26,18 @@ const widthClasses: Record<string, string> = {
   xl: "max-w-xl",
 };
 
-function handleBackdropClick(e: MouseEvent) {
-  if (props.closeOnBackdrop && e.target === e.currentTarget) {
+const target = useTemplateRef("target");
+onClickOutside(target, () => {
+  if (props.open && props.closeOnBackdrop) {
     emit("close");
   }
-}
+});
 
-function handleKeydown(e: KeyboardEvent) {
-  if (e.key === "Escape" && props.open) {
+onKeyStroke("Escape", (e) => {
+  if (props.open) {
+    e.preventDefault();
     emit("close");
   }
-}
-
-onMounted(() => {
-  document.addEventListener("keydown", handleKeydown);
-});
-
-onUnmounted(() => {
-  document.removeEventListener("keydown", handleKeydown);
-});
-
-// Prevent body scroll when open
-watch(
-  () => props.open,
-  (isOpen) => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
-  }
-);
-
-onUnmounted(() => {
-  document.body.style.overflow = "";
 });
 </script>
 
@@ -68,12 +53,12 @@ onUnmounted(() => {
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-30 md:z-50 flex items-center justify-center bg-black/70 p-4"
-        @click="handleBackdropClick"
+        class="fixed inset-0 z-30 flex items-center justify-center bg-black/70 p-4 md:z-50"
       >
         <div
           class="w-full overflow-hidden rounded-lg border border-neutral-800 bg-neutral-950"
           :class="widthClasses[maxWidth]"
+          ref="target"
         >
           <!-- Header (optional) -->
           <div
@@ -86,7 +71,7 @@ onUnmounted(() => {
               </h3>
             </slot>
             <button
-              class="text-neutral-500 cursor-pointer hover:text-neutral-300"
+              class="cursor-pointer text-neutral-500 hover:text-neutral-300"
               @click="emit('close')"
             >
               <Icon name="cross" :size="18" />

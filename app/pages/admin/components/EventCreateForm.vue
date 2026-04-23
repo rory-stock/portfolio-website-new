@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { onKeyStroke } from "@vueuse/core";
+
 const props = withDefaults(
   defineProps<{
     parentEventId?: number | null;
@@ -51,6 +53,21 @@ async function handleSubmit() {
     saving.value = false;
   }
 }
+
+onKeyStroke(
+  "s",
+  (e) => {
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      (name.value.trim() || startDate.value || location.value.trim()) &&
+      !saving.value
+    ) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  },
+  { dedupe: true }
+);
 </script>
 
 <template>
@@ -125,7 +142,7 @@ async function handleSubmit() {
     </div>
 
     <!-- Actions -->
-    <div class="flex-col flex md:justify-end md:flex-row gap-2 pt-2">
+    <div class="flex flex-col gap-2 pt-2 md:flex-row md:justify-end">
       <AppButton
         variant="secondary"
         text-size="sm"

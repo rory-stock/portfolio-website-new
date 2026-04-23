@@ -158,7 +158,13 @@ provide("refreshEvent", fetchEvent);
         to="/admin/events"
         class="mb-4 inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-300"
       >
-        <Icon name="back" :size="14" class="rotate-180" /> Back to events
+        <AppButton
+          variant="secondary"
+          text-size="sm"
+          class="flex items-center gap-1"
+          ><Icon name="back" :size="14" class="rotate-180" />Back to
+          events</AppButton
+        >
       </NuxtLink>
 
       <!-- Header -->

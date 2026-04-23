@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { onKeyStroke } from "@vueuse/core";
+
 interface EventDetail {
   id: number;
   name: string;
@@ -79,6 +81,21 @@ async function handleDelete() {
     deleting.value = false;
   }
 }
+
+onKeyStroke(
+  "s",
+  (e) => {
+    if (
+      (e.ctrlKey || e.metaKey) &&
+      (name.value.trim() || startDate.value || location.value.trim()) &&
+      !saving.value
+    ) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  },
+  { dedupe: true }
+);
 </script>
 
 <template>

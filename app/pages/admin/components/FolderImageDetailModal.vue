@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { formatFileSize, formatDateShort } from "~/utils/format";
+import { onKeyStroke, onClickOutside } from "@vueuse/core";
+import { useTemplateRef } from "vue";
 
 interface DisplayImage {
   id: number;
@@ -94,20 +96,16 @@ async function removeFromFolder() {
   }
 }
 
-function handleBackdropClick(e: MouseEvent) {
-  if (e.target === e.currentTarget) emit("close");
-}
-
-function handleKeydown(e: KeyboardEvent) {
-  if (e.key === "Escape") emit("close");
-}
-
-onMounted(() => {
-  document.addEventListener("keydown", handleKeydown);
+onKeyStroke("Escape", (e) => {
+  if (props.image) {
+    e.preventDefault();
+    emit("close");
+  }
 });
 
-onUnmounted(() => {
-  document.removeEventListener("keydown", handleKeydown);
+const target = useTemplateRef("target");
+onClickOutside(target, () => {
+  if (props.image) emit("close");
 });
 </script>
 
@@ -116,10 +114,10 @@ onUnmounted(() => {
     <div
       v-if="image"
       class="fixed inset-0 z-30 flex items-center justify-center bg-black/80 p-4 md:z-50"
-      @click="handleBackdropClick"
     >
       <div
         class="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-neutral-800 bg-neutral-950 md:flex-row"
+        ref="target"
       >
         <!-- Image preview -->
         <div class="flex flex-1 items-center justify-center bg-neutral-900 p-4">
