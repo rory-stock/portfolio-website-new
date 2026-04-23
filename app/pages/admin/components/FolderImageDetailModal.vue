@@ -115,7 +115,7 @@ onUnmounted(() => {
   <Teleport to="body">
     <div
       v-if="image"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+      class="fixed inset-0 z-30 flex items-center justify-center bg-black/80 p-4 md:z-50"
       @click="handleBackdropClick"
     >
       <div
@@ -142,10 +142,10 @@ onUnmounted(() => {
               {{ image.original_filename }}
             </h3>
             <button
-              class="text-neutral-500 hover:text-neutral-300"
+              class="cursor-pointer text-neutral-500 hover:text-neutral-300"
               @click="emit('close')"
             >
-              ✕
+              <Icon name="cross" :size="18" />
             </button>
           </div>
 
@@ -170,13 +170,15 @@ onUnmounted(() => {
               >
                 Cover image
               </span>
-              <button
+              <AppButton
                 v-else
-                class="rounded border border-neutral-700 px-2 py-1 text-xs text-neutral-300 hover:border-neutral-500 hover:text-white"
+                variant="secondary"
+                text-size="sm"
+                class="py-1"
                 @click="emit('set-cover', image.instanceId)"
               >
                 Set as cover
-              </button>
+              </AppButton>
             </div>
 
             <!-- Alt text -->
@@ -210,25 +212,27 @@ onUnmounted(() => {
 
           <!-- Actions footer -->
           <div
-            class="flex items-center justify-between border-t border-neutral-800 p-4"
+            class="flex flex-col gap-2 border-t border-neutral-800 p-4 md:flex-row md:items-center md:justify-between md:gap-0"
           >
             <!-- Remove from folder -->
-            <button
+            <AppButton
               :disabled="removing"
-              class="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-950/50 hover:text-red-300 disabled:opacity-50"
+              variant="danger"
+              text-size="sm"
               @click="removeFromFolder"
             >
               {{ removing ? "Removing..." : "Remove" }}
-            </button>
+            </AppButton>
 
             <!-- Save -->
-            <button
+            <AppButton
               :disabled="!hasChanges || saving"
-              class="rounded bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-950 transition-colors hover:bg-white disabled:opacity-30"
+              variant="primary"
+              text-size="sm"
               @click="save"
             >
               {{ saving ? "Saving..." : "Save" }}
-            </button>
+            </AppButton>
           </div>
         </div>
       </div>

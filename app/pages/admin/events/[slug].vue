@@ -158,11 +158,11 @@ provide("refreshEvent", fetchEvent);
         to="/admin/events"
         class="mb-4 inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-300"
       >
-        ← Back to events
+        <Icon name="back" :size="14" class="rotate-180" /> Back to events
       </NuxtLink>
 
       <!-- Header -->
-      <div class="mb-6 flex items-start justify-between gap-4">
+      <div class="mb-6 flex items-start justify-between md:gap-4">
         <div>
           <h1 class="text-2xl font-bold text-white md:text-3xl">
             {{ eventData.name }}
@@ -188,64 +188,79 @@ provide("refreshEvent", fetchEvent);
 
         <AppButton
           variant="secondary"
-          :text-size="isMobile ? 'sm' : 'md'"
+          text-size="md"
           @click="showEditModal = true"
         >
-          Edit event
+          <span v-if="!isMobile">Edit event</span>
+          <Icon v-else name="edit" :size="16" />
         </AppButton>
       </div>
 
-      <!-- Sub-event navigation tabs -->
-      <div class="mb-6 border-b border-neutral-800">
-        <div class="flex items-center gap-1 overflow-x-auto">
-          <!-- "All images" tab (event root folder) -->
-          <NuxtLink
-            :to="`/admin/events/${slug}`"
-            class="shrink-0 border-b-2 px-3 py-2 text-sm transition-colors"
-            :class="
-              !activeSubSlug
-                ? 'border-neutral-100 text-neutral-100'
-                : 'border-transparent text-neutral-500 hover:text-neutral-300'
-            "
-          >
-            All images
-            <span class="ml-1 text-xs text-neutral-600">
-              {{ totalImageCount }}
-            </span>
-          </NuxtLink>
+      <div
+        class="rounded border border-neutral-800 bg-neutral-900 px-4 pt-1 pb-6"
+      >
+        <!-- Sub-event navigation tabs -->
+        <div class="mb-6 border-b border-neutral-800">
+          <div class="flex items-center gap-1 overflow-x-auto">
+            <!-- "All images" tab (event root folder) -->
+            <NuxtLink
+              :to="`/admin/events/${slug}`"
+              class="shrink-0 border-b-2 px-3 py-2 text-sm transition-colors"
+              :class="
+                !activeSubSlug
+                  ? 'border-neutral-100 text-neutral-100'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-300'
+              "
+            >
+              All images
+              <span class="ml-1 text-xs text-neutral-600">
+                {{ totalImageCount }}
+              </span>
+            </NuxtLink>
 
-          <!-- Sub-event tabs -->
-          <NuxtLink
-            v-for="sub in subEvents"
-            :key="sub.id"
-            :to="`/admin/events/${slug}/${sub.slug}`"
-            class="shrink-0 border-b-2 px-3 py-2 text-sm transition-colors"
-            :class="
-              activeSubSlug === sub.slug
-                ? 'border-neutral-100 text-neutral-100'
-                : 'border-transparent text-neutral-500 hover:text-neutral-300'
-            "
-          >
-            {{ sub.name }}
-            <span class="ml-1 text-xs text-neutral-600">
-              {{ getSubEventImageCount(sub) }}
-            </span>
-          </NuxtLink>
+            <!-- Sub-event tabs -->
+            <NuxtLink
+              v-for="sub in subEvents"
+              :key="sub.id"
+              :to="`/admin/events/${slug}/${sub.slug}`"
+              class="shrink-0 border-b-2 px-3 py-2 text-sm transition-colors"
+              :class="
+                activeSubSlug === sub.slug
+                  ? 'border-neutral-100 text-neutral-100'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-300'
+              "
+            >
+              {{ sub.name }}
+              <span class="ml-1 text-xs text-neutral-600">
+                {{ getSubEventImageCount(sub) }}
+              </span>
+            </NuxtLink>
 
-          <!-- Add sub-event button -->
-          <AppButton
-            variant="secondary-simple"
-            text-size="sm"
-            class="border-b-2 border-transparent"
-            @click="showCreateSubEventModal = true"
-          >
-            + Add
-          </AppButton>
+            <!-- Add sub-event button -->
+            <AppButton
+              variant="secondary-simple"
+              text-size="sm"
+              class="border-b-2 border-transparent"
+              @click="showCreateSubEventModal = true"
+            >
+              <span class="flex items-center gap-1"
+                ><Icon
+                  name="cross"
+                  :size="13"
+                  stroke="white"
+                  stroke-linejoin="miter"
+                  stroke-width="0.2"
+                  class="rotate-45"
+                />
+                Add</span
+              >
+            </AppButton>
+          </div>
         </div>
-      </div>
 
-      <!-- Child route content -->
-      <NuxtPage />
+        <!-- Child route content -->
+        <NuxtPage />
+      </div>
     </div>
 
     <!-- Edit event modal -->

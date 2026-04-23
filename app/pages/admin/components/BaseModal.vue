@@ -68,7 +68,7 @@ onUnmounted(() => {
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-30 flex items-center justify-center bg-black/70 p-4"
+        class="fixed inset-0 z-30 md:z-50 flex items-center justify-center bg-black/70 p-4"
         @click="handleBackdropClick"
       >
         <div

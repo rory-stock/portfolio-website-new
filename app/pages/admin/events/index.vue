@@ -60,14 +60,22 @@ void fetchEvents();
 <template>
   <div class="mx-auto max-w-6xl space-y-6 p-6 md:mt-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2 md:justify-between md:gap-0">
       <h1 class="text-2xl font-bold text-white md:text-3xl">Events</h1>
       <AppButton
         variant="primary"
         text-size="sm"
         @click="showCreateModal = true"
       >
-        New event
+        <span v-if="!isMobile">New event</span>
+        <Icon
+          v-else
+          name="cross"
+          :size="16"
+          stroke="black"
+          stroke-width="0.5"
+          class="rotate-45"
+        />
       </AppButton>
     </div>
 
@@ -101,7 +109,7 @@ void fetchEvents();
         v-for="evt in events"
         :key="evt.id"
         :to="`/admin/events/${evt.slug}`"
-        class="group flex items-center gap-4 px-2 rounded-lg border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-neutral-700 hover:bg-neutral-900/80"
+        class="group flex items-center gap-4 rounded-lg border border-neutral-800 bg-neutral-900 p-4 px-2 transition-colors hover:border-neutral-700 hover:bg-neutral-900/80"
       >
         <!-- Cover image -->
         <div class="h-16 w-24 shrink-0 overflow-hidden rounded bg-neutral-800">
@@ -119,7 +127,13 @@ void fetchEvents();
           </div>
         </div>
 
-        <div :class="isMobile ? 'flex flex-col' : ''">
+        <div
+          :class="
+            isMobile
+              ? 'flex flex-col'
+              : 'flex w-full items-center justify-between'
+          "
+        >
           <!-- Info -->
           <div class="min-w-0 flex-1">
             <h3
@@ -128,26 +142,37 @@ void fetchEvents();
               {{ evt.name }}
             </h3>
             <div
-              class="mt-0.5 flex flex-col md:flex-row md:items-center md:gap-3 text-xs text-neutral-500"
+              class="mt-0.5 flex flex-col text-xs text-neutral-500 md:flex-row md:items-center md:gap-3"
             >
               <span>{{ formatDateShort(evt.start_date) }}</span>
+              <span v-if="!isMobile">|</span>
               <span>{{ evt.location }}</span>
             </div>
           </div>
 
           <!-- Stats -->
-          <div
-            class="flex shrink-0 items-center gap-2 md:gap-4 text-xs text-neutral-500"
-          >
-            <span v-if="evt.sub_event_count > 0">
-              {{ evt.sub_event_count }} sub-event{{
-                evt.sub_event_count > 1 ? "s" : ""
-              }}
-            </span>
-            <span>
-              {{ evt.image_count }} image{{ evt.image_count !== 1 ? "s" : "" }}
-            </span>
-            <span v-if="!isMobile" class="text-neutral-700 group-hover:text-neutral-500">→</span>
+          <div class="flex shrink-0 items-center text-xs text-neutral-500">
+            <div>
+              <span v-if="evt.sub_event_count > 0">
+                {{ evt.sub_event_count }} sub-event{{
+                  evt.sub_event_count > 1 ? "s" : ""
+                }}
+              </span>
+              <span v-if="evt.sub_event_count && evt.image_count" class="px-2"
+                >|</span
+              >
+              <span>
+                {{ evt.image_count }} image{{
+                  evt.image_count !== 1 ? "s" : ""
+                }}
+              </span>
+            </div>
+            <Icon
+              v-if="!isMobile"
+              name="back"
+              :size="19"
+              class="ml-2 text-neutral-700 group-hover:text-neutral-500"
+            />
           </div>
         </div>
       </NuxtLink>

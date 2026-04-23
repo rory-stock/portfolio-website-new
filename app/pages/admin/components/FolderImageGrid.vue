@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useBreakpoints, breakpointsTailwind } from "@vueuse/core";
+
 interface DisplayImage {
   id: number;
   instanceId: number;
@@ -35,6 +37,9 @@ const isSelected = (image: DisplayImage) =>
 
 const isCover = (image: DisplayImage) =>
   props.coverImageInstanceId === image.instanceId;
+
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const isMobile = computed(() => breakpoints.isSmaller("md"));
 </script>
 
 <template>
@@ -114,18 +119,20 @@ const isCover = (image: DisplayImage) =>
                 : 'border-neutral-400 bg-neutral-900/80 text-transparent hover:border-neutral-300'
             "
           >
-            ✓
+            <Icon name="check" :size="14" />
           </div>
         </div>
 
         <!-- Set as cover button (hover only, hidden if already cover) -->
-        <button
-          v-if="!isCover(image)"
-          class="absolute right-1.5 bottom-1.5 rounded bg-neutral-800/90 px-1.5 py-0.5 text-[10px] text-neutral-300 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-700 hover:text-white"
+        <AppButton
+          v-if="!isCover(image) && !isMobile"
+          variant="secondary"
+          text-size="sm"
+          class="absolute left-1.5 top-1.5 rounded bg-neutral-800/90 px-1.5 py-0.5 text-[10px] text-neutral-200 opacity-0 group-hover:opacity-100 hover:bg-neutral-700"
           @click.stop="emit('set-cover', image.instanceId)"
         >
           Set cover
-        </button>
+        </AppButton>
       </div>
     </div>
 
