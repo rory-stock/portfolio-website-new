@@ -57,7 +57,7 @@ onKeyStroke("Escape", (e) => {
       >
         <div
           class="w-full overflow-hidden rounded-lg border border-neutral-800 bg-neutral-950"
-          :class="widthClasses[maxWidth]"
+          :class="widthClasses[maxWidth ?? 'md']"
           ref="target"
         >
           <!-- Header (optional) -->

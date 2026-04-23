@@ -269,10 +269,10 @@ async function deleteSubEvent() {
     });
 
     // Navigate back to parent event root
+    if (refreshEvent) await refreshEvent();
+
     const parentSlug = route.params.slug as string;
     await navigateTo(`/admin/events/${parentSlug}`);
-
-    if (refreshEvent) void refreshEvent();
   } catch (err: any) {
     console.error("Failed to delete sub-event:", err);
     alert(err.data?.message || "Failed to delete sub-event");

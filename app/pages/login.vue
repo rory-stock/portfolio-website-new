@@ -40,9 +40,9 @@ async function logout() {
 </script>
 
 <template>
-  <div>
+  <div class="h-screen">
     <!-- Centered login page container -->
-    <div class="flex justify-center py-32">
+    <div class="flex justify-center pt-32">
       <div class="flex flex-col gap-3">
         <!-- Login form - prevents default submit and calls login method -->
         <form
