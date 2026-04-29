@@ -141,7 +141,7 @@ watch(
   { immediate: true }
 );
 
-// Also refetch aggregated when subEvents change (new uploads in sub-folders)
+// Also refetch aggregated when subEvents change (new uploads in subfolders)
 watch(
   () => subEvents?.value,
   () => {
@@ -152,29 +152,75 @@ watch(
   { deep: true }
 );
 
-// Selection state — use reactive Map for proper reactivity
-const selectedIds = ref(new Set<number>());
-const selectedImage = ref<any>(null);
+// Selection system (sub-event tabs only)
 
-// Sub-event edit/delete
-const showEditSubEventModal = ref(false);
-const deletingSubEvent = ref(false);
+const {
+  selectedImageIds,
+  isSelectionMode,
+  hasSelection,
+  selectedCount,
+  selectedImages,
+  toggleSelection,
+  selectAll,
+  clearSelection,
+  isSelected,
+  enterSelectionMode,
+  exitSelectionMode,
+  selectRange,
+} = useMultiSelect({ images: singleFolderImages });
 
-function toggleSelect(instanceId: number) {
-  const newSet = new Set(selectedIds.value);
-  if (newSet.has(instanceId)) {
-    newSet.delete(instanceId);
+const { scheduleOperation } = useDelayedOperation();
+const { success, error: showError } = useToast();
+
+function handleImageSelect(instanceId: number, event: MouseEvent) {
+  if (event.shiftKey) {
+    selectRange(instanceId);
   } else {
-    newSet.add(instanceId);
+    toggleSelection(instanceId);
   }
-  selectedIds.value = newSet;
 }
 
-function clearSelection() {
-  selectedIds.value = new Set();
+// Bulk remove
+
+function handleBulkRemove() {
+  if (selectedCount.value === 0) return;
+
+  const count = selectedCount.value;
+  const ids = [...selectedImages.value.map((img) => img.instanceId)];
+
+  scheduleOperation(
+    `Removing ${count} image${count > 1 ? "s" : ""}`,
+    async () => {
+      let removed = 0;
+      for (const id of ids) {
+        try {
+          await removeImage(id);
+          removed++;
+        } catch (err) {
+          console.error(`Failed to remove image ${id}:`, err);
+        }
+      }
+
+      exitSelectionMode();
+      void fetchFolder();
+      if (refreshEvent) void refreshEvent();
+
+      if (removed === count) {
+        success(`Successfully removed ${count} image${count > 1 ? "s" : ""}`);
+      } else {
+        showError(
+          `Removed ${removed} of ${count} images. ${count - removed} failed.`
+        );
+      }
+    },
+    8000
+  );
 }
 
 // Image detail modal
+
+const selectedImage = ref<any>(null);
+
 function openImageDetail(image: any) {
   selectedImage.value = image;
 }
@@ -184,12 +230,6 @@ function closeImageDetail() {
 }
 
 async function onImageRemoved(instanceId: number) {
-  if (selectedIds.value.has(instanceId)) {
-    const newSet = new Set(selectedIds.value);
-    newSet.delete(instanceId);
-    selectedIds.value = newSet;
-  }
-
   if (isRootTab.value) {
     aggregatedImages.value = aggregatedImages.value.filter(
       (img) => img.instanceId !== instanceId
@@ -218,34 +258,9 @@ async function onUploadComplete() {
   if (refreshEvent) void refreshEvent();
 }
 
-// Bulk remove
-const bulkDeleting = ref(false);
-
-async function bulkRemove() {
-  if (selectedIds.value.size === 0) return;
-
-  const confirmed = window.confirm(
-    `Remove ${selectedIds.value.size} image${selectedIds.value.size > 1 ? "s" : ""} from this folder?`
-  );
-  if (!confirmed) return;
-
-  bulkDeleting.value = true;
-
-  const idsToRemove = [...selectedIds.value];
-  for (const id of idsToRemove) {
-    try {
-      await removeImage(id);
-    } catch (err) {
-      console.error(`Failed to remove image ${id}:`, err);
-    }
-  }
-
-  selectedIds.value = new Set();
-  bulkDeleting.value = false;
-
-  void fetchFolder();
-  if (refreshEvent) void refreshEvent();
-}
+// Sub-event edit/delete
+const showEditSubEventModal = ref(false);
+const deletingSubEvent = ref(false);
 
 async function onSubEventUpdated(newSlug: string) {
   showEditSubEventModal.value = false;
@@ -275,7 +290,6 @@ async function deleteSubEvent() {
       method: "DELETE",
     });
 
-    // Navigate back to parent event root
     if (refreshEvent) await refreshEvent();
 
     const parentSlug = route.params.slug as string;
@@ -313,72 +327,116 @@ const notFound = computed(() => {
 
     <!-- Folder content -->
     <div v-else>
-      <!-- Sub-event actions (only shown when viewing a sub-event) -->
-      <div v-if="activeSubEvent" class="mb-4 flex items-center justify-between">
-        <h2 class="text-lg font-medium text-neutral-200">
-          {{ activeSubEvent.name }}
-        </h2>
-        <div class="flex items-center gap-2">
-          <AppButton
-            variant="secondary"
-            text-size="sm"
-            class="py-1.5"
-            @click="showEditSubEventModal = true"
-          >
-            Edit
-          </AppButton>
-          <AppButton
-            variant="danger"
-            text-size="sm"
-            class="py-1.5"
-            :disabled="deletingSubEvent"
-            @click="deleteSubEvent"
-          >
-            {{ deletingSubEvent ? "Deleting..." : "Delete" }}
-          </AppButton>
+      <!-- Sub-event toolbar (only on sub-event tabs) -->
+      <div
+        v-if="activeSubEvent"
+        class="mb-4 rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-3"
+      >
+        <!-- Top row: name, count, edit, delete -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <h2 class="text-lg font-medium text-neutral-200">
+              {{ activeSubEvent.name }}
+            </h2>
+            <span v-if="total > 0" class="text-sm text-neutral-500">
+              {{ total }} image{{ total !== 1 ? "s" : "" }}
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <AppButton
+              variant="secondary"
+              text-size="sm"
+              class="py-1.5"
+              @click="showEditSubEventModal = true"
+            >
+              Edit
+            </AppButton>
+            <AppButton
+              variant="danger-simple"
+              text-size="sm"
+              class="py-1.5"
+              :disabled="deletingSubEvent"
+              @click="deleteSubEvent"
+            >
+              {{ deletingSubEvent ? "Deleting..." : "Delete" }}
+            </AppButton>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="my-2 border-t border-neutral-800" />
+
+        <!-- Bottom row: selection controls -->
+        <div class="flex items-center justify-between">
+          <!-- Left side: Select / Select All / Exit -->
+          <div class="flex items-center gap-2">
+            <AppButton
+              v-if="!isSelectionMode"
+              variant="secondary"
+              text-size="sm"
+              class="py-1"
+              @click="enterSelectionMode"
+            >
+              Select
+            </AppButton>
+            <template v-else>
+              <AppButton
+                variant="secondary"
+                text-size="sm"
+                class="py-1"
+                @click="selectAll"
+              >
+                Select All
+              </AppButton>
+              <AppButton
+                variant="secondary"
+                text-size="sm"
+                class="py-1"
+                @click="exitSelectionMode"
+              >
+                Exit Selection
+              </AppButton>
+            </template>
+          </div>
+
+          <!-- Right side: count + Remove + Clear -->
+          <div v-if="hasSelection" class="flex items-center gap-2">
+            <span class="text-xs text-neutral-500">
+              {{ selectedCount }} selected
+            </span>
+            <AppButton
+              variant="danger-simple"
+              text-size="sm"
+              class="py-1"
+              @click="handleBulkRemove"
+            >
+              Remove
+            </AppButton>
+            <AppButton
+              variant="secondary"
+              text-size="sm"
+              class="py-1"
+              @click="clearSelection"
+            >
+              Clear
+            </AppButton>
+          </div>
         </div>
       </div>
 
-      <!-- Toolbar -->
-      <div class="mb-4 flex items-center justify-between">
+      <!-- Root tab -->
+      <div v-if="isRootTab" class="mb-4">
         <div class="text-sm text-neutral-400">
-          <span v-if="total > 0"
-            >{{ total }} image{{ total !== 1 ? "s" : "" }}</span
-          >
+          <span v-if="total > 0">
+            {{ total }} image{{ total !== 1 ? "s" : "" }}
+          </span>
           <span v-else>No images yet</span>
           <span
-            v-if="isRootTab && subEvents && subEvents.length > 0"
+            v-if="subEvents && subEvents.length > 0"
             class="ml-1 text-neutral-600"
           >
             (across all folders)
           </span>
-        </div>
-
-        <!-- Bulk actions -->
-        <div
-          v-if="!isRootTab && selectedIds.size > 0"
-          class="flex items-center gap-2"
-        >
-          <span class="text-xs text-neutral-500">
-            {{ selectedIds.size }} selected
-          </span>
-          <AppButton
-            variant="danger-simple"
-            text-size="sm"
-            class="py-1"
-            :disabled="bulkDeleting"
-            @click="bulkRemove"
-          >
-            {{ bulkDeleting ? "Removing..." : "Remove" }}
-          </AppButton>
-          <AppButton
-            variant="secondary"
-            text-size="sm"
-            @click="clearSelection"
-            class="py-1"
-          >
-            Clear
-          </AppButton>
         </div>
       </div>
 
@@ -397,10 +455,11 @@ const notFound = computed(() => {
         :loading="loading"
         :loading-more="isRootTab ? false : loadingMore"
         :has-more="isRootTab ? false : hasMore"
-        :selected-ids="isRootTab ? undefined : selectedIds"
+        :selected-ids="isRootTab ? undefined : selectedImageIds"
         :cover-image-instance-id="folder?.cover_image?.instanceId ?? null"
+        :is-selection-mode="isRootTab ? false : isSelectionMode"
         @image-click="openImageDetail"
-        @image-select="toggleSelect"
+        @image-select="handleImageSelect"
         @load-more="loadMore"
         @set-cover="onSetCover"
       />

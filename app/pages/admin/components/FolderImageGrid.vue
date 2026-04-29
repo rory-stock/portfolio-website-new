@@ -16,18 +16,24 @@ interface DisplayImage {
   context: string;
 }
 
-const props = defineProps<{
-  images: DisplayImage[];
-  loading?: boolean;
-  loadingMore?: boolean;
-  hasMore?: boolean;
-  selectedIds?: Set<number>;
-  coverImageInstanceId?: number | null;
-}>();
+const props = withDefaults(
+  defineProps<{
+    images: DisplayImage[];
+    loading?: boolean;
+    loadingMore?: boolean;
+    hasMore?: boolean;
+    selectedIds?: Set<number>;
+    coverImageInstanceId?: number | null;
+    isSelectionMode?: boolean;
+  }>(),
+  {
+    isSelectionMode: false,
+  }
+);
 
 const emit = defineEmits<{
   "image-click": [image: DisplayImage];
-  "image-select": [imageInstanceId: number];
+  "image-select": [imageInstanceId: number, event: MouseEvent];
   "load-more": [];
   "set-cover": [imageInstanceId: number];
 }>();
@@ -40,6 +46,14 @@ const isCover = (image: DisplayImage) =>
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = computed(() => breakpoints.isSmaller("md"));
+
+function handleImageClick(image: DisplayImage, event: MouseEvent) {
+  if (props.isSelectionMode) {
+    emit("image-select", image.instanceId, event);
+  } else {
+    emit("image-click", image);
+  }
+}
 </script>
 
 <template>
@@ -70,7 +84,7 @@ const isMobile = computed(() => breakpoints.isSmaller("md"));
           'ring-2 ring-blue-500 ring-offset-1 ring-offset-neutral-950':
             isSelected(image),
         }"
-        @click="emit('image-click', image)"
+        @click="handleImageClick(image, $event)"
       >
         <!-- Image -->
         <ProgressiveImage
@@ -89,8 +103,21 @@ const isMobile = computed(() => breakpoints.isSmaller("md"));
           Cover
         </div>
 
+        <!-- Selection overlay -->
+        <div
+          v-if="isSelectionMode && isSelected(image)"
+          class="absolute inset-0 z-10 flex items-center justify-center bg-black/60"
+        >
+          <div
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-900/90"
+          >
+            <Icon name="check" :size="20" class="text-neutral-100" />
+          </div>
+        </div>
+
         <!-- Hover overlay -->
         <div
+          v-if="!isSelectionMode"
           class="absolute inset-0 flex items-end bg-linear-to-t from-black/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
         >
           <div class="w-full p-2">
@@ -100,16 +127,16 @@ const isMobile = computed(() => breakpoints.isSmaller("md"));
           </div>
         </div>
 
-        <!-- Select checkbox (visible on hover or when selected) -->
+        <!-- Select checkbox -->
         <div
-          v-if="selectedIds"
+          v-if="selectedIds && !isSelectionMode"
           class="absolute top-1.5 right-1.5 transition-opacity"
           :class="
             isSelected(image)
               ? 'opacity-100'
               : 'opacity-0 group-hover:opacity-100'
           "
-          @click.stop="emit('image-select', image.instanceId)"
+          @click.stop="emit('image-select', image.instanceId, $event)"
         >
           <div
             class="flex h-5 w-5 items-center justify-center rounded border text-xs"
@@ -123,9 +150,9 @@ const isMobile = computed(() => breakpoints.isSmaller("md"));
           </div>
         </div>
 
-        <!-- Set as cover button (hover only, hidden if already cover) -->
+        <!-- Set as cover button -->
         <AppButton
-          v-if="!isCover(image) && !isMobile"
+          v-if="!isCover(image) && !isMobile && !isSelectionMode"
           variant="secondary"
           text-size="sm"
           class="absolute top-1.5 left-1.5 rounded bg-neutral-800/90 px-1.5 py-0.5 text-[10px] text-neutral-200 opacity-0 group-hover:opacity-100 hover:bg-neutral-700"
