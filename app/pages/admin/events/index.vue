@@ -158,7 +158,7 @@ void fetchEvents();
                   evt.sub_event_count > 1 ? "s" : ""
                 }}
               </span>
-              <span v-if="evt.sub_event_count && evt.image_count" class="px-2"
+              <span v-if="evt.sub_event_count" class="px-2"
                 >|</span
               >
               <span>

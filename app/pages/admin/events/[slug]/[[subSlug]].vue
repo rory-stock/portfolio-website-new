@@ -354,7 +354,7 @@ const notFound = computed(() => {
           </span>
         </div>
 
-        <!-- Bulk actions (only for single folder tabs) -->
+        <!-- Bulk actions -->
         <div
           v-if="!isRootTab && selectedIds.size > 0"
           class="flex items-center gap-2"
@@ -362,23 +362,27 @@ const notFound = computed(() => {
           <span class="text-xs text-neutral-500">
             {{ selectedIds.size }} selected
           </span>
-          <button
+          <AppButton
+            variant="danger-simple"
+            text-size="sm"
+            class="py-1"
             :disabled="bulkDeleting"
-            class="rounded border border-red-800 px-2 py-1 text-xs text-red-400 hover:bg-red-950/50 disabled:opacity-50"
             @click="bulkRemove"
           >
             {{ bulkDeleting ? "Removing..." : "Remove" }}
-          </button>
-          <button
-            class="rounded border border-neutral-700 px-2 py-1 text-xs text-neutral-400 hover:border-neutral-500"
+          </AppButton>
+          <AppButton
+            variant="secondary"
+            text-size="sm"
             @click="clearSelection"
+            class="py-1"
           >
             Clear
-          </button>
+          </AppButton>
         </div>
       </div>
 
-      <!-- Upload zone (only for single folder tabs, not aggregated view) -->
+      <!-- Upload zone -->
       <div v-if="!isRootTab && activeFolderId" class="mb-6">
         <FolderUploadZone
           :folder-id="activeFolderId"

@@ -208,30 +208,29 @@ const folderTypeOptions = [
     <!-- Actions -->
     <div class="mt-6 flex items-center justify-between">
       <div>
-        <button
+        <AppButton
           v-if="isEditing"
+          variant="danger-simple"
+          text-size="sm"
           :disabled="deleting"
-          class="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-950/50 hover:text-red-300 disabled:opacity-50"
           @click="handleDelete"
         >
           {{ deleting ? "Deleting..." : "Delete folder" }}
-        </button>
+        </AppButton>
       </div>
 
       <div class="flex gap-2">
-        <button
-          class="rounded border border-neutral-700 px-3 py-1.5 text-xs text-neutral-200 hover:border-neutral-500"
-          @click="emit('cancel')"
-        >
+        <AppButton variant="secondary" text-size="sm" @click="emit('cancel')">
           Cancel
-        </button>
-        <button
+        </AppButton>
+        <AppButton
+          variant="primary"
+          text-size="sm"
           :disabled="saving || !name.trim()"
-          class="rounded bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-950 hover:bg-white disabled:opacity-30"
           @click="save"
         >
           {{ saving ? "Saving..." : isEditing ? "Save" : "Create" }}
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>

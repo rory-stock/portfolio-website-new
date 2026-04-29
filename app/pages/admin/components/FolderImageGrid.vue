@@ -128,7 +128,7 @@ const isMobile = computed(() => breakpoints.isSmaller("md"));
           v-if="!isCover(image) && !isMobile"
           variant="secondary"
           text-size="sm"
-          class="absolute left-1.5 top-1.5 rounded bg-neutral-800/90 px-1.5 py-0.5 text-[10px] text-neutral-200 opacity-0 group-hover:opacity-100 hover:bg-neutral-700"
+          class="absolute top-1.5 left-1.5 rounded bg-neutral-800/90 px-1.5 py-0.5 text-[10px] text-neutral-200 opacity-0 group-hover:opacity-100 hover:bg-neutral-700"
           @click.stop="emit('set-cover', image.instanceId)"
         >
           Set cover
@@ -138,13 +138,14 @@ const isMobile = computed(() => breakpoints.isSmaller("md"));
 
     <!-- Load more -->
     <div v-if="hasMore" class="mt-6 text-center">
-      <button
+      <AppButton
+        variant="secondary"
+        text-size="sm"
         :disabled="loadingMore"
-        class="rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition-colors hover:border-neutral-500 hover:text-white disabled:opacity-50"
         @click="emit('load-more')"
       >
         {{ loadingMore ? "Loading..." : "Load more" }}
-      </button>
+      </AppButton>
     </div>
   </div>
 </template>

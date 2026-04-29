@@ -138,24 +138,26 @@ function getStatusColor(status: string): string {
         </div>
       </div>
       <div class="flex gap-2">
-        <button
+        <AppButton
           v-if="hasValidFiles"
-          class="rounded bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-950 hover:bg-white"
+          variant="primary"
+          text-size="sm"
           @click="void skipInvalidAndUpload()"
         >
           Skip invalid &amp; upload {{ state.files.length }} file{{
             state.files.length > 1 ? "s" : ""
           }}
-        </button>
-        <button
-          class="rounded border border-neutral-700 px-3 py-1.5 text-xs text-neutral-200 hover:border-neutral-500"
+        </AppButton>
+        <AppButton
+          variant="secondary"
+          text-size="sm"
           @click="
             clearInvalidFiles();
             reset();
           "
         >
           Cancel all
-        </button>
+        </AppButton>
       </div>
     </div>
 
@@ -250,20 +252,18 @@ function getStatusColor(status: string): string {
 
       <!-- Actions -->
       <div class="mt-3 flex gap-2">
-        <button
+        <AppButton
           v-if="state.isUploading"
-          class="rounded border border-amber-600 px-3 py-1.5 text-xs text-amber-300 hover:bg-amber-950/50"
+          variant="secondary"
+          text-size="sm"
+          class="border-amber-600 text-amber-300 hover:bg-amber-950/50"
           @click="cancelUpload"
         >
           Cancel
-        </button>
-        <button
-          v-else
-          class="rounded border border-neutral-700 px-3 py-1.5 text-xs text-neutral-200 hover:border-neutral-500"
-          @click="reset"
-        >
+        </AppButton>
+        <AppButton v-else variant="secondary" text-size="sm" @click="reset">
           Close
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>
