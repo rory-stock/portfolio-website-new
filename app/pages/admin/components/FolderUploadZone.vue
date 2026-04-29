@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useDropZone } from "@vueuse/core";
+import UploadProgress from "~/pages/admin/components/UploadProgress.vue";
 
 const props = defineProps<{
   folderId: number;
@@ -24,7 +25,6 @@ const {
 } = useFileUpload({
   context: "events",
   onComplete: async (imageIds: number[]) => {
-    // After upload, link each new image instance to this folder
     for (const instanceId of imageIds) {
       try {
         await $fetch(`/api/folders/${props.folderId}/images`, {
@@ -74,34 +74,17 @@ watch(
   }
 );
 
-function getStatusIcon(status: string): string {
-  switch (status) {
-    case "success":
-      return "✓";
-    case "error":
-      return "✗";
-    case "uploading":
-      return "⟳";
-    case "cancelled":
-      return "—";
-    default:
-      return "⏳";
-  }
+function handleSkipInvalid() {
+  void skipInvalidAndUpload();
 }
 
-function getStatusColor(status: string): string {
-  switch (status) {
-    case "success":
-      return "text-green-500";
-    case "error":
-      return "text-red-500";
-    case "uploading":
-      return "text-blue-500 animate-spin";
-    case "cancelled":
-      return "text-neutral-500";
-    default:
-      return "text-neutral-600";
-  }
+function handleClearInvalid() {
+  clearInvalidFiles();
+  reset();
+}
+
+function handleClose() {
+  reset();
 }
 </script>
 
@@ -116,54 +99,26 @@ function getStatusColor(status: string): string {
       @change="onFileInputChange"
     />
 
-    <!-- Invalid files alert -->
-    <div
-      v-if="hasInvalidFiles"
-      class="rounded-lg border border-red-800 bg-red-950/50 p-4"
-    >
-      <p class="mb-2 text-xs font-medium text-red-300">
-        {{ state.invalidFiles.length }} file{{
-          state.invalidFiles.length > 1 ? "s" : ""
-        }}
-        can't be uploaded:
-      </p>
-      <div class="mb-3 max-h-32 space-y-1 overflow-y-auto">
-        <div
-          v-for="(invalid, i) in state.invalidFiles"
-          :key="i"
-          class="text-xs text-red-400"
-        >
-          <span class="font-medium">{{ invalid.file.name }}</span>
-          — {{ invalid.reasons.join(", ") }}
-        </div>
-      </div>
-      <div class="flex gap-2">
-        <AppButton
-          v-if="hasValidFiles"
-          variant="primary"
-          text-size="sm"
-          @click="void skipInvalidAndUpload()"
-        >
-          Skip invalid &amp; upload {{ state.files.length }} file{{
-            state.files.length > 1 ? "s" : ""
-          }}
-        </AppButton>
-        <AppButton
-          variant="secondary"
-          text-size="sm"
-          @click="
-            clearInvalidFiles();
-            reset();
-          "
-        >
-          Cancel all
-        </AppButton>
-      </div>
-    </div>
+    <!-- Upload progress / invalid files / summary -->
+    <UploadProgress
+      v-if="hasInvalidFiles || state.isUploading || state.summary"
+      :files="state.files"
+      :invalid-files="state.invalidFiles"
+      :has-invalid-files="hasInvalidFiles"
+      :has-valid-files="hasValidFiles"
+      :is-uploading="state.isUploading"
+      :is-cancelling="state.isCancelling"
+      :progress="state.progress"
+      :summary="state.summary"
+      @cancel="cancelUpload"
+      @close="handleClose"
+      @skip-invalid="handleSkipInvalid"
+      @clear-invalid="handleClearInvalid"
+    />
 
     <!-- Drop zone (shown when idle) -->
     <div
-      v-else-if="!state.isUploading && state.files.length === 0"
+      v-else
       ref="dropZoneRef"
       class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors"
       :class="
@@ -177,94 +132,6 @@ function getStatusColor(status: string): string {
         Drop images here or click to upload
       </p>
       <p class="mt-1 text-xs text-neutral-600">JPG, PNG, WebP — 60MB max</p>
-    </div>
-
-    <!-- Upload progress (shown during/after upload) -->
-    <div
-      v-else-if="state.isUploading || state.summary"
-      class="rounded-lg border border-neutral-800 bg-neutral-900 p-4"
-    >
-      <!-- Cancelling banner -->
-      <div
-        v-if="state.isCancelling"
-        class="mb-3 rounded-lg border border-amber-500 bg-amber-950/50 p-2 text-xs text-amber-300"
-      >
-        <span class="font-medium">Cancelling uploads...</span>
-      </div>
-
-      <!-- Progress bar -->
-      <div class="mb-3">
-        <div class="mb-1 flex items-center justify-between text-xs">
-          <span class="text-neutral-300">
-            {{ state.progress.completed }} of {{ state.progress.total }} files
-          </span>
-          <span v-if="state.isUploading" class="text-neutral-500">
-            Uploading...
-          </span>
-          <span v-else-if="state.summary" class="text-neutral-400">
-            {{ state.summary.succeeded }} succeeded<span
-              v-if="state.summary.failed > 0"
-              >, {{ state.summary.failed }} failed</span
-            ><span v-if="state.summary.cancelled > 0"
-              >, {{ state.summary.cancelled }} cancelled</span
-            >
-          </span>
-        </div>
-        <div class="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
-          <div
-            class="h-full rounded-full bg-blue-500 transition-all"
-            :style="{
-              width:
-                state.progress.total > 0
-                  ? `${(state.progress.completed / state.progress.total) * 100}%`
-                  : '0%',
-            }"
-          />
-        </div>
-      </div>
-
-      <!-- File list -->
-      <div class="max-h-48 space-y-1 overflow-y-auto">
-        <div
-          v-for="file in state.files"
-          :key="file.id"
-          class="flex items-center gap-2 text-xs"
-        >
-          <!-- Status icon -->
-          <span :class="getStatusColor(file.status)">
-            {{ getStatusIcon(file.status) }}
-          </span>
-
-          <!-- Filename -->
-          <span class="flex-1 truncate text-neutral-300">
-            {{ file.fileName }}
-          </span>
-
-          <!-- Error message -->
-          <span
-            v-if="file.status === 'error' && 'error' in file"
-            class="text-red-400"
-          >
-            {{ file.error }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="mt-3 flex gap-2">
-        <AppButton
-          v-if="state.isUploading"
-          variant="secondary"
-          text-size="sm"
-          class="border-amber-600 text-amber-300 hover:bg-amber-950/50"
-          @click="cancelUpload"
-        >
-          Cancel
-        </AppButton>
-        <AppButton v-else variant="secondary" text-size="sm" @click="reset">
-          Close
-        </AppButton>
-      </div>
     </div>
   </div>
 </template>
