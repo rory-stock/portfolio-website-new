@@ -173,6 +173,11 @@ const { scheduleOperation } = useDelayedOperation();
 const { success, error: showError } = useToast();
 
 function handleImageSelect(instanceId: number, event: MouseEvent) {
+  // Auto-enter selection mode if not already in it
+  if (!isSelectionMode.value) {
+    enterSelectionMode();
+  }
+
   if (event.shiftKey) {
     selectRange(instanceId);
   } else {
@@ -424,7 +429,7 @@ const notFound = computed(() => {
         </div>
       </div>
 
-      <!-- Root tab -->
+      <!-- Root tab: simple count text -->
       <div v-if="isRootTab" class="mb-4">
         <div class="text-sm text-neutral-400">
           <span v-if="total > 0">

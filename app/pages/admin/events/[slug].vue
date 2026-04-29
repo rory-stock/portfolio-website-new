@@ -313,5 +313,7 @@ provide("refreshEvent", fetchEvent);
         />
       </div>
     </BaseModal>
+
+    <Toast />
   </div>
 </template>
