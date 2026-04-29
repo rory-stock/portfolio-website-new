@@ -93,14 +93,18 @@ void fetchEvents();
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="events.length === 0" class="py-16 text-center">
+    <div
+      v-else-if="events.length === 0"
+      class="flex flex-col items-center gap-1 py-16 text-center"
+    >
       <p class="text-neutral-400">No events yet.</p>
-      <button
-        class="mt-3 rounded border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:border-neutral-500"
+      <AppButton
+        variant="secondary"
+        class="w-fit"
         @click="showCreateModal = true"
       >
         Create your first event
-      </button>
+      </AppButton>
     </div>
 
     <!-- Events list -->
@@ -158,9 +162,7 @@ void fetchEvents();
                   evt.sub_event_count > 1 ? "s" : ""
                 }}
               </span>
-              <span v-if="evt.sub_event_count" class="px-2"
-                >|</span
-              >
+              <span v-if="evt.sub_event_count" class="px-2">|</span>
               <span>
                 {{ evt.image_count }} image{{
                   evt.image_count !== 1 ? "s" : ""
