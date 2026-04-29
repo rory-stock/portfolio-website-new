@@ -247,10 +247,17 @@ async function bulkRemove() {
   if (refreshEvent) void refreshEvent();
 }
 
-// Sub-event edit
-async function onSubEventUpdated() {
+async function onSubEventUpdated(newSlug: string) {
   showEditSubEventModal.value = false;
-  if (refreshEvent) void refreshEvent();
+
+  if (refreshEvent) await refreshEvent();
+
+  if (newSlug !== activeSubSlug.value) {
+    const parentSlug = route.params.slug as string;
+    await navigateTo(`/admin/events/${parentSlug}/${newSlug}`, {
+      replace: true,
+    });
+  }
 }
 
 async function deleteSubEvent() {

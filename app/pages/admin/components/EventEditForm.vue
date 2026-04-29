@@ -17,7 +17,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  updated: [];
+  updated: [slug: string];
   deleted: [];
   cancel: [];
 }>();
@@ -42,18 +42,21 @@ async function handleSubmit() {
   error.value = null;
 
   try {
-    await $fetch(`/api/events/${props.event.id}`, {
-      method: "PATCH",
-      body: {
-        name: name.value.trim(),
-        start_date: startDate.value,
-        end_date: endDate.value || null,
-        location: location.value.trim(),
-        description: description.value.trim() || null,
-        external_url: externalUrl.value.trim() || null,
-      },
-    });
-    emit("updated");
+    const response = await $fetch<{ slug: string }>(
+      `/api/events/${props.event.id}`,
+      {
+        method: "PATCH",
+        body: {
+          name: name.value.trim(),
+          start_date: startDate.value,
+          end_date: endDate.value || null,
+          location: location.value.trim(),
+          description: description.value.trim() || null,
+          external_url: externalUrl.value.trim() || null,
+        },
+      }
+    );
+    emit("updated", response.slug);
   } catch (err: any) {
     error.value = err.data?.message || "Failed to update event";
   } finally {

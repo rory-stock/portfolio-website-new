@@ -120,6 +120,16 @@ const totalImageCount = computed(() => {
   return total;
 });
 
+async function onParentEventUpdated(newSlug: string) {
+  showEditModal.value = false;
+
+  if (newSlug !== slug.value) {
+    await navigateTo(`/admin/events/${newSlug}`, { replace: true });
+  }
+
+  await fetchEvent();
+}
+
 async function onSubEventCreated() {
   showCreateSubEventModal.value = false;
   await fetchEvent();
@@ -280,10 +290,7 @@ provide("refreshEvent", fetchEvent);
         <EventEditForm
           v-if="eventData"
           :event="eventData"
-          @updated="
-            showEditModal = false;
-            fetchEvent();
-          "
+          @updated="onParentEventUpdated"
           @deleted="navigateTo('/admin/events')"
           @cancel="showEditModal = false"
         />
