@@ -13,8 +13,17 @@ export default defineEventHandler(async (event): Promise<EventResponse> => {
     EventCreateRequest & { parent_event_id?: number }
   >(event);
 
+  const isSubEvent = !!body.parent_event_id;
+
   // Validation
-  if (!body.name || !body.start_date || !body.location) {
+  if (!body.name || !body.start_date) {
+    throw createError({
+      statusCode: 400,
+      message: "name and start_date are required",
+    });
+  }
+
+  if (!isSubEvent && !body.location) {
     throw createError({
       statusCode: 400,
       message: "name, start_date, and location are required",
@@ -57,11 +66,18 @@ export default defineEventHandler(async (event): Promise<EventResponse> => {
     name: body.name,
     startDate: body.start_date,
     endDate: body.end_date,
-    location: body.location,
+    location: body.location || "",
     description: body.description,
     externalUrl: body.external_url,
     parentEventId: body.parent_event_id ?? null,
   });
+
+  if (!newEvent) {
+    throw createError({
+      statusCode: 500,
+      message: "Failed to create event",
+    });
+  }
 
   return eventToResponse(newEvent);
 });

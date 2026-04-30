@@ -15,6 +15,8 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
+const isSubEvent = computed(() => !!props.parentEventId);
+
 const name = ref("");
 const startDate = ref("");
 const endDate = ref("");
@@ -24,8 +26,19 @@ const externalUrl = ref("");
 const saving = ref(false);
 const error = ref<string | null>(null);
 
+const canSubmit = computed(() => {
+  if (!name.value.trim() || !startDate.value) return false;
+  if (!isSubEvent.value && !location.value.trim()) return false;
+  return !saving.value;
+});
+
 async function handleSubmit() {
-  if (!name.value.trim() || !startDate.value || !location.value.trim()) {
+  if (!name.value.trim() || !startDate.value) {
+    error.value = "Name and start date are required";
+    return;
+  }
+
+  if (!isSubEvent.value && !location.value.trim()) {
     error.value = "Name, start date, and location are required";
     return;
   }
@@ -40,7 +53,7 @@ async function handleSubmit() {
         name: name.value.trim(),
         start_date: startDate.value,
         end_date: endDate.value || undefined,
-        location: location.value.trim(),
+        location: location.value.trim() || undefined,
         description: description.value.trim() || undefined,
         external_url: externalUrl.value.trim() || undefined,
         parent_event_id: props.parentEventId || undefined,
@@ -57,11 +70,7 @@ async function handleSubmit() {
 onKeyStroke(
   "s",
   (e) => {
-    if (
-      (e.ctrlKey || e.metaKey) &&
-      (name.value.trim() || startDate.value || location.value.trim()) &&
-      !saving.value
-    ) {
+    if ((e.ctrlKey || e.metaKey) && canSubmit.value) {
       e.preventDefault();
       handleSubmit();
     }
@@ -112,7 +121,9 @@ onKeyStroke(
 
     <!-- Location -->
     <div>
-      <label class="mb-1 block text-xs text-neutral-400">Location *</label>
+      <label class="mb-1 block text-xs text-neutral-400">
+        Location{{ isSubEvent ? "" : " *" }}
+      </label>
       <input
         v-model="location"
         type="text"
@@ -155,7 +166,7 @@ onKeyStroke(
         variant="primary"
         text-size="sm"
         class="py-1.5"
-        :disabled="saving || !name.trim() || !startDate || !location.trim()"
+        :disabled="!canSubmit"
         @click="handleSubmit"
       >
         {{ saving ? "Creating..." : "Create event" }}
