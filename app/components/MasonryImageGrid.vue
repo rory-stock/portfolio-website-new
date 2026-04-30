@@ -6,11 +6,11 @@ const props = withDefaults(
   defineProps<{
     images: DisplayImage[];
     columnWidth?: number;
+    maxColumns?: number;
     gap?: number;
   }>(),
   {
-    columnWidth: 350,
-    gap: 4,
+    gap: 6,
   }
 );
 
@@ -23,6 +23,7 @@ const emit = defineEmits<{
   <MasonryWall
     :items="images"
     :column-width="columnWidth"
+    :max-columns="maxColumns"
     :gap="gap"
     :ssr-columns="3"
   >

@@ -71,7 +71,7 @@ const selectedImage = ref<DisplayImage | null>(null);
       </p>
       <NuxtLink
         :to="`/events/${route.params.slug}`"
-        class="mt-3 inline-block text-xl font-ghost text-neutral-500 underline hover:text-black"
+        class="mt-3 inline-block font-ghost text-xl text-neutral-500 underline hover:text-black"
       >
         ← Back to event
       </NuxtLink>
@@ -79,7 +79,9 @@ const selectedImage = ref<DisplayImage | null>(null);
 
     <!-- No images -->
     <div v-else-if="isEmpty" class="py-16 text-center">
-      <p class="font-ghost text-lg text-neutral-400">
+      <p
+        class="font-ghost text-2xl text-black selection:bg-black selection:text-white"
+      >
         No photos from this event yet — check back soon!
       </p>
     </div>
@@ -88,8 +90,8 @@ const selectedImage = ref<DisplayImage | null>(null);
     <template v-else>
       <MasonryImageGrid
         :images="displayImages"
-        :column-width="350"
-        :gap="4"
+        :max-columns="3"
+        :gap="8"
         @image-click="selectedImage = $event"
       />
 

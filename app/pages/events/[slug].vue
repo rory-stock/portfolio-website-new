@@ -67,12 +67,10 @@ useSeoMeta({
 
 <template>
   <div class="md:mt-20">
-    <div v-if="event" class="mx-auto max-w-7xl px-4 py-8">
+    <div v-if="event" class="px-4 py-6">
       <!-- Event header -->
-      <div class="mb-6">
-        <h1
-          class="mb-1 font-ghost text-2xl text-black selection:bg-black selection:text-white md:text-3xl lg:text-4xl"
-        >
+      <div class="mb-6 selection:bg-black selection:text-white">
+        <h1 class="mb-1 font-ghost text-2xl text-black md:text-3xl lg:text-4xl">
           {{ event.name }}
         </h1>
 
@@ -111,7 +109,7 @@ useSeoMeta({
             v-for="sub in subEvents"
             :key="sub.id"
             :to="`/events/${slug}/${sub.slug}`"
-            class="shrink-0 border-b-2 pb-2 font-ghost text-sm tracking-wide uppercase transition-colors md:text-base"
+            class="shrink-0 border-b-2 pb-2 font-ghost text-sm tracking-wide uppercase transition-colors select-none md:text-base"
             :class="
               activeSubSlug === sub.slug
                 ? 'border-black text-black'
