@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { getOgImageUrl, getTwitterImageUrl } from "~/utils/meta";
 import type { DisplayImage } from "~~/types/imageTypes";
-import MasonryImageGrid from "~/components/MasonryImageGrid.vue";
 
 definePageMeta({
   layout: "events",
@@ -32,7 +31,6 @@ interface PublicEventData {
   images: DisplayImage[];
 }
 
-// Fetch from public endpoint
 const { data: eventData } = await useFetch<PublicEventData>(
   `/api/events/${slug}/public`
 );
@@ -41,34 +39,20 @@ const event = computed(() => eventData.value);
 const subEvents = computed(() => event.value?.sub_events ?? []);
 const hasSubEvents = computed(() => subEvents.value.length > 0);
 
-// Active sub-event tab (default to first)
-const activeSubSlug = ref<string | null>(null);
+const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 
-watch(
-  subEvents,
-  (subs) => {
-    if (subs.length > 0 && !activeSubSlug.value) {
-      activeSubSlug.value = subs[0]!.slug;
-    }
-  },
-  { immediate: true }
-);
-
-const activeSubEvent = computed(() => {
-  if (!hasSubEvents.value) return null;
-  return subEvents.value.find((s) => s.slug === activeSubSlug.value) ?? null;
-});
-
-// Images to display — either active sub-event images or root images
-const displayImages = computed(() => {
-  if (hasSubEvents.value && activeSubEvent.value) {
-    return activeSubEvent.value.images;
+// Redirect to first sub-event if at root with sub-events
+onMounted(() => {
+  if (!activeSubSlug.value && hasSubEvents.value && subEvents.value[0]) {
+    void navigateTo(`/events/${slug}/${subEvents.value[0].slug}`, {
+      replace: true,
+    });
   }
-  return event.value?.images ?? [];
 });
 
-// Lightbox
-const selectedImage = ref<DisplayImage | null>(null);
+// Provide data to child route
+provide("publicEventData", eventData);
+provide("publicSubEvents", subEvents);
 
 useHead({
   title: event.value?.name || "Event",
@@ -123,43 +107,31 @@ useSeoMeta({
       <!-- Sub-event tabs -->
       <div v-if="hasSubEvents" class="mb-6 border-b border-neutral-200">
         <div class="flex items-center gap-6 overflow-x-auto">
-          <button
+          <NuxtLink
             v-for="sub in subEvents"
             :key="sub.id"
-            type="button"
-            class="shrink-0 cursor-pointer border-b-2 pb-2 font-ghost text-sm tracking-wide uppercase transition-colors md:text-base"
+            :to="`/events/${slug}/${sub.slug}`"
+            class="shrink-0 border-b-2 pb-2 font-ghost text-sm tracking-wide uppercase transition-colors md:text-base"
             :class="
               activeSubSlug === sub.slug
                 ? 'border-black text-black'
                 : 'border-transparent text-neutral-400 hover:text-neutral-600'
             "
-            @click="activeSubSlug = sub.slug"
           >
             {{ sub.name }}
-          </button>
+          </NuxtLink>
         </div>
       </div>
 
-      <!-- Image grid -->
-      <MasonryImageGrid
-        v-if="displayImages.length > 0"
-        :images="displayImages"
-        :column-width="350"
-        :gap="8"
-        @image-click="selectedImage = $event"
-      />
-
-      <!-- No images -->
-      <div
-        v-else-if="!hasSubEvents || activeSubEvent"
-        class="py-12 text-center font-ghost text-neutral-400"
-      >
-        No images available.
-      </div>
+      <!-- Child route content -->
+      <NuxtPage />
     </div>
 
     <!-- Event not found -->
-    <div v-else class="mx-auto max-w-6xl px-4 py-16 text-center">
+    <div
+      v-else
+      class="mx-auto max-w-6xl px-4 py-16 text-center selection:bg-black selection:text-white"
+    >
       <h1 class="mb-4 font-ghost text-3xl text-black">Event Not Found</h1>
       <NuxtLink
         to="/events"
@@ -168,14 +140,5 @@ useSeoMeta({
         ← Back to Events
       </NuxtLink>
     </div>
-
-    <!-- Lightbox -->
-    <ImageLightbox
-      :is-open="!!selectedImage"
-      :image-path="selectedImage?.r2_path ?? selectedImage?.url ?? ''"
-      :alt="selectedImage?.alt ?? 'Event Image'"
-      :description="selectedImage?.description ?? ''"
-      @close="selectedImage = null"
-    />
   </div>
 </template>
