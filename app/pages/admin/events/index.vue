@@ -33,6 +33,14 @@ const showCreateModal = ref(false);
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = computed(() => breakpoints.isSmaller("md"));
 
+const contentFields = [
+  {
+    key: "subheader",
+    label: "Subheader",
+    type: "text" as const,
+  },
+];
+
 async function fetchEvents() {
   loading.value = true;
   error.value = null;
@@ -108,7 +116,7 @@ void fetchEvents();
     </div>
 
     <!-- Events list -->
-    <div v-else class="space-y-3">
+    <div v-else class="space-y-3 border border-neutral-800 p-4 rounded-lg max-h-96 overflow-y-scroll">
       <NuxtLink
         v-for="evt in events"
         :key="evt.id"
@@ -179,6 +187,8 @@ void fetchEvents();
         </div>
       </NuxtLink>
     </div>
+
+    <ContentSection table="events" title="Events" :fields="contentFields" />
 
     <!-- Create event modal -->
     <BaseModal

@@ -35,12 +35,16 @@ const selectedImage = ref<DisplayImage | null>(null);
     <div
       class="flex flex-col gap-4 px-4 pt-2 pb-8 md:grid md:grid-cols-3 md:gap-12 md:px-12 md:pt-3 md:pb-0 lg:gap-14 lg:px-28 lg:pt-4 lg:pb-28 xl:grid-cols-4"
     >
-      <ImageGridItem
+      <ProgressiveImage
         v-for="image in images"
         :key="image.instanceId"
-        :image="image"
+        :src="image.r2_path"
+        :alt="image.alt ?? ''"
+        :width="image.width"
+        :height="image.height"
+        :showPlaceholder="false"
         @click="selectedImage = image"
-        class="cursor-pointer"
+        class="w-full h-auto object-cover cursor-pointer"
       />
     </div>
 

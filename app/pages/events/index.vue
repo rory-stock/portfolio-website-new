@@ -38,25 +38,35 @@ const eventURL = (slug: string) => {
     </h1>
 
     <div
-      class="flex flex-col gap-8 px-8 pt-2 pb-4 md:gap-12 md:px-20 md:pb-12 lg:grid lg:grid-cols-2 lg:gap-x-24 lg:gap-y-12 lg:px-28"
+      class="flex flex-col gap-8 px-8 pt-2 pb-4 selection:bg-black selection:text-neutral-100 md:gap-12 md:px-20 md:pb-12 lg:grid lg:grid-cols-2 lg:gap-x-24 lg:gap-y-12 lg:px-28"
     >
       <NuxtLink
         v-for="event in events"
         :to="eventURL(event.slug)"
         :key="event.id"
-        class="group flex flex-col"
+        class="group flex cursor-pointer flex-col"
       >
         <div v-if="event.cover_image">
-          <ImageGridItem
-            :key="event.id"
-            :image="event.cover_image"
-            class="peer cursor-pointer"
+          <NuxtPicture
+            :src="event.cover_image.r2_path"
+            :alt="event.cover_image.alt ?? ''"
+            :img-attrs="{ class: 'w-full h-auto object-cover' }"
           />
-          <div
-            class="mt-1 flex font-ghost text-base group-hover:font-ghost-italic md:text-xl`"
+          <p
+            class="mt-1 flex font-ghost text-base group-hover:font-ghost-italic md:text-lg"
           >
-            <p>{{ event.name }}</p>
+            {{ event.name }}
+          </p>
+        </div>
+        <div v-else>
+          <div class="flex aspect-3/2 w-full items-center bg-neutral-300">
+            <p class="mx-auto select-none">Image not found</p>
           </div>
+          <p
+            class="mt-1 flex font-ghost text-base group-hover:font-ghost-italic md:text-lg"
+          >
+            {{ event.name }}
+          </p>
         </div>
       </NuxtLink>
     </div>

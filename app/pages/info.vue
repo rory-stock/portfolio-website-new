@@ -32,7 +32,7 @@ const { data: info } = await useContentData("info");
   <div class="md:mt-20 md:ml-10 md:flex md:flex-1 md:grow md:justify-start">
     <!-- Profile Image -->
     <div
-      class="mx-3 w-full flex-1 pt-3 grayscale md:max-w-80 lg:mx-0 lg:max-w-80 lg:pt-4 lg:pl-4 xl:max-w-[20rem]"
+      class="mx-3 max-w-min max-sm:min-w-fit flex-1 pt-3 grayscale md:max-w-80 lg:mx-0 lg:max-w-80 lg:pt-4 lg:pl-4 xl:max-w-[20rem]"
     >
       <NuxtPicture
         v-if="image && imagePath"

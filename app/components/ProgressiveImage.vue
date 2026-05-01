@@ -9,10 +9,12 @@ const props = withDefaults(
     height?: number;
     imgClass?: string;
     rootMargin?: string;
+    showPlaceholder?: boolean;
   }>(),
   {
     imgClass: "h-full w-full object-cover",
     rootMargin: "200px",
+    showPlaceholder: true,
   }
 );
 
@@ -20,6 +22,12 @@ const containerRef = ref<HTMLElement | null>(null);
 const isVisible = ref(false);
 const isLoaded = ref(false);
 const hasError = ref(false);
+const showPlaceholder = ref(props.showPlaceholder);
+
+const containerClass = computed(() => ({
+  'bg-neutral-900': (!isLoaded.value && showPlaceholder.value) || hasError.value,
+  'bg-transparent': isLoaded.value || !showPlaceholder.value,
+}))
 
 const { stop } = useIntersectionObserver(
   containerRef,
@@ -55,12 +63,13 @@ const aspectRatio = computed(() => {
 <template>
   <div
     ref="containerRef"
-    class="overflow-hidden bg-neutral-900"
+    class="overflow-hidden"
+    :class="containerClass"
     :style="aspectRatio ? { aspectRatio: `${aspectRatio}` } : undefined"
   >
     <!-- Placeholder shown until image loads -->
     <div
-      v-if="!isLoaded && !hasError"
+      v-if="!isLoaded && !hasError && showPlaceholder"
       class="flex h-full w-full items-center justify-center"
     >
       <div
@@ -72,9 +81,9 @@ const aspectRatio = computed(() => {
     <!-- Error state -->
     <div
       v-if="hasError"
-      class="flex h-full w-full items-center justify-center text-xs text-neutral-600"
+      class="flex h-full w-full items-center justify-center text-xs text-neutral-400"
     >
-      Failed to load
+      Image failed to load
     </div>
 
     <!-- Actual image (only rendered when in viewport) -->

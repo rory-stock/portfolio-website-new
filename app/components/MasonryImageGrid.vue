@@ -40,6 +40,7 @@ const emit = defineEmits<{
           :alt="item.alt ?? ''"
           :width="item.width"
           :height="item.height"
+          :show-placeholder="false"
           img-class="h-full w-full object-cover"
         />
       </button>
