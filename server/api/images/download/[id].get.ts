@@ -95,12 +95,18 @@ export default defineEventHandler(async (event) => {
   };
   const contentType = contentTypeMap[ext || ""] || "application/octet-stream";
 
-  // Set response headers for file download
+  // Check if this is an inline view request (iOS mobile flow)
+  const query = getQuery(event);
+  const isViewMode = query.view === "true";
+
+  // Set response headers
   setResponseHeader(event, "Content-Type", contentType);
   setResponseHeader(
     event,
     "Content-Disposition",
-    `attachment; filename="${cleanFilename}"`
+    isViewMode
+      ? `inline; filename="${cleanFilename}"`
+      : `attachment; filename="${cleanFilename}"`
   );
   setResponseHeader(event, "Content-Length", baseImage.fileSize);
   setResponseHeader(event, "Cache-Control", "private, no-cache");
