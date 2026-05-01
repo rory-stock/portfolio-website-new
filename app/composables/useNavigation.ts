@@ -1,14 +1,5 @@
-import type { IconName } from "~/components/icons/iconData";
-
-export interface PageConfig {
-  label: string;
-  publicPath: string;
-  publicRouteName: string;
-  adminPath: string;
-  icon: IconName;
-  isPublic: boolean;
-  context: string;
-}
+import type { PageConfig, adminNavItem, publicNavItem } from "~~/types/navTypes";
+import type { ComputedRef } from "vue";
 
 const pages: PageConfig[] = [
   {
@@ -55,7 +46,7 @@ export const headerTransparentRoutes = ["index"];
 
 export const useNavigation = () => {
   // For public header navigation (DesktopNav, MobileMenu)
-  const publicNavItems = computed(() =>
+  const publicNavItems: ComputedRef<publicNavItem[]> = computed(() =>
     pages
       .filter((p) => p.isPublic)
       .map((p) => ({
@@ -65,8 +56,22 @@ export const useNavigation = () => {
       }))
   );
 
+  // For events page navigation
+  const eventsNavItems: ComputedRef<publicNavItem[]> = computed(() => [
+    {
+      to: "/events",
+      name: "events",
+      label: "Events",
+    },
+    {
+      to: "/",
+      name: "index",
+      label: "Portfolio",
+    },
+  ]);
+
   // For admin sidebar page navigation
-  const adminPageItems = computed(() =>
+  const adminPageItems: ComputedRef<adminNavItem[]> = computed(() =>
     pages.map((p) => ({
       label: p.label,
       path: p.adminPath,
@@ -78,6 +83,7 @@ export const useNavigation = () => {
   return {
     pages,
     publicNavItems,
+    eventsNavItems,
     adminPageItems,
   };
 };

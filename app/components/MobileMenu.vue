@@ -10,7 +10,7 @@
           :class="menuContentClass"
         >
           <NuxtLink
-            v-for="link in publicNavItems"
+            v-for="link in navItems"
             :key="link.name"
             :to="link.to"
             :class="getLinkClass(link.name)"
@@ -24,12 +24,14 @@
 </template>
 
 <script setup lang="ts">
+import type { publicNavItem } from "~~/types/navTypes";
+
 const props = defineProps({
   isOpen: Boolean,
+  navItems: Array as () => publicNavItem[],
 });
 
 const route = useRoute();
-const { publicNavItems } = useNavigation();
 
 const menuContainerClass = computed(() =>
   props.isOpen ? "block h-screen" : "h-0"

@@ -14,8 +14,8 @@
           Rory Stock
         </h1>
         <div>
-          <MobileNav />
-          <DesktopNav />
+          <MobileNav :nav-items=publicNavItems />
+          <DesktopNav :nav-items=publicNavItems />
         </div>
       </div>
       <div class="h-[0.22rem] w-full bg-black md:hidden"></div>
@@ -29,6 +29,8 @@ import { headerTransparentRoutes } from "~/composables/useNavigation";
 
 const route = useRoute();
 const { isWhiteText } = useHeaderTextColour();
+
+const { publicNavItems } = useNavigation();
 
 const headerClass = computed(() =>
   headerTransparentRoutes.includes(route.name as string)

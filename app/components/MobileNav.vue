@@ -8,12 +8,17 @@
     >
       <Hamburger :isOpen="isOpen" />
     </button>
-    <MobileMenu :isOpen="isOpen" />
+    <MobileMenu :isOpen="isOpen" :nav-items=props.navItems />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useScrollLock, syncRefs, useToggle } from "@vueuse/core";
+import type { publicNavItem } from "~~/types/navTypes";
+
+const props = defineProps({
+  navItems: Array as () => publicNavItem[],
+});
 
 const route = useRoute();
 

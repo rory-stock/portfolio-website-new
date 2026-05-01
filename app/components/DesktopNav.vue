@@ -4,7 +4,7 @@
       class="hidden items-center gap-4 pt-1 pr-6 transition-colors duration-300 md:inline-flex md:text-xl lg:text-3xl"
       :class="isWhiteText ? 'md:text-white' : 'text-black'"
     >
-      <li v-for="link in publicNavItems" :key="link.name">
+      <li v-for="link in navItems" :key="link.name">
         <NuxtLink :to="link.to" :class="getLinkClass(link.name)">
           {{ link.label }}
         </NuxtLink>
@@ -14,13 +14,18 @@
 </template>
 
 <script setup lang="ts">
+import type { publicNavItem } from "~~/types/navTypes";
+
 const route = useRoute();
-const { publicNavItems } = useNavigation();
 const { isWhiteText } = useHeaderTextColour();
+
+const props = defineProps({
+  navItems: Array as () => publicNavItem[],
+})
 
 const getLinkClass = computed(() => (name: string) => {
   return route.name === name
-    ? "font-ghost-italic italic"
-    : "font-ghost hover:font-ghost-italic hover:italic";
+    ? "font-ghost-italic"
+    : "font-ghost hover:font-ghost-italic";
 });
 </script>

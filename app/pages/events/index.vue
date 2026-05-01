@@ -53,7 +53,7 @@ const eventURL = (slug: string) => {
             class="peer cursor-pointer"
           />
           <div
-            class="mt-1 flex font-ghost text-base group-hover:font-ghost-italic md:text-xl lg:mt-2"
+            class="mt-1 flex font-ghost text-base group-hover:font-ghost-italic md:text-xl`"
           >
             <p>{{ event.name }}</p>
           </div>
