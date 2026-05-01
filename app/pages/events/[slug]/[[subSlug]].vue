@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DisplayImage } from "~~/types/imageTypes";
+import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 
 const route = useRoute();
 
@@ -55,6 +56,16 @@ const isEmpty = computed(
   () => !isNotFound.value && displayImages.value.length === 0
 );
 
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const isMobile = breakpoints.smaller("md");
+const isTablet = breakpoints.smaller("lg");
+
+const columns = computed(() => {
+  if (isMobile.value) return 1;
+  if (isTablet.value) return 2;
+  return 3;
+})
+
 // Lightbox
 const selectedImage = ref<DisplayImage | null>(null);
 </script>
@@ -90,8 +101,11 @@ const selectedImage = ref<DisplayImage | null>(null);
     <template v-else>
       <MasonryImageGrid
         :images="displayImages"
-        :max-columns="3"
+        :max-columns="columns"
+        :min-columns="columns"
+        :column-width="isMobile ? 1 : isTablet ? 2 : 3"
         :gap="8"
+        :show-download="true"
         @image-click="selectedImage = $event"
       />
 
@@ -101,6 +115,9 @@ const selectedImage = ref<DisplayImage | null>(null);
         :image-path="selectedImage?.r2_path ?? selectedImage?.url ?? ''"
         :alt="selectedImage?.alt ?? 'Event Image'"
         :description="selectedImage?.description ?? ''"
+        :show-download="true"
+        :image-instance-id="selectedImage?.instanceId ?? null"
+        :image-context="selectedImage?.context ?? ''"
         @close="selectedImage = null"
       />
     </template>

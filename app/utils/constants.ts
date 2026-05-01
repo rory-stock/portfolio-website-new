@@ -30,3 +30,30 @@ export const VALID_IMAGE_EXTENSIONS = ["jpg", "jpeg", "webp"] as const;
 // Type exports for type safety
 export type ValidImageType = (typeof VALID_IMAGE_TYPES)[number];
 export type ValidImageExtension = (typeof VALID_IMAGE_EXTENSIONS)[number];
+
+// ==================== Downloads ====================
+
+/**
+ * Contexts that allow public image downloads.
+ * Checked client-side (to show/hide UI) and server-side (to reject requests).
+ */
+export const DOWNLOADABLE_CONTEXTS = ["events"] as const;
+export type DownloadableContext = (typeof DOWNLOADABLE_CONTEXTS)[number];
+
+export function isDownloadableContext(
+  context: string
+): context is DownloadableContext {
+  return DOWNLOADABLE_CONTEXTS.includes(context as DownloadableContext);
+}
+
+/**
+ * Progressive rate limit configuration for image downloads.
+ * Multiple windows — the longer someone sustains high download rates, the stricter it gets.
+ */
+export const DOWNLOAD_RATE_LIMITS = {
+  windows: [
+    { maxRequests: 30, windowMs: 60 * 1000 }, // 30 per minute
+    { maxRequests: 80, windowMs: 10 * 60 * 1000 }, // 80 per 10 minutes
+    { maxRequests: 200, windowMs: 60 * 60 * 1000 }, // 200 per hour
+  ],
+} as const;

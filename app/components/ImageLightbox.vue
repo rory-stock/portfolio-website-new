@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import { onKeyStroke, useScrollLock } from "@vueuse/core";
 
-const props = defineProps<{
-  imagePath: string;
-  alt: string;
-  description: string;
-  isOpen: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    imagePath: string;
+    alt: string;
+    description: string;
+    isOpen: boolean;
+    showDownload?: boolean;
+    imageInstanceId?: number | null;
+    imageContext?: string;
+  }>(),
+  {
+    showDownload: false,
+    imageInstanceId: null,
+    imageContext: "",
+  }
+);
 
 const emit = defineEmits<{
   close: [];
@@ -45,6 +55,12 @@ watch(
     imageLoading.value = true;
   }
 );
+
+// Whether download button should render
+const canDownload = computed(
+  () =>
+    props.showDownload && props.imageInstanceId !== null && props.imageContext
+);
 </script>
 
 <template>
@@ -55,14 +71,30 @@ watch(
         class="fixed inset-0 z-50 flex items-center justify-center bg-white p-6"
         @click="emit('close')"
       >
-        <button
-          type="button"
-          @click="emit('close')"
-          class="absolute top-3 right-3 z-50 flex h-10 w-10 cursor-pointer items-center justify-center md:top-8 md:right-10"
-          aria-label="Close"
+        <!-- Top-right buttons -->
+        <div
+          class="absolute top-3 right-3 z-50 flex items-center gap-2 md:top-8 md:right-10"
         >
-          <Icon name="cross" :size="32" />
-        </button>
+          <!-- Download button -->
+          <DownloadButton
+            v-if="canDownload"
+            :instance-id="imageInstanceId!"
+            :context="imageContext!"
+            class="flex h-10 w-10 cursor-pointer items-center justify-center transition-colors duration-200 hover:text-neutral-600"
+          >
+            <Icon name="download" :size="32" class="mt-1" />
+          </DownloadButton>
+
+          <!-- Close button -->
+          <button
+            type="button"
+            @click="emit('close')"
+            class="flex h-10 w-10 cursor-pointer items-center justify-center"
+            aria-label="Close"
+          >
+            <Icon name="cross" :size="32" />
+          </button>
+        </div>
 
         <!-- Loading spinner -->
         <div

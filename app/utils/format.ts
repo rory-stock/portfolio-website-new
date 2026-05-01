@@ -136,3 +136,25 @@ export function formatDateRelative(date: Date | string): string {
 export function formatNumber(num: number): string {
   return num.toLocaleString("en-US");
 }
+
+/**
+ * Clean the upload hash from a filename for user-facing downloads.
+ * Upload process adds a 6-char hash before the extension: "[filename]-a3b2c1.jpg"
+ * This strips it back to: "[filename].jpg"
+ *
+ * @param filename - The stored filename with hash (e.g. "[filename]-a3b2c1.jpg")
+ * @returns Cleaned filename without hash (e.g. "[filename].jpg")
+ */
+export function cleanDownloadFilename(filename: string): string {
+  // Match: anything, then a hyphen, then exactly 6 alphanumeric chars, then .extension
+  // The hash from generateHash() uses base-36 chars (a-z, 0-9)
+  const hashPattern = /^(.+)-[a-z0-9]{6}(\.\w+)$/;
+  const match = filename.match(hashPattern);
+
+  if (match && match[1] && match[2]) {
+    return `${match[1]}${match[2]}`;
+  }
+
+  // If pattern doesn't match, return as-is
+  return filename;
+}
