@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
+
 interface FooterData {
   email: string;
   location: string;
@@ -9,6 +11,11 @@ interface FooterData {
 const { data } = await useContentData("footer");
 const footer = data as Ref<FooterData | undefined>;
 const { loggedIn } = useUserSession();
+
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const isMobile = breakpoints.smaller("md");
+
+const adminIconSize = computed(() => (isMobile.value ? 21 : 24));
 
 const authLink = computed(() => {
   return loggedIn.value ? "/admin" : "/login";
@@ -71,12 +78,14 @@ function handleEmail() {
       <!---------------- Copyright ------------------>
       <div class="mt-7 flex justify-between">
         <p>{{ footer?.copyright }}</p>
+        <!--------------------------------------------->
+        <!-------------- ADMIN/LOGIN LINK ------------->
         <button
           @click="navigateTo(authLink)"
           aria-hidden="true"
           class="cursor-pointer"
         >
-          <Icon name="smile" width="18.41" height="19" />
+          <Icon name="smile" :size=adminIconSize />
         </button>
       </div>
       <!--------------------------------------------->
