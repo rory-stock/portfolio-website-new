@@ -10,6 +10,7 @@ interface EventDetail {
   location: string;
   description: string | null;
   external_url: string | null;
+  parent_event_id?: number | null;
 }
 
 const props = defineProps<{
@@ -22,6 +23,8 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
+const isSubEvent = computed(() => !!props.event.parent_event_id);
+
 const name = ref(props.event.name);
 const startDate = ref(props.event.start_date);
 const endDate = ref(props.event.end_date || "");
@@ -32,8 +35,19 @@ const saving = ref(false);
 const deleting = ref(false);
 const error = ref<string | null>(null);
 
+const canSubmit = computed(() => {
+  if (!name.value.trim() || !startDate.value) return false;
+  if (!isSubEvent.value && !location.value.trim()) return false;
+  return !saving.value;
+});
+
 async function handleSubmit() {
-  if (!name.value.trim() || !startDate.value || !location.value.trim()) {
+  if (!name.value.trim() || !startDate.value) {
+    error.value = "Name and start date are required";
+    return;
+  }
+
+  if (!isSubEvent.value && !location.value.trim()) {
     error.value = "Name, start date, and location are required";
     return;
   }
@@ -88,11 +102,7 @@ async function handleDelete() {
 onKeyStroke(
   "s",
   (e) => {
-    if (
-      (e.ctrlKey || e.metaKey) &&
-      (name.value.trim() || startDate.value || location.value.trim()) &&
-      !saving.value
-    ) {
+    if ((e.ctrlKey || e.metaKey) && canSubmit.value) {
       e.preventDefault();
       handleSubmit();
     }
@@ -143,7 +153,9 @@ onKeyStroke(
 
     <!-- Location -->
     <div>
-      <label class="mb-1 block text-xs text-neutral-400">Location *</label>
+      <label class="mb-1 block text-xs text-neutral-400">
+        Location{{ isSubEvent ? "" : " *" }}
+      </label>
       <input
         v-model="location"
         type="text"
@@ -198,7 +210,7 @@ onKeyStroke(
           variant="primary"
           text-size="sm"
           class="py-1.5"
-          :disabled="saving || !name.trim() || !startDate || !location.trim()"
+          :disabled="!canSubmit"
           @click="handleSubmit"
         >
           {{ saving ? "Saving..." : "Save" }}

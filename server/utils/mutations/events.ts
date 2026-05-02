@@ -1,7 +1,6 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, ne } from "drizzle-orm";
 import * as schema from "~~/server/db/schema";
-import { generateSlug } from "../validation";
 import type { NewEvent, NewEventImage } from "~~/types/database";
 import { generateUniqueSlug } from "~/utils/slug";
 
@@ -20,19 +19,14 @@ export async function createEventRecord(
     parentEventId?: number | null;
   }
 ) {
-  // Generate unique slug under the same parent
+  // Generate globally unique slug
   const parentId = data.parentEventId ?? null;
 
-  const siblingCondition = parentId
-    ? eq(schema.events.parentEventId, parentId)
-    : isNull(schema.events.parentEventId);
-
-  const siblings = await db
+  const allEvents = await db
     .select({ slug: schema.events.slug })
-    .from(schema.events)
-    .where(siblingCondition);
+    .from(schema.events);
 
-  const existingSlugs = siblings.map((s) => s.slug);
+  const existingSlugs = allEvents.map((s) => s.slug);
   const slug = generateUniqueSlug(data.name, existingSlugs);
 
   // Auto-create a linked folder for this event
@@ -126,41 +120,15 @@ export async function updateEvent(
 
   // Regenerate slug if name changed
   if (data.name) {
-    // Get the event to find its parent
-    const [existing] = await db
-      .select({
-        parentEventId: schema.events.parentEventId,
-        slug: schema.events.slug,
-      })
-      .from(schema.events)
-      .where(eq(schema.events.id, id));
+    const allEvents = await db
+      .select({ slug: schema.events.slug, id: schema.events.id })
+      .from(schema.events);
 
-    if (existing) {
-      const parentId = existing.parentEventId;
-      const siblingCondition = parentId
-        ? and(
-            eq(schema.events.parentEventId, parentId),
-            // Exclude self from sibling check
-            eq(schema.events.id, id)
-          )
-        : and(isNull(schema.events.parentEventId), eq(schema.events.id, id));
+    const existingSlugs = allEvents
+      .filter((s) => s.id !== id)
+      .map((s) => s.slug);
 
-      // Get all siblings except self
-      const allSiblings = await db
-        .select({ slug: schema.events.slug, id: schema.events.id })
-        .from(schema.events)
-        .where(
-          parentId
-            ? eq(schema.events.parentEventId, parentId)
-            : isNull(schema.events.parentEventId)
-        );
-
-      const existingSlugs = allSiblings
-        .filter((s) => s.id !== id)
-        .map((s) => s.slug);
-
-      updateData.slug = generateUniqueSlug(data.name, existingSlugs);
-    }
+    updateData.slug = generateUniqueSlug(data.name, existingSlugs);
   }
 
   const [event] = await db
@@ -176,7 +144,7 @@ export async function updateEvent(
  * Delete an event
  * - Validates no sub-events exist
  * - Cascades to event_images
- * - Deletes linked folder (which cascades to folder_images)
+ * - Deletes the linked folder (which cascades to folder_images)
  */
 export async function deleteEvent(
   db: DrizzleD1Database<typeof schema>,
