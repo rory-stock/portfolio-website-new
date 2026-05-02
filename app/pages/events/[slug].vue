@@ -41,14 +41,18 @@ const hasSubEvents = computed(() => subEvents.value.length > 0);
 
 const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 
-// Redirect to first sub-event if at root with sub-events
-onMounted(() => {
-  if (!activeSubSlug.value && hasSubEvents.value && subEvents.value[0]) {
-    void navigateTo(`/events/${slug}/${subEvents.value[0].slug}`, {
-      replace: true,
-    });
-  }
-});
+// Redirect to first sub-event when at event root with sub-events
+watch(
+  activeSubSlug,
+  (subSlug) => {
+    if (!subSlug && hasSubEvents.value && subEvents.value[0]) {
+      void navigateTo(`/events/${slug}/${subEvents.value[0].slug}`, {
+        replace: true,
+      });
+    }
+  },
+  { immediate: true }
+);
 
 // Provide data to child route
 provide("publicEventData", eventData);
