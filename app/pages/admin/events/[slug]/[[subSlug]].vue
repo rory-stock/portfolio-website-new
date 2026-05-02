@@ -2,7 +2,7 @@
 const route = useRoute();
 
 // Injected from parent layout
-const eventData = inject<Ref<any>>("eventData");
+const eventData = inject<Ref>("eventData");
 const subEvents = inject<Ref<any[]>>("subEvents");
 const refreshEvent = inject<() => Promise<void>>("refreshEvent");
 
@@ -459,7 +459,7 @@ const notFound = computed(() => {
         :images="images"
         :loading="loading"
         :loading-more="isRootTab ? false : loadingMore"
-        :has-more="isRootTab ? false : hasMore"s
+        :has-more="isRootTab ? false : hasMore"
         :selected-ids="isRootTab ? undefined : selectedImageIds"
         :cover-image-instance-id="folder?.cover_image?.instanceId ?? null"
         :is-selection-mode="isRootTab ? false : isSelectionMode"

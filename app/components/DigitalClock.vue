@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useNow } from "@vueuse/core";
 
-const now = useNow({ interval: 1000 });
+const now = useNow();
 
 const currentTime = computed(() =>
   now.value.toLocaleTimeString("en-NZ", {
@@ -20,9 +20,7 @@ const currentTime = computed(() =>
       {{ currentTime }}
     </p>
     <template #fallback>
-      <p>
-        --:--:-- --
-      </p>
+      <p>--:--:-- --</p>
     </template>
   </ClientOnly>
 </template>

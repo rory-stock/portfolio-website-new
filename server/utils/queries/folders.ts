@@ -1,5 +1,5 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { and, asc, desc, eq, isNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import * as schema from "~~/server/db/schema";
 
 /**

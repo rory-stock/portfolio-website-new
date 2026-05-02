@@ -1,4 +1,4 @@
-import { eq, isNull, asc } from "drizzle-orm";
+import { asc } from "drizzle-orm";
 import { useDB } from "~~/server/db/client";
 import * as schema from "~~/server/db/schema";
 import { requireAuth } from "~~/server/utils/requireAuth";
