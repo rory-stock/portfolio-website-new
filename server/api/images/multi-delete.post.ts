@@ -59,7 +59,7 @@ export default defineEventHandler(
       } else {
         failed++;
         errors.push({
-          id: instance_ids[index],
+          id: instance_ids[index]!,
           error: result.reason?.message || "Unknown error",
         });
         logger.error(

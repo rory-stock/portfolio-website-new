@@ -78,7 +78,7 @@ const selectedImage = ref<DisplayImage | null>(null);
       class="py-16 text-center selection:bg-black selection:text-white"
     >
       <p class="font-ghost text-2xl text-black">
-        This part of the event couldn't be found.
+        Page not found
       </p>
       <NuxtLink
         :to="`/events/${route.params.slug}`"
@@ -93,7 +93,7 @@ const selectedImage = ref<DisplayImage | null>(null);
       <p
         class="font-ghost text-2xl text-black selection:bg-black selection:text-white"
       >
-        No photos from this event yet — check back soon!
+        Nothing here yet — check back soon
       </p>
     </div>
 

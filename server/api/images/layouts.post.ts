@@ -105,8 +105,13 @@ export default defineEventHandler(
 
     // Validate images are consecutive (strict)
     for (let i = 1; i < sortedInstances.length; i++) {
-      const prevOrder = sortedInstances[i - 1].order;
-      const currOrder = sortedInstances[i].order;
+      const prev = sortedInstances[i - 1];
+      const curr = sortedInstances[i];
+
+      if (!prev || !curr) continue;
+
+      const prevOrder = prev.order;
+      const currOrder = curr.order;
 
       // Both must have order set
       if (prevOrder === null || currOrder === null) {
@@ -127,7 +132,8 @@ export default defineEventHandler(
     }
 
     // Create a layout group for ALL layouts (single or multi-image)
-    const groupDisplayOrder = sortedInstances[0].order ?? 0;
+    const firstSorted = sortedInstances[0];
+    const groupDisplayOrder = firstSorted?.order ?? 0;
 
     const [layoutGroup] = await db
       .insert(schema.layoutGroups)
@@ -140,12 +146,21 @@ export default defineEventHandler(
       })
       .returning();
 
+    if (!layoutGroup) {
+      throw createError({
+        statusCode: 500,
+        message: "Failed to create layout group",
+      });
+    }
+
     const layoutGroupId = layoutGroup.id;
     const isGroupLayout = layoutConfig.imageCount > 1;
 
     // Create image_layouts for each instance
     for (let i = 0; i < image_ids.length; i++) {
       const instanceId = image_ids[i];
+
+      if (instanceId === undefined) continue;
 
       await db.insert(schema.imageLayouts).values({
         imageInstanceId: instanceId,
@@ -171,6 +186,13 @@ export default defineEventHandler(
           .from(schema.baseImages)
           .where(eq(schema.baseImages.id, instance.imageId));
 
+        if (!base) {
+          throw createError({
+            statusCode: 500,
+            message: `Base image not found for instance ${instance.id}`,
+          });
+        }
+
         const [metadata] = await db
           .select()
           .from(schema.imageMetadata)
@@ -183,9 +205,9 @@ export default defineEventHandler(
           .where(eq(schema.imageLayouts.imageInstanceId, instance.id))
           .limit(1);
 
-        let layoutGroup = null;
+        let layoutGroupData = null;
         if (layout && layout.layoutGroupId) {
-          [layoutGroup] = await db
+          [layoutGroupData] = await db
             .select()
             .from(schema.layoutGroups)
             .where(eq(schema.layoutGroups.id, layout.layoutGroupId));
@@ -201,10 +223,10 @@ export default defineEventHandler(
             metadata: metadata || null,
             layout: layout || null,
           },
-          layoutGroup
+          layoutGroupData
             ? {
-                layoutType: layoutGroup.layoutType,
-                groupDisplayOrder: layoutGroup.groupDisplayOrder,
+                layoutType: layoutGroupData.layoutType,
+                groupDisplayOrder: layoutGroupData.groupDisplayOrder,
               }
             : null
         );

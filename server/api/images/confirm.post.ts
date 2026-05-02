@@ -87,6 +87,13 @@ export default defineEventHandler(
         config.r2PublicUrl
       );
 
+      if (!baseImage) {
+        throw createError({
+          statusCode: 500,
+          message: "Failed to create base image record",
+        });
+      }
+
       // Create instances for primary context + additional contexts
       const allContexts = [body.context, ...additionalCtx];
       const instances = await Promise.all(
@@ -98,9 +105,14 @@ export default defineEventHandler(
         )
       );
 
+      // Filter out any undefined results
+      const validInstances = instances.filter(
+        (inst): inst is NonNullable<typeof inst> => inst != null
+      );
+
       // Create metadata if description provided
-      if (body.description) {
-        const metadataInserts = instances.map((inst) => ({
+      if (body.description && validInstances.length > 0) {
+        const metadataInserts = validInstances.map((inst) => ({
           imageInstanceId: inst.id,
           description: body.description,
           createdAt: new Date(),
@@ -113,7 +125,7 @@ export default defineEventHandler(
       // Return instances with their IDs
       return {
         success: true,
-        images: instances.map((inst) => ({ id: inst.id })),
+        images: validInstances.map((inst) => ({ id: inst.id })),
       };
     } catch (error: any) {
       logger.error("Image processing error", error);

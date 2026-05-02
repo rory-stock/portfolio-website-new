@@ -23,7 +23,7 @@ const props = withDefaults(
     loading?: boolean;
     loadingMore?: boolean;
     hasMore?: boolean;
-    selectedIds?: Set<number>;
+    selectedIds?: ReadonlySet<number> | Set<number>;
     coverImageInstanceId?: number | null;
     isSelectionMode?: boolean;
   }>(),

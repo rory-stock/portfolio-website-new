@@ -98,7 +98,12 @@ export default defineEventHandler(async (event): Promise<ImageListResponse> => {
     includeLayouts,
   });
 
-  const displayImages = imageWithInstanceArrayToDisplay(imagesData);
+  const validImagesData = imagesData.filter(
+    (img): img is typeof img & { base: NonNullable<typeof img.base> } =>
+      img.base != null
+  );
+
+  const displayImages = imageWithInstanceArrayToDisplay(validImagesData);
 
   return {
     images: displayImages,

@@ -66,6 +66,13 @@ export default defineEventHandler(async (event) => {
     .where(eq(schema.imageFolders.id, id))
     .returning();
 
+  if (!updated) {
+    throw createError({
+      statusCode: 500,
+      message: "Failed to update folder",
+    });
+  }
+
   return {
     folder: {
       id: updated.id,

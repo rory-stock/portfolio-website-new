@@ -1,19 +1,5 @@
 import type { Ref } from "vue";
-
-interface DisplayImage {
-  id: number;
-  instanceId: number;
-  url: string;
-  alt: string;
-  width: number;
-  height: number;
-  file_size: number;
-  original_filename: string;
-  captured_at: string | null;
-  description: string | null;
-  is_public: boolean;
-  context: string;
-}
+import type { DisplayImage } from "~~/types/imageTypes";
 
 interface FolderImagesResponse {
   images: DisplayImage[];

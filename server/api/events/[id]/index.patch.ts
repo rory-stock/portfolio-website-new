@@ -46,5 +46,12 @@ export default defineEventHandler(async (event): Promise<EventResponse> => {
 
   const updatedEvent = await updateEvent(db, id, updateData);
 
+  if (!updatedEvent) {
+    throw createError({
+      statusCode: 404,
+      message: "Event not found",
+    });
+  }
+
   return eventToResponse(updatedEvent);
 });

@@ -1,5 +1,5 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { eq, and, isNull, ne } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import * as schema from "~~/server/db/schema";
 import type { NewEvent, NewEventImage } from "~~/types/database";
 import { generateUniqueSlug } from "~/utils/slug";
@@ -71,6 +71,13 @@ export async function createEventRecord(
       updatedAt: now,
     })
     .returning();
+
+  if (!folder) {
+    throw createError({
+      statusCode: 500,
+      message: "Failed to create folder for event",
+    });
+  }
 
   // Create the event with a folder link
   const insertData: NewEvent = {

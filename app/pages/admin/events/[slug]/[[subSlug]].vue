@@ -459,7 +459,7 @@ const notFound = computed(() => {
         :images="images"
         :loading="loading"
         :loading-more="isRootTab ? false : loadingMore"
-        :has-more="isRootTab ? false : hasMore"
+        :has-more="isRootTab ? false : hasMore"s
         :selected-ids="isRootTab ? undefined : selectedImageIds"
         :cover-image-instance-id="folder?.cover_image?.instanceId ?? null"
         :is-selection-mode="isRootTab ? false : isSelectionMode"

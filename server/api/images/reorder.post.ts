@@ -41,6 +41,9 @@ export default defineEventHandler(
     // Update order and group_display_order for each instance
     for (let i = 0; i < order.length; i++) {
       const instanceId = order[i];
+
+      if (instanceId === undefined) continue;
+
       const layoutGroupId = instanceLayoutMap.get(instanceId);
 
       // Determine group_display_order for layouts
@@ -79,7 +82,13 @@ export default defineEventHandler(
       includeLayouts: true,
     });
 
-    const displayImages = imageWithInstanceArrayToDisplay(updatedImagesData);
+    // Filter out entries where base is undefined
+    const validImagesData = updatedImagesData.filter(
+      (img): img is typeof img & { base: NonNullable<typeof img.base> } =>
+        img.base != null
+    );
+
+    const displayImages = imageWithInstanceArrayToDisplay(validImagesData);
 
     return {
       success: true,

@@ -83,6 +83,13 @@ export default defineEventHandler(async (event) => {
     })
     .returning();
 
+  if (!folder) {
+    throw createError({
+      statusCode: 500,
+      message: "Failed to create folder",
+    });
+  }
+
   return {
     folder: {
       id: folder.id,

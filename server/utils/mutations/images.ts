@@ -149,7 +149,7 @@ export async function addImageToContext(
 
   // Create metadata if description provided
   let metadata = null;
-  if (options.description) {
+  if (options.description && instance) {
     const metadataData: NewImageMetadata = {
       imageInstanceId: instance.id,
       description: options.description,
@@ -198,7 +198,7 @@ export async function deleteImageInstance(
     .where(eq(schema.imageInstances.imageId, imageId));
 
   let deletedBaseImage = false;
-  let r2Path = null;
+  let r2Path: string | null = null;
 
   if (remainingInstances.length === 0) {
     // Last instance - delete base image

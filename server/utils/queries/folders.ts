@@ -152,7 +152,8 @@ export async function getFirstFolderImage(
 ): Promise<number | null> {
   const { images } = await getFolderImages(db, folderId, { page: 1, limit: 1 });
 
-  if (images.length === 0) return null;
+  const first = images[0];
+  if (!first) return null;
 
-  return images[0].instance.id;
+  return first.instance.id;
 }

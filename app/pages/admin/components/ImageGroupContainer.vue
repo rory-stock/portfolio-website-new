@@ -26,7 +26,7 @@
         <ImageAdminThumbnail
           :image="img"
           :isSelectionMode="isSelectionMode"
-          :isSelected="isSelected(img.instanceId)"
+          :isSelected="isSelectedFn(img.instanceId)"
           @click="handleClick($event, img)"
           @toggle-primary="$emit('togglePrimary', img)"
         />
@@ -59,6 +59,10 @@ const emit = defineEmits<{
   togglePrimary: [image: DisplayImage];
   imageClick: [event: MouseEvent, image: DisplayImage];
 }>();
+
+const isSelectedFn = (instanceId: number): boolean => {
+  return props.isSelected ? props.isSelected(instanceId) : false;
+};
 
 // Local copy of images for v-model
 const localImages = computed({
