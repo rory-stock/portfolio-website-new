@@ -9,45 +9,37 @@ export async function getImageWithInstance(
   db: DrizzleD1Database<typeof schema>,
   instanceId: number
 ) {
-  // Get the instance
-  const [instance] = await db
-    .select()
+  const rows = await db
+    .select({
+      base: schema.baseImages,
+      instance: schema.imageInstances,
+      metadata: schema.imageMetadata,
+      layout: schema.imageLayouts,
+    })
     .from(schema.imageInstances)
-    .where(eq(schema.imageInstances.id, instanceId));
-
-  if (!instance) {
-    return null;
-  }
-
-  // Get the base image
-  const [base] = await db
-    .select()
-    .from(schema.baseImages)
-    .where(eq(schema.baseImages.id, instance.imageId));
-
-  if (!base) {
-    return null;
-  }
-
-  // Get metadata (if exists)
-  const [metadata] = await db
-    .select()
-    .from(schema.imageMetadata)
-    .where(eq(schema.imageMetadata.imageInstanceId, instanceId))
+    .innerJoin(
+      schema.baseImages,
+      eq(schema.imageInstances.imageId, schema.baseImages.id)
+    )
+    .leftJoin(
+      schema.imageMetadata,
+      eq(schema.imageMetadata.imageInstanceId, schema.imageInstances.id)
+    )
+    .leftJoin(
+      schema.imageLayouts,
+      eq(schema.imageLayouts.imageInstanceId, schema.imageInstances.id)
+    )
+    .where(eq(schema.imageInstances.id, instanceId))
     .limit(1);
 
-  // Get layout (if exists)
-  const [layout] = await db
-    .select()
-    .from(schema.imageLayouts)
-    .where(eq(schema.imageLayouts.imageInstanceId, instanceId))
-    .limit(1);
+  const row = rows[0];
+  if (!row) return null;
 
   return {
-    base,
-    instance,
-    metadata: metadata || null,
-    layout: layout || null,
+    base: row.base,
+    instance: row.instance,
+    metadata: row.metadata || null,
+    layout: row.layout || null,
   };
 }
 
@@ -69,58 +61,77 @@ export async function getImagesForContext(
     conditions.push(eq(schema.imageInstances.isPublic, options.isPublic));
   }
 
-  // Get instances
-  const instances = await db
-    .select()
+  if (options.includeLayouts) {
+    // Join instances → base_images → metadata → image_layouts → layout_groups
+    const rows = await db
+      .select({
+        base: schema.baseImages,
+        instance: schema.imageInstances,
+        metadata: schema.imageMetadata,
+        layout: schema.imageLayouts,
+        layoutGroup: schema.layoutGroups,
+      })
+      .from(schema.imageInstances)
+      .innerJoin(
+        schema.baseImages,
+        eq(schema.imageInstances.imageId, schema.baseImages.id)
+      )
+      .leftJoin(
+        schema.imageMetadata,
+        eq(schema.imageMetadata.imageInstanceId, schema.imageInstances.id)
+      )
+      .leftJoin(
+        schema.imageLayouts,
+        eq(schema.imageLayouts.imageInstanceId, schema.imageInstances.id)
+      )
+      .leftJoin(
+        schema.layoutGroups,
+        eq(schema.imageLayouts.layoutGroupId, schema.layoutGroups.id)
+      )
+      .where(and(...conditions))
+      .orderBy(
+        asc(schema.imageInstances.order),
+        desc(schema.imageInstances.createdAt)
+      );
+
+    return rows.map((row) => ({
+      base: row.base,
+      instance: row.instance,
+      metadata: row.metadata || null,
+      layout: row.layout || null,
+      layoutGroup: row.layoutGroup || null,
+    }));
+  }
+
+  // Without layouts — simpler join
+  const rows = await db
+    .select({
+      base: schema.baseImages,
+      instance: schema.imageInstances,
+      metadata: schema.imageMetadata,
+    })
     .from(schema.imageInstances)
+    .innerJoin(
+      schema.baseImages,
+      eq(schema.imageInstances.imageId, schema.baseImages.id)
+    )
+    .leftJoin(
+      schema.imageMetadata,
+      eq(schema.imageMetadata.imageInstanceId, schema.imageInstances.id)
+    )
     .where(and(...conditions))
     .orderBy(
       asc(schema.imageInstances.order),
       desc(schema.imageInstances.createdAt)
     );
 
-  // Get all related data
-  return await Promise.all(
-    instances.map(async (instance) => {
-      const [base] = await db
-        .select()
-        .from(schema.baseImages)
-        .where(eq(schema.baseImages.id, instance.imageId));
-
-      const [metadata] = await db
-        .select()
-        .from(schema.imageMetadata)
-        .where(eq(schema.imageMetadata.imageInstanceId, instance.id))
-        .limit(1);
-
-      let layout = null;
-      let layoutGroup = null;
-      if (options.includeLayouts) {
-        [layout] = await db
-          .select()
-          .from(schema.imageLayouts)
-          .where(eq(schema.imageLayouts.imageInstanceId, instance.id))
-          .limit(1);
-
-        // If the layout exists and has a group, fetch the group
-        if (layout && layout.layoutGroupId) {
-          [layoutGroup] = await db
-            .select()
-            .from(schema.layoutGroups)
-            .where(eq(schema.layoutGroups.id, layout.layoutGroupId))
-            .limit(1);
-        }
-      }
-
-      return {
-        base,
-        instance,
-        metadata: metadata || null,
-        layout: layout || null,
-        layoutGroup: layoutGroup || null,
-      };
-    })
-  );
+  return rows.map((row) => ({
+    base: row.base,
+    instance: row.instance,
+    metadata: row.metadata || null,
+    layout: null,
+    layoutGroup: null,
+  }));
 }
 
 /**
@@ -159,9 +170,16 @@ export async function getPrimaryImageForContext(
   db: DrizzleD1Database<typeof schema>,
   context: string
 ) {
-  const [instance] = await db
-    .select()
+  const rows = await db
+    .select({
+      base: schema.baseImages,
+      instance: schema.imageInstances,
+    })
     .from(schema.imageInstances)
+    .innerJoin(
+      schema.baseImages,
+      eq(schema.imageInstances.imageId, schema.baseImages.id)
+    )
     .where(
       and(
         eq(schema.imageInstances.context, context as any),
@@ -170,14 +188,6 @@ export async function getPrimaryImageForContext(
     )
     .limit(1);
 
-  if (!instance) {
-    return null;
-  }
-
-  const [base] = await db
-    .select()
-    .from(schema.baseImages)
-    .where(eq(schema.baseImages.id, instance.imageId));
-
-  return base ? { base, instance } : null;
+  const row = rows[0];
+  return row ? { base: row.base, instance: row.instance } : null;
 }

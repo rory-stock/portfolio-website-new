@@ -64,45 +64,80 @@ export async function deleteR2Object(key: string) {
   }
 }
 
+/**
+ * List all objects in the R2 bucket.
+ */
 export async function listR2Objects() {
   const client = getR2Client();
   const config = useRuntimeConfig();
   const endpoint = getR2Endpoint();
 
-  const url = `${endpoint}/${config.r2BucketName}?list-type=2`;
-  const response = await client.fetch(url);
+  const allObjects: Array<{ key: string; size: number; lastModified: Date }> =
+    [];
+  let continuationToken: string | null = null;
 
-  if (!response.ok) {
-    throw new Error(`Failed to list objects: ${response.statusText}`);
-  }
+  do {
+    const params = new URLSearchParams({ "list-type": "2" });
+    if (continuationToken) {
+      params.set("continuation-token", continuationToken);
+    }
 
-  const text = await response.text();
+    const url = `${endpoint}/${config.r2BucketName}?${params.toString()}`;
+    const response = await client.fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to list objects: ${response.statusText}`);
+    }
+
+    const text = await response.text();
+
+    // Parse objects from this page
+    const pageObjects = parseListObjectsResponse(text);
+    allObjects.push(...pageObjects);
+
+    // Check for more pages
+    const isTruncated = /<IsTruncated>true<\/IsTruncated>/i.test(text);
+
+    if (isTruncated) {
+      const tokenMatch = text.match(
+        /<NextContinuationToken>(.*?)<\/NextContinuationToken>/
+      );
+      continuationToken = tokenMatch?.[1] ?? null;
+
+      // Safety: if truncated but no token, break to avoid infinite loop
+      if (!continuationToken) break;
+    } else {
+      continuationToken = null;
+    }
+  } while (continuationToken);
+
+  return allObjects;
+}
+
+/**
+ * Parse the XML response from S3 ListObjectsV2 into structured objects.
+ */
+function parseListObjectsResponse(
+  xml: string
+): Array<{ key: string; size: number; lastModified: Date }> {
   const objects: Array<{ key: string; size: number; lastModified: Date }> = [];
 
-  const keyMatches = text.matchAll(/<Key>(.*?)<\/Key>/g);
-  const sizeMatches = text.matchAll(/<Size>(.*?)<\/Size>/g);
-  const dateMatches = text.matchAll(/<LastModified>(.*?)<\/LastModified>/g);
+  const contentsBlocks = xml.matchAll(/<Contents>([\s\S]*?)<\/Contents>/g);
 
-  const keys = Array.from(keyMatches).map((m: RegExpMatchArray) => m[1]!);
-  const sizes = Array.from(sizeMatches).map((m: RegExpMatchArray) =>
-    parseInt(m[1]!)
-  );
-  const dates = Array.from(dateMatches).map(
-    (m: RegExpMatchArray) => new Date(m[1]!)
-  );
+  for (const block of contentsBlocks) {
+    const content = block[1];
+    if (!content) continue;
 
-  // Validate all arrays have matching lengths
-  if (keys.length !== sizes.length || keys.length !== dates.length) {
-    throw new Error(
-      `Malformed R2 response: mismatched field counts (keys: ${keys.length}, sizes: ${sizes.length}, dates: ${dates.length})`
-    );
-  }
+    const keyMatch = content.match(/<Key>(.*?)<\/Key>/);
+    const sizeMatch = content.match(/<Size>(.*?)<\/Size>/);
+    const dateMatch = content.match(/<LastModified>(.*?)<\/LastModified>/);
 
-  for (let i = 0; i < keys.length; i++) {
+    if (!keyMatch?.[1] || !sizeMatch?.[1] || !dateMatch?.[1]) continue;
+
     objects.push({
-      key: keys[i]!,
-      size: sizes[i]!,
-      lastModified: dates[i]!,
+      key: keyMatch[1],
+      size: parseInt(sizeMatch[1]),
+      lastModified: new Date(dateMatch[1]),
     });
   }
 

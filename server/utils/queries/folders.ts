@@ -31,20 +31,22 @@ export async function getFolderWithCover(
   let coverImage = null;
 
   if (folder.coverImageId) {
-    const [instance] = await db
-      .select()
+    const rows = await db
+      .select({
+        base: schema.baseImages,
+        instance: schema.imageInstances,
+      })
       .from(schema.imageInstances)
-      .where(eq(schema.imageInstances.id, folder.coverImageId));
+      .innerJoin(
+        schema.baseImages,
+        eq(schema.imageInstances.imageId, schema.baseImages.id)
+      )
+      .where(eq(schema.imageInstances.id, folder.coverImageId))
+      .limit(1);
 
-    if (instance) {
-      const [base] = await db
-        .select()
-        .from(schema.baseImages)
-        .where(eq(schema.baseImages.id, instance.imageId));
-
-      if (base) {
-        coverImage = { base, instance };
-      }
+    const row = rows[0];
+    if (row) {
+      coverImage = { base: row.base, instance: row.instance };
     }
   }
 
@@ -52,8 +54,8 @@ export async function getFolderWithCover(
 }
 
 /**
- * Get paginated images for a folder
- * Sorted by: captured_at → created_at → filename (deterministic)
+ * Get paginated images for a folder using a joined query.
+ * Sorted by: captured_at → created_at → filename
  */
 export async function getFolderImages(
   db: DrizzleD1Database<typeof schema>,
@@ -63,48 +65,35 @@ export async function getFolderImages(
   const { page = 1, limit = 50 } = options;
   const offset = (page - 1) * limit;
 
-  // Get folder_images links for this folder
-  const folderImageLinks = await db
-    .select()
+  // query: folder_images → image_instances → base_images + metadata
+  const rows = await db
+    .select({
+      base: schema.baseImages,
+      instance: schema.imageInstances,
+      metadata: schema.imageMetadata,
+    })
     .from(schema.folderImages)
+    .innerJoin(
+      schema.imageInstances,
+      eq(schema.folderImages.imageInstanceId, schema.imageInstances.id)
+    )
+    .innerJoin(
+      schema.baseImages,
+      eq(schema.imageInstances.imageId, schema.baseImages.id)
+    )
+    .leftJoin(
+      schema.imageMetadata,
+      eq(schema.imageMetadata.imageInstanceId, schema.imageInstances.id)
+    )
     .where(eq(schema.folderImages.folderId, folderId));
 
-  if (folderImageLinks.length === 0) {
-    return { images: [], total: 0, page, limit };
-  }
-
-  const instanceIds = folderImageLinks.map((fi) => fi.imageInstanceId);
-
-  // Fetch all instances with their base images
-  const results = await Promise.all(
-    instanceIds.map(async (instanceId) => {
-      const [instance] = await db
-        .select()
-        .from(schema.imageInstances)
-        .where(eq(schema.imageInstances.id, instanceId));
-
-      if (!instance) return null;
-
-      const [base] = await db
-        .select()
-        .from(schema.baseImages)
-        .where(eq(schema.baseImages.id, instance.imageId));
-
-      if (!base) return null;
-
-      const [metadata] = await db
-        .select()
-        .from(schema.imageMetadata)
-        .where(eq(schema.imageMetadata.imageInstanceId, instanceId))
-        .limit(1);
-
-      return { base, instance, metadata: metadata || null, layout: null };
-    })
-  );
-
-  // Filter nulls and sort: captured_at → created_at → filename
-  const allImages = results
-    .filter((r): r is NonNullable<typeof r> => r !== null)
+  const sorted = rows
+    .map((row) => ({
+      base: row.base,
+      instance: row.instance,
+      metadata: row.metadata || null,
+      layout: null,
+    }))
     .sort((a, b) => {
       // 1. captured_at (nulls last)
       const aCaptured = a.base.capturedAt?.getTime() ?? Infinity;
@@ -120,8 +109,8 @@ export async function getFolderImages(
       return a.base.originalFilename.localeCompare(b.base.originalFilename);
     });
 
-  const total = allImages.length;
-  const paginatedImages = allImages.slice(offset, offset + limit);
+  const total = sorted.length;
+  const paginatedImages = sorted.slice(offset, offset + limit);
 
   return { images: paginatedImages, total, page, limit };
 }
@@ -150,7 +139,10 @@ export async function getFirstFolderImage(
   db: DrizzleD1Database<typeof schema>,
   folderId: number
 ): Promise<number | null> {
-  const { images } = await getFolderImages(db, folderId, { page: 1, limit: 1 });
+  const { images } = await getFolderImages(db, folderId, {
+    page: 1,
+    limit: 1,
+  });
 
   const first = images[0];
   if (!first) return null;

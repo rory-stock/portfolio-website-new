@@ -1,54 +1,56 @@
+import { z } from "zod";
 import { useDB } from "~~/server/db/client";
 import { requireAuth } from "~~/server/utils/requireAuth";
-import type { EventCreateRequest, EventResponse } from "~~/types/api";
+import type { EventResponse } from "~~/types/api";
 import { createEventRecord } from "~~/server/utils/mutations";
-import { validateDate } from "~~/server/utils/validation";
 import { eventToResponse } from "~~/server/utils/eventTransform";
+import { eq } from "drizzle-orm";
+import * as schema from "~~/server/db/schema";
+
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+const bodySchema = z
+  .object({
+    name: z.string().min(1, "Name is required").trim(),
+    start_date: z
+      .string()
+      .regex(DATE_REGEX, "start_date must be in YYYY-MM-DD format"),
+    end_date: z
+      .string()
+      .regex(DATE_REGEX, "end_date must be in YYYY-MM-DD format")
+      .optional(),
+    location: z.string().trim().optional().default(""),
+    description: z.string().trim().optional(),
+    external_url: z
+      .string()
+      .trim()
+      .optional()
+      .refine(
+        (val) => !val || val === "" || /^https?:\/\/.+/.test(val),
+        "external_url must be a valid URL"
+      ),
+    parent_event_id: z.number().int().positive().optional(),
+  })
+  .refine(
+    (data) => {
+      // Location is required for top-level events
+      return !(!data.parent_event_id && !data.location);
+
+    },
+    {
+      message: "Location is required for top-level events",
+      path: ["location"],
+    }
+  );
 
 export default defineEventHandler(async (event): Promise<EventResponse> => {
   await requireAuth(event);
 
   const db = useDB(event);
-  const body = await readBody<
-    EventCreateRequest & { parent_event_id?: number }
-  >(event);
+  const body = await readValidatedBody(event, bodySchema.parse);
 
-  const isSubEvent = !!body.parent_event_id;
-
-  // Validation
-  if (!body.name || !body.start_date) {
-    throw createError({
-      statusCode: 400,
-      message: "name and start_date are required",
-    });
-  }
-
-  if (!isSubEvent && !body.location) {
-    throw createError({
-      statusCode: 400,
-      message: "name, start_date, and location are required",
-    });
-  }
-
-  if (!validateDate(body.start_date)) {
-    throw createError({
-      statusCode: 400,
-      message: "start_date must be in YYYY-MM-DD format",
-    });
-  }
-
-  if (body.end_date && !validateDate(body.end_date)) {
-    throw createError({
-      statusCode: 400,
-      message: "end_date must be in YYYY-MM-DD format",
-    });
-  }
-
-  // If parent_event_id provided, validate it exists
+  // Validate parent event exists if specified
   if (body.parent_event_id) {
-    const { eq } = await import("drizzle-orm");
-    const schema = await import("~~/server/db/schema");
-
     const [parent] = await db
       .select({ id: schema.events.id })
       .from(schema.events)
@@ -66,9 +68,9 @@ export default defineEventHandler(async (event): Promise<EventResponse> => {
     name: body.name,
     startDate: body.start_date,
     endDate: body.end_date,
-    location: body.location || "",
+    location: body.location,
     description: body.description,
-    externalUrl: body.external_url,
+    externalUrl: body.external_url || undefined,
     parentEventId: body.parent_event_id ?? null,
   });
 
