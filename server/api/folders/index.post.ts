@@ -1,35 +1,42 @@
-import { z } from "zod";
 import { eq, and, isNull } from "drizzle-orm";
 import { useDB } from "~~/server/db/client";
 import * as schema from "~~/server/db/schema";
 import { requireAuth } from "~~/server/utils/requireAuth";
 
-const bodySchema = z.object({
-  name: z.string().min(1, "Name is required").trim(),
-  slug: z.string().min(1, "Slug is required").trim(),
-  parent_folder_id: z.number().int().positive().nullable().optional(),
-  folder_type: z.enum(["event", "client_gallery", "project"], {
-    error: "Folder type must be event, client_gallery, or project",
-  }),
-  is_public: z.boolean().optional().default(false),
-});
-
 export default defineEventHandler(async (event) => {
   await requireAuth(event);
 
   const db = useDB(event);
-  const body = await readValidatedBody(event, bodySchema.parse);
+  const body = await readBody<{
+    name: string;
+    slug: string;
+    parent_folder_id?: number | null;
+    folder_type: "event" | "client_gallery" | "project";
+    is_public?: boolean;
+  }>(event);
 
-  const parentId = body.parent_folder_id ?? null;
+  if (!body.name?.trim()) {
+    throw createError({ statusCode: 400, message: "Name is required" });
+  }
+
+  if (!body.slug?.trim()) {
+    throw createError({ statusCode: 400, message: "Slug is required" });
+  }
+
+  if (!body.folder_type) {
+    throw createError({ statusCode: 400, message: "Folder type is required" });
+  }
 
   // Check for duplicate slug under the same parent
+  const parentId = body.parent_folder_id ?? null;
+
   const existingConditions = parentId
     ? and(
-        eq(schema.imageFolders.slug, body.slug),
+        eq(schema.imageFolders.slug, body.slug.trim()),
         eq(schema.imageFolders.parentFolderId, parentId)
       )
     : and(
-        eq(schema.imageFolders.slug, body.slug),
+        eq(schema.imageFolders.slug, body.slug.trim()),
         isNull(schema.imageFolders.parentFolderId)
       );
 
@@ -65,11 +72,11 @@ export default defineEventHandler(async (event) => {
   const [folder] = await db
     .insert(schema.imageFolders)
     .values({
-      name: body.name,
-      slug: body.slug,
+      name: body.name.trim(),
+      slug: body.slug.trim(),
       parentFolderId: parentId,
       folderType: body.folder_type,
-      isPublic: body.is_public,
+      isPublic: body.is_public ?? false,
       imageCount: 0,
       createdAt: now,
       updatedAt: now,

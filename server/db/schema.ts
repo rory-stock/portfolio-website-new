@@ -133,3 +133,17 @@ export const events = sqliteTable("events", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
+
+// ==================== Event Images - Links Images to Events ====================
+export const eventImages = sqliteTable("event_images", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  eventId: integer("event_id")
+    .notNull()
+    .references(() => events.id, { onDelete: "cascade" }),
+  imageInstanceId: integer("image_instance_id")
+    .notNull()
+    .references(() => imageInstances.id, { onDelete: "cascade" }),
+  isCover: integer("is_cover", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});

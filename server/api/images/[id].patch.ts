@@ -1,10 +1,9 @@
-import { z } from "zod";
 import { eq } from "drizzle-orm";
 import * as schema from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
-import { VALID_CONTEXTS } from "~/utils/context";
+import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
 import { requireAuth } from "~~/server/utils/requireAuth";
-import type { ImageUpdateResponse } from "~~/types/api";
+import type { ImageUpdateRequest, ImageUpdateResponse } from "~~/types/api";
 import {
   getImageWithInstance,
   getImagesByR2Path,
@@ -14,30 +13,25 @@ import { createImageInstanceRecord } from "~~/server/utils/mutations";
 import { deleteImageInstance } from "~~/server/utils/mutations";
 import { deleteR2Object } from "~/utils/r2";
 
-const contextEnum = z.enum(VALID_CONTEXTS);
-
-const bodySchema = z.object({
-  alt: z.string().optional(),
-  description: z.string().optional(),
-  is_primary: z.boolean().optional(),
-  is_public: z.boolean().optional(),
-  add_contexts: z.array(contextEnum).optional(),
-  remove_contexts: z.array(contextEnum).optional(),
-  remove_layout: z.boolean().optional(),
-});
-
 export default defineEventHandler(
   async (event): Promise<ImageUpdateResponse> => {
     await requireAuth(event);
 
     const db = useDB(event);
     const id = Number(getRouterParam(event, "id")); // This is instanceId
+    const body = await readBody<ImageUpdateRequest>(event);
 
     if (!id || isNaN(id)) {
       throw createError({ statusCode: 400, message: "Invalid image ID" });
     }
 
-    const body = await readValidatedBody(event, bodySchema.parse);
+    // Validate contexts if provided
+    if (body.add_contexts?.some((c) => !isValidContext(c))) {
+      throw createError({
+        statusCode: 400,
+        message: `Invalid context value. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
+      });
+    }
 
     // Get current image data
     const currentData = await getImageWithInstance(db, id);
@@ -55,6 +49,12 @@ export default defineEventHandler(
         .limit(1);
 
       if (layout && layout.layoutGroupId) {
+        // Get all images in this layout group
+        const groupLayouts = await db
+          .select()
+          .from(schema.imageLayouts)
+          .where(eq(schema.imageLayouts.layoutGroupId, layout.layoutGroupId));
+
         // Delete all image_layouts for this group
         await db
           .delete(schema.imageLayouts)
@@ -98,6 +98,7 @@ export default defineEventHandler(
     // Update description (applies to this instance's metadata)
     if (body.description !== undefined) {
       if (currentData.metadata) {
+        // Update existing metadata
         await db
           .update(schema.imageMetadata)
           .set({
@@ -106,6 +107,7 @@ export default defineEventHandler(
           })
           .where(eq(schema.imageMetadata.imageInstanceId, id));
       } else {
+        // Create new metadata
         await db.insert(schema.imageMetadata).values({
           imageInstanceId: id,
           description: body.description,
@@ -123,7 +125,8 @@ export default defineEventHandler(
     }
 
     if (body.is_primary !== undefined) {
-      if (body.is_primary) {
+      // If setting as primary, unset others in this context
+      if (body.is_primary === true) {
         await db
           .update(schema.imageInstances)
           .set({ isPrimary: false })
@@ -137,6 +140,7 @@ export default defineEventHandler(
       instanceUpdates.isPrimary = body.is_primary;
     }
 
+    // Apply instance updates if any
     if (Object.keys(instanceUpdates).length > 1) {
       await db
         .update(schema.imageInstances)
@@ -166,6 +170,7 @@ export default defineEventHandler(
         });
       }
 
+      // Delete specified context instances
       for (const context of body.remove_contexts) {
         const instanceToDelete = allContextsData.instances.find(
           (inst) => inst.context === context
@@ -173,6 +178,8 @@ export default defineEventHandler(
 
         if (instanceToDelete) {
           const result = await deleteImageInstance(db, instanceToDelete.id);
+
+          // If this was the last instance, also delete from R2
           if (result.deletedBaseImage && result.r2Path) {
             await deleteR2Object(result.r2Path);
           }
@@ -198,6 +205,7 @@ export default defineEventHandler(
         (c) => !existingContexts.includes(c as any)
       );
 
+      // Create new instances for each new context
       for (const context of newContexts) {
         await createImageInstanceRecord(db, currentData.base.id, context, {
           isPublic: currentData.instance.isPublic,

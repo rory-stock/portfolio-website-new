@@ -1,47 +1,46 @@
-import { z } from "zod";
 import { useDB } from "~~/server/db/client";
 import { getR2Object, deleteR2Object } from "~/utils/r2";
-import { VALID_CONTEXTS } from "~/utils/context";
+import { VALID_CONTEXTS, isValidContext } from "~/utils/context";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { fileConstraints } from "~/utils/constants";
 import { formatFileSize } from "~/utils/format";
 import { logger } from "~/utils/logger";
-import type { ImageConfirmResponse } from "~~/types/api";
+import type { ImageConfirmRequest, ImageConfirmResponse } from "~~/types/api";
 import {
   createBaseImageRecord,
   createImageInstanceRecord,
 } from "~~/server/utils/mutations";
 import * as schema from "~~/server/db/schema";
 
-const contextEnum = z.enum(VALID_CONTEXTS, {
-  error: `Invalid context. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
-});
-
-const bodySchema = z.object({
-  r2_path: z.string().min(1, "r2_path is required"),
-  context: contextEnum,
-  alt: z.string().optional().default(""),
-  description: z.string().optional(),
-  is_primary: z.boolean().optional().default(false),
-  is_public: z.boolean().optional().default(true),
-  additionalContexts: z.array(contextEnum).optional().default([]),
-});
-
 export default defineEventHandler(
   async (event): Promise<ImageConfirmResponse> => {
     await requireAuth(event);
 
-    const body = await readValidatedBody(event, bodySchema.parse);
+    const body = await readBody<ImageConfirmRequest>(event);
 
-    // Validate additional contexts don't include primary
-    const duplicateContexts = body.additionalContexts.filter(
-      (c) => c === body.context
-    );
-    if (duplicateContexts.length > 0) {
+    if (!body.r2_path || !body.context) {
       throw createError({
         statusCode: 400,
-        message: "Additional contexts must be different from primary context",
+        message: "r2_path and context required",
       });
+    }
+
+    if (!isValidContext(body.context)) {
+      throw createError({
+        statusCode: 400,
+        message: `Invalid context. Must be one of: ${VALID_CONTEXTS.join(", ")}`,
+      });
+    }
+
+    // Validate additional contexts
+    const additionalCtx = body.additionalContexts || [];
+    for (const ctx of additionalCtx) {
+      if (!isValidContext(ctx) || ctx === body.context) {
+        throw createError({
+          statusCode: 400,
+          message: `Invalid additional context. Must be one of: ${VALID_CONTEXTS.join(", ")} and different from primary context`,
+        });
+      }
     }
 
     try {
@@ -64,6 +63,7 @@ export default defineEventHandler(
 
       // Validate file size
       if (buffer.length > fileConstraints.maxFileSize) {
+        // Cleanup: delete from R2
         await deleteR2Object(body.r2_path);
         throw createError({
           statusCode: 400,
@@ -95,12 +95,12 @@ export default defineEventHandler(
       }
 
       // Create instances for primary context + additional contexts
-      const allContexts = [body.context, ...body.additionalContexts];
+      const allContexts = [body.context, ...additionalCtx];
       const instances = await Promise.all(
         allContexts.map((ctx, index) =>
           createImageInstanceRecord(db, baseImage.id, ctx, {
-            isPublic: body.is_public,
-            isPrimary: index === 0 ? body.is_primary : false,
+            isPublic: body.is_public ?? true,
+            isPrimary: index === 0 ? (body.is_primary ?? false) : false,
           })
         )
       );
@@ -122,16 +122,15 @@ export default defineEventHandler(
         await db.insert(schema.imageMetadata).values(metadataInserts);
       }
 
+      // Return instances with their IDs
       return {
         success: true,
         images: validInstances.map((inst) => ({ id: inst.id })),
       };
     } catch (error: any) {
-      // Don't re-wrap createError responses
-      if (error.statusCode) throw error;
-
       logger.error("Image processing error", error);
 
+      // Cleanup: try to delete from R2 on failure
       try {
         await deleteR2Object(body.r2_path);
       } catch (e) {

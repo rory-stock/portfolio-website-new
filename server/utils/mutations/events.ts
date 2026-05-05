@@ -1,7 +1,7 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { eq, and, isNull } from "drizzle-orm";
 import * as schema from "~~/server/db/schema";
-import type { NewEvent } from "~~/types/database";
+import type { NewEvent, NewEventImage } from "~~/types/database";
 import { generateUniqueSlug } from "~/utils/slug";
 
 /**
@@ -148,9 +148,10 @@ export async function updateEvent(
 }
 
 /**
- * Delete an event and its linked folder.
- * Cascading: event deletion removes the event record,
- * folder deletion cascades to folder_images.
+ * Delete an event
+ * - Validates no sub-events exist
+ * - Cascades to event_images
+ * - Deletes the linked folder (which cascades to folder_images)
  */
 export async function deleteEvent(
   db: DrizzleD1Database<typeof schema>,
@@ -176,7 +177,7 @@ export async function deleteEvent(
     .from(schema.events)
     .where(eq(schema.events.id, id));
 
-  // Delete the event
+  // Delete the event (cascades to event_images)
   await db.delete(schema.events).where(eq(schema.events.id, id));
 
   // Delete the linked folder if it exists (cascades to folder_images)
@@ -187,4 +188,37 @@ export async function deleteEvent(
   }
 
   return { success: true };
+}
+
+/**
+ * Add an image to an event
+ */
+export async function addImageToEvent(
+  db: DrizzleD1Database<typeof schema>,
+  eventId: number,
+  imageInstanceId: number,
+  isCover: boolean = false
+) {
+  // If setting as cover, unset other covers for this event
+  if (isCover) {
+    await db
+      .update(schema.eventImages)
+      .set({ isCover: false })
+      .where(eq(schema.eventImages.eventId, eventId));
+  }
+
+  const insertData: NewEventImage = {
+    eventId,
+    imageInstanceId,
+    isCover,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const [eventImage] = await db
+    .insert(schema.eventImages)
+    .values(insertData)
+    .returning();
+
+  return eventImage;
 }

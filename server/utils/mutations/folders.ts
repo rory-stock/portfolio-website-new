@@ -108,10 +108,11 @@ export async function addImageToFolder(
  * Remove an image from a folder with smart cascade deletion
  *
  * 1. Remove from folder_images (unlink)
- * 2. Check if image_instance is used in other folders
- * 3. If not used elsewhere → delete the instance (which cascades to base if last)
- * 4. Update folder image_count
- * 5. If the deleted image was cover → auto-select the first remaining image
+ * 2. Check if image_instance is used in other folders/contexts
+ * 3. If last instance → check if base_image has other instances
+ * 4. If last instance of base_image → delete base_image + R2 file
+ * 5. Update folder image_count
+ * 6. If the deleted image was cover → auto-select the first remaining image
  */
 export async function removeImageFromFolder(
   db: DrizzleD1Database<typeof schema>,
@@ -150,22 +151,38 @@ export async function removeImageFromFolder(
     .where(eq(schema.folderImages.imageInstanceId, imageInstanceId))
     .limit(1);
 
+  // 3. Check if the instance is used in other contexts (portfolio, layouts, etc.)
+  const [instance] = await db
+    .select()
+    .from(schema.imageInstances)
+    .where(eq(schema.imageInstances.id, imageInstanceId));
+
   let deletedInstance = false;
   let deletedBaseImage = false;
   let r2Path: string | null = null;
 
-  // Only delete the instance if not used in any other folder
-  if (otherFolderLinks.length === 0) {
-    const result = await deleteImageInstance(db, imageInstanceId);
-    deletedInstance = result.deletedInstance;
-    deletedBaseImage = result.deletedBaseImage;
-    r2Path = result.r2Path;
+  // Only delete the instance if not used anywhere else
+  if (otherFolderLinks.length === 0 && instance) {
+    // Check if there are event_images links
+    const eventLinks = await db
+      .select({ id: schema.eventImages.id })
+      .from(schema.eventImages)
+      .where(eq(schema.eventImages.imageInstanceId, imageInstanceId))
+      .limit(1);
+
+    // If no other references, delete the instance (which may cascade to base)
+    if (eventLinks.length === 0) {
+      const result = await deleteImageInstance(db, imageInstanceId);
+      deletedInstance = result.deletedInstance;
+      deletedBaseImage = result.deletedBaseImage;
+      r2Path = result.r2Path;
+    }
   }
 
-  // 4. Update folder image count
+  // 5. Update folder image count
   await updateFolderImageCount(db, folderId);
 
-  // 5. If the deleted image was a cover, auto-select the new cover
+  // 6. If the deleted image was covered, auto-select the new cover
   if (folder.coverImageId === imageInstanceId) {
     await autoSelectCover(db, folderId);
   }

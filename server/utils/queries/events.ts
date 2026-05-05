@@ -1,13 +1,10 @@
 import type { DrizzleD1Database } from "drizzle-orm/d1";
-import { asc, desc, eq, isNull } from "drizzle-orm";
+import { asc, desc, eq, and, isNull } from "drizzle-orm";
 import * as schema from "~~/server/db/schema";
-import {
-  getFolderImages,
-  getFolderWithCover,
-} from "~~/server/utils/queries/folders";
+import { getImageWithInstance } from "./images";
 
 /**
- * Get event by ID with optional images (via linked folder)
+ * Get event by ID with optional images
  */
 export async function getEventById(
   db: DrizzleD1Database<typeof schema>,
@@ -23,19 +20,27 @@ export async function getEventById(
     return null;
   }
 
-  if (!includeImages || !event.folderId) {
+  if (!includeImages) {
     return { event, images: [] };
   }
 
-  // Get images from the event's linked folder
-  const result = await getFolderImages(db, event.folderId, {
-    page: 1,
-    limit: 500,
-  });
+  // Get event images
+  const eventImages = await db
+    .select()
+    .from(schema.eventImages)
+    .where(eq(schema.eventImages.eventId, eventId));
+
+  // Get full image data for each
+  const images = await Promise.all(
+    eventImages.map(async (ei) => {
+      const imageData = await getImageWithInstance(db, ei.imageInstanceId);
+      return imageData ? { ...imageData, isCover: ei.isCover } : null;
+    })
+  );
 
   return {
     event,
-    images: result.images,
+    images: images.filter((img) => img !== null),
   };
 }
 
@@ -142,32 +147,40 @@ export async function getSubEventCount(
 }
 
 /**
- * Get the cover image for an event via its linked folder's coverImageId.
- * Falls back to the first image in the folder if no cover is set.
+ * Get a cover image for an event (or first image as fallback)
  */
 export async function getEventCoverImage(
   db: DrizzleD1Database<typeof schema>,
   eventId: number
 ) {
-  // Get the event's folder ID
-  const [event] = await db
-    .select({ folderId: schema.events.folderId })
-    .from(schema.events)
-    .where(eq(schema.events.id, eventId));
+  // Try to get the designated cover image
+  const [coverEventImage] = await db
+    .select()
+    .from(schema.eventImages)
+    .where(
+      and(
+        eq(schema.eventImages.eventId, eventId),
+        eq(schema.eventImages.isCover, true)
+      )
+    )
+    .limit(1);
 
-  if (!event?.folderId) return null;
+  if (coverEventImage) {
+    return getImageWithInstance(db, coverEventImage.imageInstanceId);
+  }
 
-  // Use the existing folder cover resolution (includes fallback to first image)
-  const folderData = await getFolderWithCover(db, event.folderId);
+  // Fallback: get first image
+  const [firstEventImage] = await db
+    .select()
+    .from(schema.eventImages)
+    .where(eq(schema.eventImages.eventId, eventId))
+    .limit(1);
 
-  if (!folderData?.coverImage) return null;
+  if (firstEventImage) {
+    return getImageWithInstance(db, firstEventImage.imageInstanceId);
+  }
 
-  return {
-    base: folderData.coverImage.base,
-    instance: folderData.coverImage.instance,
-    metadata: null,
-    layout: null,
-  };
+  return null;
 }
 
 /**
