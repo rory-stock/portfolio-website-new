@@ -1,3 +1,5 @@
+import { VALID_IMAGE_TYPES } from "~/utils/constants";
+
 /**
  * Format file size from bytes to human-readable string
  * @param bytes - File size in bytes

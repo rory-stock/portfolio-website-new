@@ -62,7 +62,7 @@ async function save() {
   saving.value = true;
 
   try {
-    await $fetch(`/api/admin/images/${props.image.id}`, {
+    await $fetch(`/api/images/${props.image.instanceId}`, {
       method: "PATCH",
       body: {
         alt: editAlt.value,
@@ -102,6 +102,17 @@ onKeyStroke("Escape", (e) => {
     emit("close");
   }
 });
+
+onKeyStroke(
+  "s",
+  (e) => {
+    if ((e.ctrlKey || e.metaKey) && props.image && hasChanges.value) {
+      e.preventDefault();
+      save();
+    }
+  },
+  { dedupe: true }
+);
 
 const target = useTemplateRef("target");
 onClickOutside(target, () => {
