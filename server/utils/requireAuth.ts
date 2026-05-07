@@ -1,4 +1,5 @@
 import type { H3Event } from "h3";
+import { createAuthError } from "~~/server/utils/errors";
 import { logger } from "~/utils/logger";
 
 /**
@@ -11,10 +12,7 @@ export async function requireAuth(event: H3Event) {
 
   if (!session.user) {
     logger.unauthorized("Unauthorized");
-    throw createError({
-      statusCode: 401,
-      message: "Unauthorized",
-    });
+    throw createAuthError("UNAUTHENTICATED");
   }
 
   return session;

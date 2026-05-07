@@ -27,31 +27,16 @@
       <!-- Header Controls -->
       <div
         v-if="organizedItems.length > 0"
-        class="mb-4 flex flex-col w-full md:items-center gap-3 md:flex-row"
+        class="mb-4 flex w-full flex-col gap-3 md:flex-row md:items-center"
       >
-        <!-- Selection Mode Controls -->
-        <template v-if="!isSelectionMode">
-          <AppButton
-            variant="secondary"
-            @click="enterSelectionMode"
-            class="text-sm"
-          >
-            Select
-          </AppButton>
-        </template>
-        <template v-else>
-          <AppButton variant="secondary" @click="selectAll" class="text-sm">
-            Select All
-          </AppButton>
-          <MultiFilterDropdown @select="handleFilterSelect" />
-          <AppButton
-            variant="secondary"
-            @click="exitSelectionMode"
-            class="text-sm"
-          >
-            Exit Selection
-          </AppButton>
-        </template>
+        <AdminSelectionToolbar
+          :is-selection-mode="isSelectionMode"
+          :show-filter="true"
+          @enter-selection="enterSelectionMode"
+          @exit-selection="exitSelectionMode"
+          @select-all="selectAll"
+          @filter-select="handleFilterSelect"
+        />
       </div>
 
       <!-- Gallery Grid - Simple Mode (no layouts) -->
@@ -91,7 +76,7 @@
         class="mb-6 grid grid-cols-3 items-center gap-4"
       >
         <template v-for="element in organizedItems" :key="getItemKey(element)">
-          <!-- Group Container - Isolated Component (spans full width) -->
+          <!-- Group Container -->
           <ImageGroupContainer
             v-if="isGroup(element)"
             :group-images="element.images"
@@ -105,7 +90,7 @@
             :class="element.images.length > 1 ? 'col-span-3' : ''"
           />
 
-          <!-- Hero Image (1 column) -->
+          <!-- Hero Image -->
           <div
             v-else-if="isHero(element)"
             class="relative h-fit w-fit rounded-lg border-2 border-neutral-100 p-2"
@@ -214,7 +199,8 @@ import { onKeyStroke } from "@vueuse/core";
 import { getHeroType, isImageGroup, isImageHero } from "~/utils/imageGroups";
 import type { DisplayImage, ImageField } from "~~/types/imageTypes";
 import { useImageData } from "~/composables/useImageData";
-import type { MultiAction } from "~~/types/multiActions";
+import AdminSelectionToolbar from "~/pages/admin/components/AdminSelectionToolbar.vue";
+import { useImageAdminActions } from "~/composables/useImageAdminActions";
 
 interface Props {
   context: string;
@@ -239,7 +225,7 @@ const {
   fetchImages,
 } = useImageData(props.context, props.showLayoutWizard);
 
-// Multi-select composables
+// Multi-select and actions via composable
 const {
   selectedImageIds,
   isSelectionMode,
@@ -253,18 +239,23 @@ const {
   enterSelectionMode,
   exitSelectionMode,
   selectRange,
-  selectByFilter,
-} = useMultiSelect({ images: imagesRef });
-
-const { actions, getAllWarnings } = useMultiActions(props.context);
-
-const { scheduleOperation, cancelPending } = useDelayedOperation();
-
-// Multi-select state
-const showConfirmModal = ref(false);
-const pendingAction = ref<MultiAction | null>(null);
-const pendingWarnings = ref<string[]>([]);
-const isExecuting = ref(false);
+  actions,
+  showConfirmModal,
+  pendingAction,
+  pendingWarnings,
+  isExecuting,
+  confirmationContent,
+  handleActionClick,
+  handleConfirmAction,
+  handleCancelConfirmation,
+  handleFilterSelect,
+} = useImageAdminActions({
+  context: props.context,
+  images: imagesRef,
+  onActionComplete: async () => {
+    await fetchImages();
+  },
+});
 
 // Drag & drop ordering
 const {
@@ -278,28 +269,6 @@ const {
 // Modal state
 const modalOpen = ref(false);
 const selectedImage = ref<DisplayImage | null>(null);
-
-// Computed confirmation content
-const confirmationContent = computed(() => {
-  if (!pendingAction.value) {
-    return {
-      title: "",
-      message: "",
-      confirmLabel: "Confirm",
-    };
-  }
-
-  if (pendingAction.value.getConfirmation) {
-    return pendingAction.value.getConfirmation(selectedImages.value);
-  }
-
-  // Default confirmation
-  return {
-    title: pendingAction.value.label,
-    message: `Are you sure you want to ${pendingAction.value.label.toLowerCase()} ${selectedCount.value} image${selectedCount.value > 1 ? "s" : ""}?`,
-    confirmLabel: pendingAction.value.label,
-  };
-});
 
 // Event handlers
 const handleUploadComplete = () => {
@@ -315,10 +284,8 @@ const onSaveOrder = async () => {
 
 const handleImageClick = (event: MouseEvent, image: DisplayImage) => {
   if (!isSelectionMode.value) {
-    // Open modal
     openModal(image);
   } else {
-    // Handle selection
     if (event.shiftKey) {
       selectRange(image.instanceId);
     } else {
@@ -330,77 +297,6 @@ const handleImageClick = (event: MouseEvent, image: DisplayImage) => {
 const openModal = (image: DisplayImage) => {
   selectedImage.value = image;
   modalOpen.value = true;
-};
-
-const handleActionClick = (action: MultiAction) => {
-  if (action.needsConfirmation) {
-    // Get warnings
-    const warnings = getAllWarnings(action, selectedImages.value);
-
-    // Set pending state
-    pendingAction.value = action;
-    pendingWarnings.value = warnings;
-    showConfirmModal.value = true;
-  } else {
-    // Execute directly with delay
-    executeAction(action);
-  }
-};
-
-const handleConfirmAction = () => {
-  if (!pendingAction.value) return;
-
-  // Close modal
-  showConfirmModal.value = false;
-
-  // Execute the action
-  executeAction(pendingAction.value);
-
-  // Clear pending
-  pendingAction.value = null;
-  pendingWarnings.value = [];
-};
-
-const handleCancelConfirmation = () => {
-  showConfirmModal.value = false;
-  pendingAction.value = null;
-  pendingWarnings.value = [];
-};
-
-const executeAction = async (action: MultiAction) => {
-  const count = selectedCount.value;
-  const label = `${action.message} ${count} image${count > 1 ? "s" : ""}`;
-
-  const proceed = scheduleOperation(
-    label,
-    async () => {
-      isExecuting.value = true;
-      try {
-        await action.execute(selectedImages.value, props.context);
-        await fetchImages();
-        exitSelectionMode();
-        success(
-          `Successfully ${action.message.toLowerCase()} ${count} image${count > 1 ? "s" : ""}`
-        );
-      } catch (error: any) {
-        showError(
-          error.message || `Failed to ${action.label.toLowerCase()} images`
-        );
-      } finally {
-        isExecuting.value = false;
-      }
-    },
-    action.delay
-  );
-
-  if (!proceed) {
-    // User cancelled due to an existing operation
-    return;
-  }
-};
-
-const handleFilterSelect = (filterIds: string[]) => {
-  selectByFilter(filterIds);
 };
 
 const handleImageUpdated = async () => {

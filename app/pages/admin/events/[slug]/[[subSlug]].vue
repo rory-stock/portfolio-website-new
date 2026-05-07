@@ -11,11 +11,9 @@ const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 // Determine which folder to display
 const activeFolderId = computed<number | null>(() => {
   if (!activeSubSlug.value) {
-    // Root tab — show event's own folder
     return eventData?.value?.folder_id ?? null;
   }
 
-  // Sub-event tab — find matching sub-event's folder
   const sub = subEvents?.value?.find(
     (s: any) => s.slug === activeSubSlug.value
   );
@@ -84,7 +82,6 @@ async function fetchAggregatedImages() {
       allImages.push(...data.images);
     }
 
-    // Sort by captured_at → created_at → filename
     allImages.sort((a, b) => {
       const aCaptured = a.captured_at
         ? new Date(a.captured_at).getTime()
@@ -141,7 +138,7 @@ watch(
   { immediate: true }
 );
 
-// Also refetch aggregated when subEvents change (new uploads in subfolders)
+// Also refetch aggregated when subEvents change
 watch(
   () => subEvents?.value,
   () => {
@@ -152,41 +149,37 @@ watch(
   { deep: true }
 );
 
-// Selection system (sub-event tabs only)
-
+// Selection system via composable (sub-event tabs only)
 const {
   selectedImageIds,
   isSelectionMode,
   hasSelection,
   selectedCount,
   selectedImages,
-  toggleSelection,
   selectAll,
   clearSelection,
   isSelected,
   enterSelectionMode,
   exitSelectionMode,
-  selectRange,
-} = useMultiSelect({ images: singleFolderImages });
+  handleSelectionClick,
+} = useImageAdminActions({
+  context: "events",
+  images: singleFolderImages,
+  onActionComplete: async () => {
+    await fetchImages(1);
+    void fetchFolder();
+    if (refreshEvent) void refreshEvent();
+  },
+});
 
 const { scheduleOperation } = useDelayedOperation();
 const { success, error: showError } = useToast();
 
 function handleImageSelect(instanceId: number, event: MouseEvent) {
-  // Auto-enter selection mode if not already in it
-  if (!isSelectionMode.value) {
-    enterSelectionMode();
-  }
-
-  if (event.shiftKey) {
-    selectRange(instanceId);
-  } else {
-    toggleSelection(instanceId);
-  }
+  handleSelectionClick(instanceId, event);
 }
 
 // Bulk remove
-
 function handleBulkRemove() {
   if (selectedCount.value === 0) return;
 
@@ -223,7 +216,6 @@ function handleBulkRemove() {
 }
 
 // Image detail modal
-
 const selectedImage = ref<any>(null);
 
 function openImageDetail(image: any) {
@@ -373,36 +365,12 @@ const notFound = computed(() => {
 
         <!-- Bottom row: selection controls -->
         <div class="flex items-center justify-between">
-          <!-- Left side: Select / Select All / Exit -->
-          <div class="flex items-center gap-2">
-            <AppButton
-              v-if="!isSelectionMode"
-              variant="secondary"
-              text-size="sm"
-              class="py-1"
-              @click="enterSelectionMode"
-            >
-              Select
-            </AppButton>
-            <template v-else>
-              <AppButton
-                variant="secondary"
-                text-size="sm"
-                class="py-1"
-                @click="selectAll"
-              >
-                Select All
-              </AppButton>
-              <AppButton
-                variant="secondary"
-                text-size="sm"
-                class="py-1"
-                @click="exitSelectionMode"
-              >
-                Exit Selection
-              </AppButton>
-            </template>
-          </div>
+          <AdminSelectionToolbar
+            :is-selection-mode="isSelectionMode"
+            @enter-selection="enterSelectionMode"
+            @exit-selection="exitSelectionMode"
+            @select-all="selectAll"
+          />
 
           <!-- Right side: count + Remove + Clear -->
           <div v-if="hasSelection" class="flex items-center gap-2">

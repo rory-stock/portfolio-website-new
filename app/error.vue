@@ -26,6 +26,7 @@ const errorMessage = computed(() =>
 );
 
 const errorTitle = computed(() => {
+  if (statusCode.value === 401) return "Not Authenticated";
   if (statusCode.value === 404) return "Page not found";
   if (statusCode.value === 403) return "Access Denied";
   if (statusCode.value >= 500) return "Something went wrong";
@@ -89,7 +90,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen">
+  <div class="flex min-h-screen flex-col">
     <!-- Public Error -->
     <div
       v-if="!isAdminPage || !loggedIn"

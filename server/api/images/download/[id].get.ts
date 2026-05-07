@@ -4,31 +4,12 @@ import * as schema from "~~/server/db/schema";
 import { isDownloadableContext } from "~/utils/constants";
 import { cleanDownloadFilename } from "~/utils/format";
 import { getR2Object } from "~/utils/r2";
-import {
-  checkRateLimit,
-  recordDownload,
-  getClientIp,
-} from "~~/server/utils/rateLimit";
 
 export default defineEventHandler(async (event) => {
   const id = Number(getRouterParam(event, "id"));
 
   if (!id || isNaN(id)) {
     throw createError({ statusCode: 400, message: "Invalid image ID" });
-  }
-
-  // Rate limit check
-  const clientIp = getClientIp(event);
-  const rateLimitResult = checkRateLimit(clientIp);
-
-  if (!rateLimitResult.allowed) {
-    setResponseHeader(event, "Retry-After", rateLimitResult.retryAfter);
-    throw createError({
-      statusCode: 429,
-      data: { retry_after: rateLimitResult.retryAfter },
-      message:
-        "Too many downloads. Please wait before downloading more images.",
-    });
   }
 
   const db = useDB(event);
@@ -78,9 +59,6 @@ export default defineEventHandler(async (event) => {
       message: "Image file not found in storage",
     });
   }
-
-  // Record the download for rate limiting (after successful retrieval)
-  recordDownload(clientIp);
 
   // Clean the filename for the download
   const cleanFilename = cleanDownloadFilename(baseImage.originalFilename);

@@ -45,15 +45,3 @@ export function isDownloadableContext(
 ): context is DownloadableContext {
   return DOWNLOADABLE_CONTEXTS.includes(context as DownloadableContext);
 }
-
-/**
- * Progressive rate limit configuration for image downloads.
- * Multiple windows — the longer someone sustains high download rates, the stricter it gets.
- */
-export const DOWNLOAD_RATE_LIMITS = {
-  windows: [
-    { maxRequests: 30, windowMs: 60 * 1000 }, // 30 per minute
-    { maxRequests: 80, windowMs: 10 * 60 * 1000 }, // 80 per 10 minutes
-    { maxRequests: 200, windowMs: 60 * 60 * 1000 }, // 200 per hour
-  ],
-} as const;
