@@ -34,7 +34,7 @@ const authLink = computed(() => {
           <NuxtLink
             class="lowercase underline transition-opacity duration-100 hover:opacity-80"
             :to="`mailto:${contactEmail}`"
-            :external="true"
+            external
             aria-label="Contact email link"
           >
             {{ contactEmail }}
@@ -50,7 +50,7 @@ const authLink = computed(() => {
           <p>Instagram:&nbsp;</p>
           <NuxtLink
             :to="`https://www.instagram.com/${footer?.instagram}/`"
-            :external="true"
+            external
             target="_blank"
             aria-label="Instagram profile link"
             class="lowercase underline transition-opacity duration-100 hover:opacity-80"

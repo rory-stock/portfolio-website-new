@@ -64,7 +64,7 @@ onMounted(() => {
         <NuxtLink
           class="underline transition-opacity duration-100 hover:opacity-70"
           :to="`mailto:${contactEmail}`"
-          :external="true"
+          external
           aria-label="Contact email link"
           >{{ contactEmail }}</NuxtLink
         >

@@ -57,8 +57,6 @@ const reportEmailSubject = computed(
 const reportEmailBody = computed(() => {
   const timestamp = new Date().toISOString();
   return `
-Hey Rory,
-
 I encountered an error on your site:
 
 Error: ${statusCode.value} - ${errorMessage.value}
@@ -66,8 +64,6 @@ Page: ${route.fullPath}
 Time: ${timestamp}
 
 [Add any additional details here]
-
-Cheers!
   `.trim();
 });
 

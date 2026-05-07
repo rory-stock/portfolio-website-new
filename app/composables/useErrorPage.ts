@@ -11,9 +11,10 @@ export function useErrorPage() {
   const recoveryHints: Record<string, string> = {
     "/evnts": "/events",
     "/event": "/events",
-    "/journl": "/journal",
-    "/jornal": "/journal",
-    "/jrnl": "/journal",
+    "/persnl": "/personal",
+    "/prsonal": "/personal",
+    "/persoanl": "/personal",
+    "/persona": "/personal",
     "/infos": "/info",
     "/information": "/info",
     "/admon": "/admin",
@@ -32,7 +33,7 @@ export function useErrorPage() {
     }
 
     // Fuzzy match
-    const validPaths = ["/", "/events", "/journal", "/info", "/admin"];
+    const validPaths = ["/", "/events", "/personal", "/info", "/admin"];
     const cleanPath = path.toLowerCase().replace(/\/$/, "");
 
     for (const validPath of validPaths) {
