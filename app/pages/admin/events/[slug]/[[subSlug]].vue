@@ -364,23 +364,31 @@ const notFound = computed(() => {
         <div class="my-2 border-t border-neutral-800" />
 
         <!-- Bottom row: selection controls -->
-        <div class="flex items-center justify-between">
+        <div
+          class="flex flex-col items-center justify-between gap-4 md:flex-row"
+        >
           <AdminSelectionToolbar
             :is-selection-mode="isSelectionMode"
             @enter-selection="enterSelectionMode"
             @exit-selection="exitSelectionMode"
             @select-all="selectAll"
+            class="w-full md:w-auto"
           />
 
+          <div v-if="hasSelection" class="w-full border-t border-neutral-800 md:hidden"></div>
+
           <!-- Right side: count + Remove + Clear -->
-          <div v-if="hasSelection" class="flex items-center gap-2">
-            <span class="text-xs text-neutral-500">
+          <div
+            v-if="hasSelection"
+            class="flex w-full flex-col-reverse items-center gap-2 md:w-auto md:flex-row"
+          >
+            <span class="pt-1 text-xs text-neutral-500 md:pt-0">
               {{ selectedCount }} selected
             </span>
             <AppButton
               variant="danger-simple"
               text-size="sm"
-              class="py-1"
+              class="w-full py-1 md:w-auto"
               @click="handleBulkRemove"
             >
               Remove
@@ -388,7 +396,7 @@ const notFound = computed(() => {
             <AppButton
               variant="secondary"
               text-size="sm"
-              class="py-1"
+              class="w-full py-1 md:w-auto"
               @click="clearSelection"
             >
               Clear

@@ -1,17 +1,19 @@
 <template>
   <div class="relative" ref="dropdownRef">
-    <button
+    <AppButton
+      variant="secondary"
+      text-size="sm"
+      class="flex items-center gap-2"
       @click="toggleDropdown"
-      class="flex items-center gap-2 rounded border border-neutral-700 px-3 py-1.5 text-sm text-neutral-200 transition-colors hover:bg-neutral-800"
     >
       Select by filter
       <Icon
         name="chevron"
-        :size="16"
+        :size="17"
         class="transition-transform duration-200"
         :class="{ 'rotate-180': isOpen }"
       />
-    </button>
+    </AppButton>
 
     <Transition name="dropdown">
       <div

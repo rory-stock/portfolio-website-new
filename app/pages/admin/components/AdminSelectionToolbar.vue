@@ -13,12 +13,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
+  <div class="flex flex-col items-center gap-2 md:flex-row">
     <template v-if="!isSelectionMode">
       <AppButton
         variant="secondary"
         text-size="sm"
-        class="py-1"
+        class="w-full py-1"
         @click="emit('enter-selection')"
       >
         Select
@@ -28,23 +28,23 @@ const emit = defineEmits<{
       <AppButton
         variant="secondary"
         text-size="sm"
-        class="py-1"
+        class="w-full py-1 md:w-auto"
         @click="emit('select-all')"
       >
         Select All
+      </AppButton>
+      <AppButton
+        variant="secondary"
+        text-size="sm"
+        class="w-full py-1 md:w-auto"
+        @click="emit('exit-selection')"
+      >
+        Exit Selection
       </AppButton>
       <MultiFilterDropdown
         v-if="showFilter"
         @select="emit('filter-select', $event)"
       />
-      <AppButton
-        variant="secondary"
-        text-size="sm"
-        class="py-1"
-        @click="emit('exit-selection')"
-      >
-        Exit Selection
-      </AppButton>
     </template>
   </div>
 </template>
