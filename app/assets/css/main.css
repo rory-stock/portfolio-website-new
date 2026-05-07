@@ -2,87 +2,89 @@
 @import "./transitions.css";
 
 @utility no-scrollbar {
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 @theme {
-  /************** CUSTOM FONTS **************/
-  --font-geist: Geist, sans-serif;
+    /************** CUSTOM FONTS **************/
+    --font-geist: Geist, sans-serif;
 
-  --font-ibm-plex-sans: "IBM Plex Sans", sans-serif;
+    --font-ibm-plex-sans: "IBM Plex Sans", sans-serif;
 
-  --font-neue-montreal-medium-semi: "Neue Montreal Medium Semi", sans-serif;
-  --font-neue-montreal-medium-bold: "Neue Montreal Medium Bold", sans-serif;
+    --font-neue-montreal-medium-semi: "Neue Montreal Medium Semi", sans-serif;
+    --font-neue-montreal-medium-bold: "Neue Montreal Medium Bold", sans-serif;
 
-  --font-ghost: "Ghost", serif;
-  --font-ghost-italic: "Ghost Italic", serif;
+    --font-ghost: "Ghost", serif;
+    --font-ghost-italic: "Ghost Italic", serif;
 
-  --font-animo-condensed: "Animo Condensed Regular", sans-serif;
-  /****************************************************/
-
-  /**************** CUSTOM COLORS **************/
-  --color-neutral-980: oklch(0.125 0 0);
-  /****************************************************/
-
-  /************** CUSTOM BREAKPOINTS **************/
-  --breakpoint-xs: 17rem;
-  /****************************************************/
+    --font-animo-condensed: "Animo Condensed Regular", sans-serif;
+    /****************************************************/
+    /**************** CUSTOM COLORS **************/
+    --color-neutral-980: oklch(0.125 0 0);
+    /****************************************************/
+    /************** CUSTOM BREAKPOINTS **************/
+    --breakpoint-xs: 17rem;
+    /****************************************************/
 }
 
 /********************************************************/
 
 @layer base {
-  html,
-  body,
-  div {
-    @apply no-scrollbar;
-  }
-  html {
-    @apply bg-black;
-  }
-  body {
-    @apply bg-white;
-  }
+    html,
+    body,
+    div {
+        @apply no-scrollbar;
+    }
 
-  @font-face {
-    font-family: "Neue Montreal Medium Bold";
-    src: url("/fonts/neue-montreal-squeezed-700.woff2") format("woff2");
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-  }
+    html {
+        @apply bg-black;
+    }
 
-  @font-face {
-    font-family: "Neue Montreal Medium Semi";
-    src: url("/fonts/neue-montreal-semi-squeezed-530.woff2") format("woff2");
-    font-weight: 530;
-    font-style: normal;
-    font-display: swap;
-  }
+    body {
+        @apply bg-white;
+    }
 
-  @font-face {
-    font-family: "Ghost";
-    src: url("/fonts/ghost.woff2") format("woff2");
-    font-style: normal;
-    font-display: swap;
-  }
+    @font-face {
+        font-family: "Neue Montreal Medium Bold";
+        src: url("/assets/fonts/neue-montreal-squeezed-700.woff2") format("woff2");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+    }
 
-  @font-face {
-    font-family: "Ghost Italic";
-    src: url("/fonts/ghost-italic.woff2") format("woff2");
-    font-style: italic;
-    font-display: swap;
-  }
+    @font-face {
+        font-family: "Neue Montreal Medium Semi";
+        src: url("/assets/fonts/neue-montreal-semi-squeezed-530.woff2") format("woff2");
+        font-weight: 530;
+        font-style: normal;
+        font-display: swap;
+    }
 
-  @font-face {
-    font-family: "Animo Condensed Regular";
-    src: url("/fonts/animo-condensed-regular.woff2") format("woff2");
-    font-style: normal;
-    font-display: swap;
-  }
+    @font-face {
+        font-family: "Ghost";
+        src: url("/assets/fonts/ghost.woff2") format("woff2");
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "Ghost Italic";
+        src: url("/assets/fonts/ghost-italic.woff2") format("woff2");
+        font-style: italic;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "Animo Condensed Regular";
+        src: url("/assets/fonts/animo-condensed-regular.woff2") format("woff2");
+        font-style: normal;
+        font-display: swap;
+    }
 }
+
 /********************************************************/

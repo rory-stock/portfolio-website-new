@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { generatePresignedUploadUrl } from "~/utils/r2";
-import { VALID_CONTEXTS, type Context } from "~/utils/context";
+import { VALID_CONTEXTS } from "~/utils/context";
 import { requireAuth } from "~~/server/utils/requireAuth";
 import { fileConstraints, VALID_IMAGE_EXTENSIONS } from "~/utils/constants";
 import { getValidImageFormats } from "~/utils/format";

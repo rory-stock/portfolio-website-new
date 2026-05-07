@@ -8,12 +8,12 @@
     .page-leave-active {
         transition: all 0.4s;
     }
+
     .page-enter-from,
     .page-leave-to {
         opacity: 0;
         filter: blur(0.5rem);
     }
-    /*************************************************/
 
     /*************** Modal transitions ***************/
     .modal-enter-active,
@@ -64,7 +64,6 @@
         opacity: 0;
         transform: scale(0.95);
     }
-    /************************************************/
 
     /*************** Fade transitions ***************/
     .fade-enter-active,
@@ -102,7 +101,7 @@
         opacity: 0;
         transform: translateX(100%);
     }
-    /***************************************************************/
+
 
     /*************** Menu animations (mobile header) ***************/
     .animate-menu-drop {
@@ -143,8 +142,6 @@
             opacity: 1;
         }
     }
-    /*****************************************************/
-
     /*************** Error page animations ***************/
     @keyframes fadeInUp {
         from {
@@ -181,8 +178,7 @@
     .action-item:nth-child(5) {
         animation-delay: 0.3s;
     }
-    /**********************************************/
-    /*******************************************************/
+
 
     /*************** Underline slide ***************/
     .underline-slide {
@@ -204,5 +200,4 @@
     .underline-slide:hover::after {
         width: 100%;
     }
-    /***********************************************/
 }
