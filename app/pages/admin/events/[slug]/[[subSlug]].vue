@@ -167,8 +167,8 @@ const {
   images: singleFolderImages,
   onActionComplete: async () => {
     await fetchImages(1);
-    void fetchFolder();
-    if (refreshEvent) void refreshEvent();
+    await fetchFolder();
+    if (refreshEvent) await refreshEvent();
   },
 });
 
@@ -200,8 +200,8 @@ function handleBulkRemove() {
       }
 
       exitSelectionMode();
-      void fetchFolder();
-      if (refreshEvent) void refreshEvent();
+      await fetchFolder();
+      if (refreshEvent) await refreshEvent();
 
       if (removed === count) {
         success(`Successfully removed ${count} image${count > 1 ? "s" : ""}`);
@@ -233,8 +233,8 @@ async function onImageRemoved(instanceId: number) {
     );
   }
 
-  void fetchFolder();
-  if (refreshEvent) void refreshEvent();
+  await fetchFolder();
+  if (refreshEvent) await refreshEvent();
 }
 
 async function onSetCover(instanceId: number) {
@@ -251,8 +251,8 @@ async function onUploadComplete() {
   } else {
     await fetchImages(1);
   }
-  void fetchFolder();
-  if (refreshEvent) void refreshEvent();
+  await fetchFolder();
+  if (refreshEvent) await refreshEvent();
 }
 
 // Sub-event edit/delete
