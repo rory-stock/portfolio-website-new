@@ -125,17 +125,17 @@ function closeModal() {
     <Transition name="modal">
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/50 p-4"
         @click.self="closeModal"
       >
         <div
-          class="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg bg-neutral-100 shadow-xl sm:max-h-[80vh]"
+          class="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-lg border border-neutral-700 bg-neutral-900 sm:max-h-[80vh]"
         >
           <!-- Header -->
           <div
-            class="sticky top-0 flex items-center justify-between rounded-t-lg border-b bg-neutral-100 px-6 py-4"
+            class="sticky top-0 flex items-center justify-between rounded-t-lg border-b border-neutral-700 bg-neutral-900 px-6 py-4"
           >
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 text-neutral-200">
               <Icon name="cleanup" class="h-6 w-6" />
               <h2 class="text-xl font-semibold">Orphaned Files</h2>
             </div>
@@ -143,7 +143,6 @@ function closeModal() {
               variant="secondary"
               @click="closeModal"
               :disabled="isDeleting"
-              class="rounded-lg border-none bg-neutral-400 p-2 text-neutral-900 hover:bg-neutral-500"
               aria-label="Close modal"
             >
               <Icon name="cross" class="h-5 w-5" />
@@ -158,17 +157,17 @@ function closeModal() {
               class="flex flex-col items-center justify-center gap-3 py-12"
             >
               <div
-                class="h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-980"
+                class="h-12 w-12 animate-spin rounded-full border-4 border-neutral-200 border-t-neutral-600"
               ></div>
-              <p class="text-neutral-600">Loading orphaned files...</p>
+              <p class="text-neutral-200">Loading orphaned files...</p>
             </div>
 
             <!-- Error State -->
             <div
               v-else-if="error"
-              class="flex flex-col items-center justify-center gap-3 pt-12 pb-2"
+              class="flex flex-col items-center justify-center gap-3 py-12"
             >
-              <p class="text-[0.92rem] text-red-600 md:text-base">
+              <p class="text-[0.92rem] font-medium text-red-600 md:text-base">
                 {{ String(error) || "Failed to load orphaned files" }}
               </p>
               <AppButton
@@ -185,9 +184,8 @@ function closeModal() {
               v-else-if="orphanedFiles.length === 0"
               class="flex flex-col items-center justify-center gap-3 py-12"
             >
-              <Icon name="smile" class="h-16 w-16 text-gray-400" />
-              <p class="text-lg text-neutral-600">No orphaned files found!</p>
-              <p class="text-sm text-neutral-500">
+              <p class="text-lg text-neutral-200">No orphaned files found!</p>
+              <p class="text-sm text-neutral-400">
                 All your files are properly referenced.
               </p>
             </div>
@@ -197,11 +195,11 @@ function closeModal() {
               <div
                 v-for="file in orphanedFiles"
                 :key="file.key"
-                class="flex items-center gap-4 rounded-lg border border-neutral-900 bg-neutral-50 p-3 transition-colors hover:bg-neutral-100"
+                class="flex items-center gap-4 rounded-lg border border-neutral-700 bg-neutral-800 p-3 transition-colors duration-300 hover:bg-neutral-700"
               >
                 <!-- Thumbnail -->
                 <div
-                  class="h-12 w-12 shrink-0 overflow-hidden rounded bg-neutral-200"
+                  class="h-12 w-12 shrink-0 overflow-hidden rounded bg-neutral-700"
                 >
                   <NuxtPicture
                     v-if="isImageFile(file.key)"
@@ -213,19 +211,19 @@ function closeModal() {
                     v-else
                     class="flex h-full w-full items-center justify-center"
                   >
-                    <Icon name="file" class="h-6 w-6 text-neutral-400" />
+                    <Icon name="file" class="h-6 w-6 text-neutral-200" />
                   </div>
                 </div>
 
                 <!-- File Details -->
                 <div class="min-w-0 flex-1">
                   <p
-                    class="truncate font-medium text-neutral-900"
+                    class="truncate font-medium text-neutral-200"
                     :title="file.key"
                   >
                     {{ getFileName(file.key) }}
                   </p>
-                  <div class="flex items-center gap-3 text-sm text-neutral-600">
+                  <div class="flex items-center gap-3 text-sm text-neutral-500">
                     <span>{{ formatFileSize(file.size) }}</span>
                     <span class="text-neutral-400">•</span>
                     <span>{{ formatDateRelative(file.lastModified) }}</span>
@@ -238,7 +236,7 @@ function closeModal() {
           <!-- Footer -->
           <div
             v-if="orphanedFiles.length > 0 && !isLoading"
-            class="sticky bottom-0 rounded-b-lg border-t bg-neutral-100 px-6 py-4"
+            class="sticky bottom-0 rounded-b-lg border-t border-neutral-700 bg-neutral-900 px-6 py-4"
           >
             <!-- Confirmation View -->
             <Transition
@@ -251,20 +249,22 @@ function closeModal() {
               mode="out-in"
             >
               <div v-if="showConfirmation" class="space-y-3">
-                <p class="text-center text-neutral-900">
+                <p class="text-center text-neutral-200">
                   Are you sure you want to delete
                   <strong>{{ orphanedFiles.length }}</strong>
                   orphaned {{ orphanedFiles.length === 1 ? "file" : "files" }}?
                 </p>
-                <p class="text-center text-sm text-red-700">
+                <p class="text-center text-sm font-medium text-red-700">
                   This action cannot be undone.
                 </p>
-                <div class="flex gap-3">
+                <div
+                  class="flex flex-col justify-between gap-2 md:flex-row md:gap-3"
+                >
                   <AppButton
                     variant="secondary"
                     @click="toggleConfirmation(false)"
                     :disabled="isDeleting"
-                    class="flex-1 border-none bg-neutral-300 text-neutral-900 hover:bg-neutral-400"
+                    class="w-full"
                   >
                     Cancel
                   </AppButton>
@@ -273,7 +273,7 @@ function closeModal() {
                     @click="handleDeleteAll"
                     :disabled="isDeleting"
                     :loading="isDeleting"
-                    class="flex-1"
+                    class="w-full"
                   >
                     <template #loading>Deleting...</template>
                     Delete All

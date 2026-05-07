@@ -1,7 +1,7 @@
 import { useDB } from "~~/server/db/client";
-import { baseImages } from "~~/server/db/schema";
-import { listR2Objects, deleteR2Object } from "~/utils/r2";
+import { deleteR2Object } from "~/utils/r2";
 import { requireAuth } from "~~/server/utils/requireAuth";
+import { getOrphanedFiles } from "~~/server/utils/queries/orphaned";
 import { logger } from "~/utils/logger";
 import type { CleanupResponse } from "~~/types/api";
 
@@ -9,21 +9,10 @@ export default defineEventHandler(async (event): Promise<CleanupResponse> => {
   await requireAuth(event);
 
   const db = useDB(event);
+  const orphaned = await getOrphanedFiles(db);
 
-  // Get all R2 files
-  const r2Files = await listR2Objects();
-
-  // Get all unique r2_paths from base_images
-  const dbRecords = await db
-    .selectDistinct({ r2_path: baseImages.r2Path })
-    .from(baseImages);
-
-  const dbPaths = new Set(dbRecords.map((r) => r.r2_path));
-
-  // Find and delete orphaned R2 files
-  const orphaned = r2Files.filter((file) => !dbPaths.has(file.key));
-  const deleted = [];
-  const errors = [];
+  const deleted: string[] = [];
+  const errors: Array<{ key: string; error: any }> = [];
 
   for (const file of orphaned) {
     try {
