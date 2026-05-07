@@ -129,7 +129,7 @@ const actionClass = [
 
     <!-- Sidebar -->
     <aside
-      class="fixed inset-0 z-40 flex w-full flex-col justify-between bg-neutral-900 p-4 font-geist text-neutral-100 transition-transform duration-300 ease-in-out md:relative md:inset-auto md:my-4 md:ml-4 md:h-auto md:min-h-[calc(100vh-2rem)] md:w-fit md:translate-x-0 md:p-0"
+      class="fixed inset-0 z-40 flex w-full flex-col justify-between bg-neutral-900 p-4 text-neutral-100 transition-transform duration-300 ease-in-out md:relative md:inset-auto md:my-4 md:ml-4 md:h-auto md:min-h-[calc(100vh-2rem)] md:w-fit md:translate-x-0 md:p-0"
       :class="isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
       role="region"
       aria-label="Admin navigation"
