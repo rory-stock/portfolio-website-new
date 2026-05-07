@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 
-interface FooterData {
-  email: string;
-  location: string;
-  instagram: string;
-  copyright: string;
-}
-
-const { data } = await useContentData("footer");
-const footer = data as Ref<FooterData | undefined>;
 const { loggedIn } = useUserSession();
+
+const { data: footer } = await useContentData("footer");
+
+const contactEmail = ref("");
+
+onMounted(() => {
+  contactEmail.value = footer.value?.email ?? "";
+});
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = breakpoints.smaller("md");
@@ -20,12 +19,6 @@ const adminIconSize = computed(() => (isMobile.value ? 21 : 24));
 const authLink = computed(() => {
   return loggedIn.value ? "/admin" : "/login";
 });
-
-function handleEmail() {
-  if (footer.value?.email) {
-    window.open(`mailto:${footer.value.email}`);
-  }
-}
 </script>
 
 <template>
@@ -38,14 +31,14 @@ function handleEmail() {
         <!----------------- EMAIL ----------------->
         <div class="flex">
           <p>Email:&nbsp;</p>
-          <p
-            @click="handleEmail"
-            role="link"
-            aria-label="Email link"
-            class="cursor-pointer lowercase underline transition-opacity duration-100 hover:opacity-80"
+          <NuxtLink
+            class="lowercase underline transition-opacity duration-100 hover:opacity-80"
+            :to="`mailto:${contactEmail}`"
+            :external="true"
+            aria-label="Contact email link"
           >
-            {{ footer?.email }}
-          </p>
+            {{ contactEmail }}
+          </NuxtLink>
         </div>
         <!----------------------------------------->
         <p>{{ footer?.location }}</p>
@@ -85,7 +78,7 @@ function handleEmail() {
           aria-hidden="true"
           class="cursor-pointer"
         >
-          <Icon name="smile" :size=adminIconSize />
+          <Icon name="smile" :size="adminIconSize" />
         </button>
       </div>
       <!--------------------------------------------->
