@@ -179,7 +179,7 @@ provide("refreshEvent", fetchEvent);
 
       <!-- Header -->
       <div class="mb-6 flex items-start justify-between md:gap-4">
-        <div>
+        <div class="md:max-w-3/4">
           <h1 class="text-2xl font-bold text-white md:text-3xl">
             {{ eventData.name }}
           </h1>
@@ -197,7 +197,10 @@ provide("refreshEvent", fetchEvent);
               </span>
             </div>
           </div>
-          <p v-if="eventData.description" class="mt-2 text-sm text-neutral-400">
+          <p
+            v-if="eventData.description"
+            class="mt-2 text-sm text-neutral-400 md:max-w-1/2"
+          >
             {{ eventData.description }}
           </p>
         </div>

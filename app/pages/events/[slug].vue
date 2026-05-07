@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getOgImageUrl, getTwitterImageUrl } from "~/utils/meta";
 import type { DisplayImage } from "~~/types/imageTypes";
+import App from "~/app.vue";
 
 definePageMeta({
   layout: "events",
@@ -71,16 +72,20 @@ useSeoMeta({
 
 <template>
   <div class="md:mt-20">
-    <div v-if="event" class="px-4 py-4 md:py-6">
+    <div v-if="event" class="px-4 py-4 md:py-4">
       <!-- Event header -->
       <div
-        class="mb-6 max-w-min min-w-fit selection:bg-black selection:text-white"
+        class="mb-6 flex max-w-fit flex-col gap-1 selection:bg-black selection:text-white"
       >
-        <h1 class="mb-1 font-ghost text-2xl text-black md:text-3xl lg:text-4xl">
+        <h1
+          class="w-fit font-lausanne-500 text-2xl tracking-tight text-black uppercase md:text-3xl lg:text-2xl"
+        >
           {{ event.name }}
         </h1>
 
-        <p class="font-ghost text-sm text-neutral-500 md:text-base">
+        <p
+          class="w-fit font-lausanne-400 text-sm text-neutral-600 md:text-base"
+        >
           <span>{{ event.start_date }}</span>
           <span v-if="event.end_date"> — {{ event.end_date }}</span>
           <span v-if="event.location"> · {{ event.location }}</span>
@@ -88,17 +93,16 @@ useSeoMeta({
 
         <p
           v-if="event.description"
-          class="mt-2 font-ghost text-sm text-neutral-600 md:text-base"
+          class="font-lausanne-400 text-sm text-neutral-500 md:max-w-1/2 md:text-base"
         >
           {{ event.description }}
         </p>
-
         <NuxtLink
           v-if="event.external_url"
           :href="event.external_url"
           target="_blank"
           rel="noopener noreferrer"
-          class="mt-2 inline-block font-ghost text-sm text-neutral-500 underline hover:text-neutral-800 md:text-base"
+          class="w-fit font-lausanne-400 text-sm text-neutral-500 hover:text-neutral-800 md:text-base"
         >
           Event Backup Link →
         </NuxtLink>
@@ -111,7 +115,7 @@ useSeoMeta({
             v-for="sub in subEvents"
             :key="sub.id"
             :to="`/events/${slug}/${sub.slug}`"
-            class="shrink-0 border-b-2 pb-2 font-ghost text-sm tracking-wide uppercase transition-colors select-none md:text-base"
+            class="shrink-0 border-b-2 pb-2 font-lausanne-500 text-sm uppercase transition-colors select-none md:text-base"
             :class="
               activeSubSlug === sub.slug
                 ? 'border-black text-black'

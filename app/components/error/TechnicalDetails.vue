@@ -17,7 +17,7 @@ function toggleDetails() {
 <template>
   <div
     v-if="isLoggedIn"
-    class="technical-details cursor-pointer space-y-3 rounded-lg border border-neutral-700 p-6 font-ibm-plex-sans transition-all duration-300 hover:bg-neutral-900"
+    class="technical-details cursor-pointer space-y-3 rounded-lg border border-neutral-700 p-6 transition-all duration-300 hover:bg-neutral-900"
     @click="toggleDetails"
   >
     <div

@@ -14,8 +14,6 @@
     /************** CUSTOM FONTS **************/
     --font-geist: Geist, sans-serif;
 
-    --font-ibm-plex-sans: "IBM Plex Sans", sans-serif;
-
     --font-neue-montreal-medium-semi: "Neue Montreal Medium Semi", sans-serif;
     --font-neue-montreal-medium-bold: "Neue Montreal Medium Bold", sans-serif;
 
@@ -23,6 +21,9 @@
     --font-ghost-italic: "Ghost Italic", serif;
 
     --font-animo-condensed: "Animo Condensed Regular", sans-serif;
+
+    --font-lausanne-500: "Lausanne 500", sans-serif;
+    --font-lausanne-400: "Lausanne 400", sans-serif;
     /****************************************************/
     /**************** CUSTOM COLORS **************/
     --color-neutral-980: oklch(0.125 0 0);
@@ -82,6 +83,20 @@
     @font-face {
         font-family: "Animo Condensed Regular";
         src: url("/assets/fonts/animo-condensed-regular.woff2") format("woff2");
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "Lausanne 500";
+        src: url("/assets/fonts/lausanne-500.woff2") format("woff2");
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: "Lausanne 400";
+        src: url("/assets/fonts/lausanne-400.woff2") format("woff2");
         font-style: normal;
         font-display: swap;
     }

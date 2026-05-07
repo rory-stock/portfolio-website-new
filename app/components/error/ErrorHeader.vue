@@ -14,7 +14,7 @@ const props = defineProps<{
       <h1
         :class="
           isDark
-            ? 'md:text-4x flex flex-col font-ibm-plex-sans text-3xl text-neutral-200'
+            ? 'md:text-4x flex flex-col text-3xl text-neutral-200'
             : 'font-ghost text-black text-2xl xs:text-4xl sm:text-5xl md:text-8xl'
         "
       >
@@ -27,7 +27,7 @@ const props = defineProps<{
         <p
           :class="
             isDark
-              ? 'font-ibm-plex-sans text-lg text-neutral-400 md:text-xl'
+              ? 'text-lg text-neutral-400 md:text-xl'
               : 'font-ghost text-lg text-black md:text-2xl xl:text-4xl'
           "
         >
