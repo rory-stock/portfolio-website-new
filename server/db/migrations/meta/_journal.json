@@ -99,6 +99,13 @@
       "when": 1777943692954,
       "tag": "0013_modern_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1778244737267,
+      "tag": "0014_wise_dagger",
+      "breakpoints": true
     }
   ]
 }

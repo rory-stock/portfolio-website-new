@@ -1,0 +1,1 @@
+DROP INDEX `events_slug_unique`;

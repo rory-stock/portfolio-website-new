@@ -122,7 +122,7 @@ export const folderImages = sqliteTable("folder_images", {
 export const events = sqliteTable("events", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
+  slug: text("slug").notNull(),
   parentEventId: integer("parent_event_id"),
   folderId: integer("folder_id").references(() => imageFolders.id),
   startDate: text("start_date").notNull(),

@@ -19,18 +19,22 @@ export async function createEventRecord(
     parentEventId?: number | null;
   }
 ) {
-  // Generate globally unique slug
+  // Generate slug scoped to siblings under the same parent
   const parentId = data.parentEventId ?? null;
 
-  const allEvents = await db
-    .select({ slug: schema.events.slug })
-    .from(schema.events);
+  const siblingCondition = parentId
+    ? eq(schema.events.parentEventId, parentId)
+    : isNull(schema.events.parentEventId);
 
-  const existingSlugs = allEvents.map((s) => s.slug);
+  const siblings = await db
+    .select({ slug: schema.events.slug })
+    .from(schema.events)
+    .where(siblingCondition);
+
+  const existingSlugs = siblings.map((s) => s.slug);
   const slug = generateUniqueSlug(data.name, existingSlugs);
 
   // Auto-create a linked folder for this event
-  // Generate a unique folder slug under the same parent folder
   const parentEvent = parentId
     ? await db
         .select({ folderId: schema.events.folderId })
@@ -125,13 +129,28 @@ export async function updateEvent(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.externalUrl !== undefined) updateData.externalUrl = data.externalUrl;
 
-  // Regenerate slug if name changed
+  // Regenerate slug if name changed — scoped to siblings under the same parent
   if (data.name) {
-    const allEvents = await db
-      .select({ slug: schema.events.slug, id: schema.events.id })
-      .from(schema.events);
+    // Get the current event to find its parent
+    const [currentEvent] = await db
+      .select({
+        parentEventId: schema.events.parentEventId,
+      })
+      .from(schema.events)
+      .where(eq(schema.events.id, id));
 
-    const existingSlugs = allEvents
+    const parentId = currentEvent?.parentEventId ?? null;
+
+    const siblingCondition = parentId
+      ? eq(schema.events.parentEventId, parentId)
+      : isNull(schema.events.parentEventId);
+
+    const siblings = await db
+      .select({ slug: schema.events.slug, id: schema.events.id })
+      .from(schema.events)
+      .where(siblingCondition);
+
+    const existingSlugs = siblings
       .filter((s) => s.id !== id)
       .map((s) => s.slug);
 
