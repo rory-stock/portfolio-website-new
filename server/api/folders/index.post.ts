@@ -8,8 +8,8 @@ const bodySchema = z.object({
   name: z.string().min(1, "Name is required").trim(),
   slug: z.string().min(1, "Slug is required").trim(),
   parent_folder_id: z.number().int().positive().nullable().optional(),
-  folder_type: z.enum(["event", "client_gallery", "project"], {
-    error: "Folder type must be event, client_gallery, or project",
+  folder_type: z.enum(["event", "gallery", "project"], {
+    error: "Folder type must be event, gallery, or project",
   }),
   is_public: z.boolean().optional().default(false),
 });

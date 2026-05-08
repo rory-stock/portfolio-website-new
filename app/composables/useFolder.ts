@@ -14,7 +14,7 @@ interface FolderData {
   name: string;
   slug: string;
   parent_folder_id: number | null;
-  folder_type: "event" | "client_gallery" | "project";
+  folder_type: "event" | "gallery" | "project";
   is_public: boolean;
   image_count: number;
   cover_image: FolderCoverImage | null;

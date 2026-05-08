@@ -10,6 +10,10 @@ export type ImageLayout = InferSelectModel<typeof schema.imageLayouts>;
 export type ImageFolder = InferSelectModel<typeof schema.imageFolders>;
 export type FolderImage = InferSelectModel<typeof schema.folderImages>;
 export type Event = InferSelectModel<typeof schema.events>;
+export type Gallery = InferSelectModel<typeof schema.galleries>;
+export type FolderAccessEmail = InferSelectModel<
+  typeof schema.folderAccessEmails
+>;
 
 // ==================== Insert Types (to DB) ====================
 export type NewBaseImage = InferInsertModel<typeof schema.baseImages>;
@@ -20,3 +24,7 @@ export type NewImageLayout = InferInsertModel<typeof schema.imageLayouts>;
 export type NewImageFolder = InferInsertModel<typeof schema.imageFolders>;
 export type NewFolderImage = InferInsertModel<typeof schema.folderImages>;
 export type NewEvent = InferInsertModel<typeof schema.events>;
+export type NewGallery = InferInsertModel<typeof schema.galleries>;
+export type NewFolderAccessEmail = InferInsertModel<
+  typeof schema.folderAccessEmails
+>;

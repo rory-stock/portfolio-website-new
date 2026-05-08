@@ -7,7 +7,7 @@ interface FolderData {
   name: string;
   slug: string;
   parent_folder_id: number | null;
-  folder_type: "event" | "client_gallery" | "project";
+  folder_type: "event" | "gallery" | "project";
   is_public: boolean;
   image_count: number;
 }
@@ -16,7 +16,7 @@ const props = defineProps<{
   open: boolean;
   folder?: FolderData | null;
   parentFolderId?: number | null;
-  defaultFolderType?: "event" | "client_gallery" | "project";
+  defaultFolderType?: "event" | "gallery" | "project";
   existingSlugs?: string[];
 }>();
 

@@ -6,7 +6,7 @@ interface FolderData {
   name: string;
   slug: string;
   parent_folder_id: number | null;
-  folder_type: "event" | "client_gallery" | "project";
+  folder_type: "event" | "gallery" | "project";
   is_public: boolean;
   image_count: number;
 }
@@ -14,7 +14,7 @@ interface FolderData {
 const props = defineProps<{
   folder?: FolderData | null;
   parentFolderId?: number | null;
-  defaultFolderType?: "event" | "client_gallery" | "project";
+  defaultFolderType?: "event" | "gallery" | "project";
   existingSlugs?: string[];
 }>();
 
@@ -124,7 +124,7 @@ async function handleDelete() {
 
 const folderTypeOptions = [
   { value: "event", label: "Event" },
-  { value: "client_gallery", label: "Client Gallery" },
+  { value: "gallery", label: "Gallery" },
   { value: "project", label: "Project" },
 ];
 </script>

@@ -3,7 +3,7 @@ import BaseUploadZone from "~/pages/admin/components/BaseUploadZone.vue";
 
 const props = defineProps<{
   folderId: number;
-  folderType: "event" | "client_gallery" | "project";
+  folderType: "event" | "gallery" | "project";
 }>();
 
 const emit = defineEmits<{

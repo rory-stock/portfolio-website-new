@@ -33,7 +33,7 @@ export const imageInstances = sqliteTable("image_instances", {
     .notNull()
     .references(() => baseImages.id, { onDelete: "cascade" }),
   context: text("context", {
-    enum: ["overview", "events", "personal", "info"],
+    enum: ["overview", "events", "personal", "info", "galleries"],
   }).notNull(),
   isPublic: integer("is_public", { mode: "boolean" }).notNull().default(true),
   isPrimary: integer("is_primary", { mode: "boolean" })
@@ -97,11 +97,19 @@ export const imageFolders = sqliteTable("image_folders", {
   slug: text("slug").notNull(),
   parentFolderId: integer("parent_folder_id"),
   folderType: text("folder_type", {
-    enum: ["event", "client_gallery", "project"],
+    enum: ["event", "gallery", "project"],
   }).notNull(),
   isPublic: integer("is_public", { mode: "boolean" }).notNull().default(false),
   coverImageId: integer("cover_image_id"),
   imageCount: integer("image_count").notNull().default(0),
+  isPrivateLink: integer("is_private_link", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  privateLinkToken: text("private_link_token"),
+  accessCode: text("access_code"),
+  requireEmail: integer("require_email", { mode: "boolean" })
+    .notNull()
+    .default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
@@ -132,4 +140,29 @@ export const events = sqliteTable("events", {
   externalUrl: text("external_url"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+// ==================== Galleries - Client Gallery Records ====================
+export const galleries = sqliteTable("galleries", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  folderId: integer("folder_id")
+    .notNull()
+    .references(() => imageFolders.id),
+  clientName: text("client_name"),
+  shootDate: text("shoot_date"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+// ==================== Folder Access Emails - Tracks Email Gate Submissions ====================
+export const folderAccessEmails = sqliteTable("folder_access_emails", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  folderId: integer("folder_id")
+    .notNull()
+    .references(() => imageFolders.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  accessedAt: integer("accessed_at", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });

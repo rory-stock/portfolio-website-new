@@ -15,7 +15,7 @@ const props = withDefaults(
     /** Folder IDs to exclude from the list (e.g. current folder) */
     excludeIds?: number[];
     /** Folder type filter */
-    folderType?: "event" | "client_gallery" | "project";
+    folderType?: "event" | "gallery" | "project";
     /** Placeholder text */
     placeholder?: string;
   }>(),
