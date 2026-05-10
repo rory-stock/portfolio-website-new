@@ -135,7 +135,7 @@ async function onSubEventCreated() {
   await fetchEvent();
 }
 
-void fetchEvent();
+onMounted(fetchEvent);
 
 // Provide event data to child routes
 provide("eventData", eventData);

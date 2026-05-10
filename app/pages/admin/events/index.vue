@@ -62,7 +62,7 @@ function onEventCreated() {
   void fetchEvents();
 }
 
-void fetchEvents();
+onMounted(fetchEvents);
 </script>
 
 <template>

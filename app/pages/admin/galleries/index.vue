@@ -51,7 +51,7 @@ function onGalleryCreated() {
   void fetchGalleries();
 }
 
-void fetchGalleries();
+onMounted(fetchGalleries);
 </script>
 
 <template>

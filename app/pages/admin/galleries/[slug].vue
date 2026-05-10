@@ -118,7 +118,7 @@ async function onFolderCreated() {
   await fetchSubFolders();
 }
 
-void fetchGallery();
+onMounted(fetchGallery);
 
 // Provide data to child routes
 provide("galleryData", galleryData);
