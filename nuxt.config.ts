@@ -38,6 +38,7 @@ export default defineNuxtConfig({
         "@vue/devtools-kit",
         "@unhead/schema-org/vue",
         "@vueuse/core",
+        "tailwind-merge",
       ],
     },
   },
