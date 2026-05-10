@@ -11,7 +11,7 @@ export async function resolveGallery(event: H3Event) {
   await requireAuth(event);
 
   const db = useDB(event);
-  const slug = getRouterParam(event, "slug");
+  const slug = getRouterParam(event, "id");
 
   if (!slug) {
     throw createError({
