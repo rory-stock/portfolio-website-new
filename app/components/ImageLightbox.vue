@@ -82,18 +82,18 @@ const canDownload = computed(
             :context="imageContext!"
             class="flex h-10 w-10 cursor-pointer items-center justify-center transition-colors duration-200 hover:text-neutral-600"
           >
-            <Icon name="download" :size="32" class="mt-1" />
+            <Icon name="download" :size="34" class="mt-1" />
           </DownloadButton>
 
           <!-- Close button -->
-          <button
-            type="button"
+          <AppButton
             @click="emit('close')"
-            class="flex h-10 w-10 cursor-pointer items-center justify-center"
+            variant="secondary-simple"
+            class="px-0 py-0 text-black hover:text-neutral-600 md:px-0"
             aria-label="Close"
           >
-            <Icon name="cross" :size="32" />
-          </button>
+            <Icon name="cross" :size="34" />
+          </AppButton>
         </div>
 
         <!-- Loading spinner -->
@@ -110,8 +110,9 @@ const canDownload = computed(
           <NuxtPicture
             :src="imagePath"
             :alt="alt"
-            :img-attrs="{
-              class: 'max-h-[75vh] max-w-[94vw] w-auto h-auto object-contain',
+            :imgAttrs="{
+              class:
+                'max-h-[75vh] select-none max-w-[94vw] w-auto h-auto object-contain',
             }"
             @click.stop
             @load="handleImageLoad"

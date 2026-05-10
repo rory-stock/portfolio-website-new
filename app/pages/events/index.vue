@@ -50,7 +50,7 @@ const eventURL = (slug: string) => {
           <NuxtPicture
             :src="event.cover_image.r2_path"
             :alt="event.cover_image.alt ?? ''"
-            :img-attrs="{ class: 'w-full h-auto object-cover' }"
+            :imgAttrs="{ class: 'w-full h-auto object-cover' }"
           />
           <p
             class="mt-1 flex font-ghost text-base group-hover:font-ghost-italic md:text-lg"

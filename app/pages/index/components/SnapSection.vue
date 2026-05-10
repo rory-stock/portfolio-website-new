@@ -8,10 +8,10 @@
       :src="images[0].r2_path"
       :alt="images[0].alt || ''"
       format="webp"
-      quality="100"
+      quality="80"
       densities="x1 x2"
-      :img-attrs="{
-        class: 'h-full w-full cursor-pointer object-cover',
+      :imgAttrs="{
+        class: 'h-full select-none w-full cursor-pointer object-cover',
         onClick: () => handleImageClick(images[0]!),
       }"
     />
@@ -25,15 +25,16 @@
     <!-- Single Hero or Null Layout -->
     <div
       v-if="(layoutType === 'single-hero' || layoutType === null) && images[0]"
-      class="w-full max-w-5xl px-4"
+      class="w-fit max-w-5xl px-4"
     >
       <NuxtPicture
         :src="images[0].r2_path"
         :alt="images[0].alt || ''"
         format="webp"
         densities="x1 x2"
-        :img-attrs="{
-          class: 'h-auto max-h-[80vh] w-full cursor-pointer object-contain',
+        :imgAttrs="{
+          class:
+            'h-auto select-none max-h-[80vh] w-full cursor-pointer object-contain',
           onClick: () => handleImageClick(images[0]!),
         }"
       />
@@ -51,8 +52,9 @@
         :alt="image.alt || ''"
         format="webp"
         densities="x1 x2"
-        :img-attrs="{
-          class: 'h-auto max-h-[70vh] w-full cursor-pointer object-contain',
+        :imgAttrs="{
+          class:
+            'h-auto select-none max-h-[70vh] w-full cursor-pointer object-contain',
           onClick: () => handleImageClick(image),
         }"
       />
@@ -70,8 +72,9 @@
         :alt="image.alt || ''"
         densities="x1 x2"
         format="webp"
-        :img-attrs="{
-          class: 'h-auto max-h-[60vh] w-full cursor-pointer object-contain',
+        :imgAttrs="{
+          class:
+            'h-auto select-none max-h-[60vh] w-full cursor-pointer object-contain',
           onClick: () => handleImageClick(image),
         }"
       />
@@ -88,8 +91,9 @@
           :alt="images[0].alt || ''"
           format="webp"
           densities="x1 x2"
-          :img-attrs="{
-            class: 'h-auto max-h-[75vh] w-full cursor-pointer object-contain',
+          :imgAttrs="{
+            class:
+              'h-auto select-none max-h-[75vh] w-full cursor-pointer object-contain',
             onClick: () => handleImageClick(images[0]!),
           }"
         />
@@ -100,8 +104,9 @@
           :alt="images[1].alt || ''"
           format="webp"
           densities="x1 x2"
-          :img-attrs="{
-            class: 'h-auto max-h-[60vh] w-full cursor-pointer object-contain',
+          :imgAttrs="{
+            class:
+              'h-auto select-none max-h-[60vh] w-full cursor-pointer object-contain',
             onClick: () => handleImageClick(images[1]!),
           }"
         />
@@ -119,8 +124,9 @@
           :alt="images[0].alt || ''"
           format="webp"
           densities="x1 x2"
-          :img-attrs="{
-            class: 'h-auto max-h-[60vh] w-full cursor-pointer object-contain',
+          :imgAttrs="{
+            class:
+              'h-auto select-none max-h-[60vh] w-full cursor-pointer object-contain',
             onClick: () => handleImageClick(images[0]!),
           }"
         />
@@ -131,8 +137,9 @@
           :alt="images[1].alt || ''"
           format="webp"
           densities="x1 x2"
-          :img-attrs="{
-            class: 'h-auto max-h-[75vh] w-full cursor-pointer object-contain',
+          :imgAttrs="{
+            class:
+              'h-auto select-none max-h-[75vh] w-full cursor-pointer object-contain',
             onClick: () => handleImageClick(images[1]!),
           }"
         />

@@ -62,8 +62,8 @@ onMounted(() => {
           :src="image.r2_path"
           :alt="image.alt || ''"
           format="webp"
-          :img-attrs="{
-            class: 'h-auto w-full cursor-pointer',
+          :imgAttrs="{
+            class: 'h-auto selection:bg-black w-full cursor-pointer',
           }"
           @click="selectedImage = image"
         />

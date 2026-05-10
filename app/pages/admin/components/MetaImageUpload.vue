@@ -18,7 +18,7 @@
         :src="imagePath"
         :alt="`${context} meta image preview`"
         format="webp"
-        :img-attrs="{ class: 'max-w-full' }"
+        :imgAttrs="{ class: 'max-w-full' }"
         @load="imageExists = true"
         @error="handleImageError"
       />

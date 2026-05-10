@@ -56,7 +56,7 @@
                 :src="img.r2_path"
                 :alt="img.alt || 'Preview'"
                 class="aspect-square overflow-hidden rounded"
-                :img-attrs="{ class: 'h-full w-full object-cover' }"
+                :imgAttrs="{ class: 'h-full w-full object-cover' }"
               />
               <div
                 v-if="selectedImages.length > 12"

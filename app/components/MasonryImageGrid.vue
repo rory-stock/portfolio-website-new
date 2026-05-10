@@ -30,7 +30,7 @@ const emit = defineEmits<{
     :ssr-columns="3"
   >
     <template #default="{ item }: { item: DisplayImage }">
-      <div class="group relative w-fit cursor-pointer">
+      <div class="group relative selection:bg-black w-fit cursor-pointer">
         <ProgressiveImage
           :src="item.url"
           :alt="item.alt ?? ''"

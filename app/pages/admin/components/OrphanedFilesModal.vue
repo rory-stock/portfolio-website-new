@@ -205,7 +205,7 @@ function closeModal() {
                     v-if="isImageFile(file.key)"
                     :src="file.key"
                     :alt="getFileName(file.key)"
-                    :img-attrs="{ class: 'w-full h-full object-cover' }"
+                    :imgAttrs="{ class: 'w-full h-full object-cover' }"
                   />
                   <div
                     v-else
