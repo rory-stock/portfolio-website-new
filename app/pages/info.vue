@@ -44,7 +44,7 @@ onMounted(() => {
         v-if="image && imagePath"
         :src="imagePath"
         :alt="image.alt ?? 'Profile Image'"
-        class="object-cover"
+        class="object-cover selection:bg-black"
       />
     </div>
 

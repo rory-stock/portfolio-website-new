@@ -199,6 +199,41 @@ export interface EventListResponse {
   total: number;
 }
 
+// ==================== Galleries API ====================
+
+export interface GalleryCreateRequest {
+  name: string;
+  client_name?: string;
+  shoot_date?: string;
+}
+
+export interface GalleryUpdateRequest {
+  name?: string;
+  client_name?: string | null;
+  shoot_date?: string | null;
+}
+
+export interface GalleryResponse {
+  id: number;
+  name: string;
+  slug: string;
+  folder_id: number;
+  client_name: string | null;
+  shoot_date: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface GalleryListItemResponse extends GalleryResponse {
+  cover_image: DisplayImage | null;
+  image_count: number;
+}
+
+export interface GalleryListResponse {
+  galleries: GalleryListItemResponse[];
+  total: number;
+}
+
 // ==================== Meta Images API ====================
 
 export interface MetaImageUploadRequest {

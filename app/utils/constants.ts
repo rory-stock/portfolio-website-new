@@ -37,7 +37,7 @@ export type ValidImageExtension = (typeof VALID_IMAGE_EXTENSIONS)[number];
  * Contexts that allow public image downloads.
  * Checked client-side (to show/hide UI) and server-side (to reject requests).
  */
-export const DOWNLOADABLE_CONTEXTS = ["events"] as const;
+export const DOWNLOADABLE_CONTEXTS = ["events", "galleries"] as const;
 export type DownloadableContext = (typeof DOWNLOADABLE_CONTEXTS)[number];
 
 export function isDownloadableContext(

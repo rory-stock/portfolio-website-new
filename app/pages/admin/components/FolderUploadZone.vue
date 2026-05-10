@@ -10,6 +10,22 @@ const emit = defineEmits<{
   uploaded: [];
 }>();
 
+// Map folder type to image instance context
+const FOLDER_TYPE_TO_CONTEXT: Record<string, string> = {
+  gallery: "galleries",
+  event: "events",
+};
+
+const uploadContext = computed(() => {
+  const context = FOLDER_TYPE_TO_CONTEXT[props.folderType];
+  if (!context) {
+    throw new Error(
+      `No upload context for folder type: ${props.folderType}`
+    );
+  }
+  return context;
+});
+
 async function linkImagesToFolder(imageIds: number[]) {
   for (const instanceId of imageIds) {
     try {
@@ -26,7 +42,7 @@ async function linkImagesToFolder(imageIds: number[]) {
 
 <template>
   <BaseUploadZone
-    context="events"
+    :context="uploadContext"
     :on-after-upload="linkImagesToFolder"
     @uploaded="emit('uploaded')"
   />

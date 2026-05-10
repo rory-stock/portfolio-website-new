@@ -1,4 +1,8 @@
-import type { PageConfig, adminNavItem, publicNavItem } from "~~/types/navTypes";
+import type {
+  PageConfig,
+  adminNavItem,
+  publicNavItem,
+} from "~~/types/navTypes";
 import type { ComputedRef } from "vue";
 
 const pages: PageConfig[] = [
@@ -19,6 +23,15 @@ const pages: PageConfig[] = [
     icon: "event",
     isPublic: false,
     context: "events",
+  },
+  {
+    label: "Galleries",
+    publicPath: "/gallery",
+    publicRouteName: "gallery",
+    adminPath: "/admin/galleries",
+    icon: "file",
+    isPublic: false,
+    context: "galleries",
   },
   {
     label: "Personal",

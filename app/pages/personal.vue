@@ -44,7 +44,7 @@ const selectedImage = ref<DisplayImage | null>(null);
         :height="image.height"
         :showPlaceholder="false"
         @click="selectedImage = image"
-        class="w-full h-auto object-cover cursor-pointer"
+        class="w-full h-auto select-none object-cover cursor-pointer"
       />
     </div>
 
