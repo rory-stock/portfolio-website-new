@@ -21,6 +21,7 @@ export const iconNames = [
   "openEye",
   "edit",
   "download",
+  "lock",
 ] as const;
 
 export type IconName = (typeof iconNames)[number];
@@ -189,5 +190,10 @@ export const iconData: Record<IconName, IconData> = {
     viewBox: "0 0 16 16",
     fill: "currentColor",
     path: "M3.5 13h9a.5.5 0 0 1 .09.992L12.5 14h-9a.5.5 0 0 1-.09-.992zh9zM7.91 1.008L8 1a.5.5 0 0 1 .492.41l.008.09v8.792l2.682-2.681a.5.5 0 0 1 .638-.058l.07.058a.5.5 0 0 1 .057.638l-.058.069l-3.535 3.536a.5.5 0 0 1-.638.057l-.07-.057l-3.535-3.536a.5.5 0 0 1 .638-.765l.069.058L7.5 10.292V1.5a.5.5 0 0 1 .41-.492L8 1z",
+  },
+  lock: {
+    viewBox: "0 0 24 24",
+    fill: "currentColor",
+    path: "M12 17a2 2 0 0 0 2-2a2 2 0 0 0-2-2a2 2 0 0 0-2 2a2 2 0 0 0 2 2m6-9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2h1V6a5 5 0 0 1 5-5a5 5 0 0 1 5 5v2zm-6-5a3 3 0 0 0-3 3v2h6V6a3 3 0 0 0-3-3",
   },
 } as const;

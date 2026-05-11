@@ -295,3 +295,12 @@ export interface MultiUpdateResponse {
   failed: number;
   errors?: Array<{ id: number; error: string }>;
 }
+
+// ==================== Access Control ====================
+
+export interface FolderAccessFlags {
+  is_private_link: boolean;
+  private_link_token: string | null;
+  access_code: string | null;
+  require_email: boolean;
+}
