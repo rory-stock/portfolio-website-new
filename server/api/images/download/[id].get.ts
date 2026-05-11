@@ -4,6 +4,7 @@ import * as schema from "~~/server/db/schema";
 import { isDownloadableContext } from "~/utils/constants";
 import { cleanDownloadFilename } from "~/utils/format";
 import { getR2Object } from "~/utils/r2";
+import { validateImageAccess } from "~~/server/utils/folderAccess";
 
 export default defineEventHandler(async (event) => {
   const id = Number(getRouterParam(event, "id"));
@@ -29,6 +30,16 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 403,
       message: "Downloads are not available for this content",
+    });
+  }
+
+  // Validate folder access control
+  const hasAccess = await validateImageAccess(event, db, id);
+
+  if (!hasAccess) {
+    throw createError({
+      statusCode: 403,
+      message: "Access denied — this content is protected",
     });
   }
 
