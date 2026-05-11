@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { formatDateShort } from "~/utils/format";
 import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
+import type { FolderAccessFlags } from "~~/types/api";
 
 definePageMeta({
   middleware: "authenticated",
@@ -37,7 +38,7 @@ interface SubEvent {
   cover_image: { url: string; alt: string } | null;
 }
 
-interface FolderData {
+interface FolderData extends FolderAccessFlags {
   id: number;
   image_count: number;
 }
@@ -49,7 +50,9 @@ const subEvents = ref<SubEvent[]>([]);
 const rootFolderImageCount = ref(0);
 const subEventFolderCounts = ref<Record<number, number>>({});
 const showEditModal = ref(false);
+const showAccessControlModal = ref(false);
 const showCreateSubEventModal = ref(false);
+const folderData = ref<FolderData | null>(null);
 
 const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 
@@ -66,14 +69,16 @@ async function fetchEvent() {
 
     useHead({ title: `${data.name} — Events Admin` });
 
-    // Fetch root folder image count
+    // Fetch root folder data
     if (data.folder_id) {
       try {
-        const folderData = await $fetch<{ folder: FolderData }>(
+        const result = await $fetch<{ folder: FolderData }>(
           `/api/folders/${data.folder_id}`
         );
-        rootFolderImageCount.value = folderData.folder.image_count;
+        folderData.value = result.folder;
+        rootFolderImageCount.value = result.folder.image_count;
       } catch {
+        folderData.value = null;
         rootFolderImageCount.value = 0;
       }
     }
@@ -205,14 +210,25 @@ provide("refreshEvent", fetchEvent);
           </p>
         </div>
 
-        <AppButton
-          variant="secondary"
-          text-size="md"
-          @click="showEditModal = true"
-        >
-          <span v-if="!isMobile">Edit event</span>
-          <Icon v-else name="edit" :size="16" />
-        </AppButton>
+        <div class="flex gap-2 md:gap-4">
+          <AppButton
+            variant="secondary"
+            text-size="md"
+            @click="showEditModal = true"
+          >
+            <span v-if="!isMobile">Edit event</span>
+            <Icon v-else name="edit" :size="16" />
+          </AppButton>
+
+          <AppButton
+            variant="secondary"
+            text-size="md"
+            @click="showAccessControlModal = true"
+          >
+            <span v-if="!isMobile">Access Control</span>
+            <Icon v-else name="lock" :size="16" />
+          </AppButton>
+        </div>
       </div>
 
       <div
@@ -296,6 +312,25 @@ provide("refreshEvent", fetchEvent);
           @updated="onParentEventUpdated"
           @deleted="navigateTo('/admin/events')"
           @cancel="showEditModal = false"
+        />
+      </div>
+    </BaseModal>
+
+    <!-- Edit Access Control modal -->
+    <BaseModal
+      :open="showAccessControlModal"
+      title="Access Control"
+      @close="showAccessControlModal = false"
+    >
+      <div class="p-5">
+        <FolderAccessControl
+          v-if="folderData"
+          :folder-id="folderData.id"
+          :is-private-link="folderData.is_private_link"
+          :private-link-token="folderData.private_link_token"
+          :access-code="folderData.access_code"
+          :require-email="folderData.require_email"
+          @updated="fetchEvent"
         />
       </div>
     </BaseModal>
