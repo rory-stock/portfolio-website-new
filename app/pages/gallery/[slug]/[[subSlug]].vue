@@ -91,15 +91,22 @@ const selectedImage = ref<DisplayImage | null>(null);
 
     <!-- Image grid -->
     <template v-else>
-      <MasonryImageGrid
-        :images="displayImages"
-        :max-columns="columns"
-        :min-columns="columns"
-        :column-width="isMobile ? 1 : isTablet ? 2 : 3"
-        :gap="8"
-        :show-download="true"
-        @image-click="selectedImage = $event"
-      />
+      <ClientOnly>
+        <MasonryImageGrid
+          :images="displayImages"
+          :max-columns="columns"
+          :min-columns="columns"
+          :column-width="isMobile ? 1 : isTablet ? 2 : 3"
+          :gap="8"
+          :show-download="true"
+          @image-click="selectedImage = $event"
+        />
+        <template #fallback>
+          <div class="py-12 text-center text-neutral-400">
+            Loading images...
+          </div>
+        </template>
+      </ClientOnly>
 
       <!-- Lightbox -->
       <ImageLightbox

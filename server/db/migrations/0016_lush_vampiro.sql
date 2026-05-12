@@ -1,0 +1,1 @@
+ALTER TABLE `image_folders` ADD `access_version` integer DEFAULT 1 NOT NULL;

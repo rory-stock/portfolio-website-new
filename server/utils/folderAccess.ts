@@ -86,7 +86,10 @@ export async function validateFolderAccess(
   }
 
   // Check for valid access cookie
-  const cookie = await getAccessCookie(event, rootFolder.id);
+  const cookie = await getAccessCookie(event, {
+    id: rootFolder.id,
+    accessVersion: rootFolder.accessVersion,
+  });
 
   if (cookie) {
     // Verify cookie covers all active gates
@@ -94,10 +97,7 @@ export async function validateFolderAccess(
       cookie.gatesCleared.includes(gate)
     );
 
-    // Verify not expired
-    const notExpired = cookie.expiry > Date.now();
-
-    if (allGatesCleared && notExpired) {
+    if (allGatesCleared) {
       return { allowed: true };
     }
   }

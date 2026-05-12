@@ -1,11 +1,5 @@
 <script setup lang="ts">
-const galleryNavItems = computed(() => [
-  {
-    to: "/",
-    name: "index",
-    label: "Portfolio",
-  },
-]);
+const { galleryNavItems } = useNavigation();
 </script>
 
 <template>

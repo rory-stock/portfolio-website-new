@@ -24,7 +24,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const gatesCleared: AccessGate[] = [];
-  const existingCookie = await getAccessCookie(event, rootFolder.id);
+  const existingCookie = await getAccessCookie(event, {
+    id: rootFolder.id,
+    accessVersion: rootFolder.accessVersion,
+  });
 
   // Carry forward any previously cleared gates
   if (existingCookie) {
@@ -105,6 +108,7 @@ export default defineEventHandler(async (event) => {
   // All gates cleared — set cookie
   await setAccessCookie(event, {
     rootFolderId: rootFolder.id,
+    accessVersion: rootFolder.accessVersion,
     gatesCleared,
   });
 

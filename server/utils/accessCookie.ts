@@ -4,6 +4,7 @@ import type { AccessGate } from "~~/server/utils/folderAccess";
 interface AccessCookieData {
   v: 1;
   rootFolderId: number;
+  accessVersion: number;
   gatesCleared: AccessGate[];
   expiry: number;
 }
@@ -131,12 +132,14 @@ export async function setAccessCookie(
   event: H3Event,
   data: {
     rootFolderId: number;
+    accessVersion: number;
     gatesCleared: AccessGate[];
   }
 ): Promise<void> {
   const cookieData: AccessCookieData = {
     v: 1,
     rootFolderId: data.rootFolderId,
+    accessVersion: data.accessVersion,
     gatesCleared: data.gatesCleared,
     expiry: Date.now() + COOKIE_MAX_AGE * 1000,
   };
@@ -155,16 +158,19 @@ export async function setAccessCookie(
 
 export async function getAccessCookie(
   event: H3Event,
-  rootFolderId: number
+  folder: {
+    id: number;
+    accessVersion: number;
+  }
 ): Promise<AccessCookieData | null> {
-  const raw = getCookie(event, getCookieName(rootFolderId));
+  const raw = getCookie(event, getCookieName(folder.id));
   if (!raw) {
     return null;
   }
   try {
     const verifiedPayload = await verify(raw, getSessionPassword());
     if (!verifiedPayload) {
-      clearAccessCookie(event, rootFolderId);
+      clearAccessCookie(event, folder.id);
       return null;
     }
 
@@ -174,26 +180,32 @@ export async function getAccessCookie(
     if (
       data.v !== 1 ||
       typeof data.rootFolderId !== "number" ||
+      typeof data.accessVersion !== "number" ||
       !Array.isArray(data.gatesCleared) ||
       typeof data.expiry !== "number"
     ) {
-      clearAccessCookie(event, rootFolderId);
+      clearAccessCookie(event, folder.id);
       return null;
     }
 
-    if (data.rootFolderId !== rootFolderId) {
-      clearAccessCookie(event, rootFolderId);
+    if (data.rootFolderId !== folder.id) {
+      clearAccessCookie(event, folder.id);
+      return null;
+    }
+
+    if (data.accessVersion !== folder.accessVersion) {
+      clearAccessCookie(event, folder.id);
       return null;
     }
 
     if (data.expiry <= Date.now()) {
-      clearAccessCookie(event, rootFolderId);
+      clearAccessCookie(event, folder.id);
       return null;
     }
 
     return data;
   } catch {
-    clearAccessCookie(event, rootFolderId);
+    clearAccessCookie(event, folder.id);
     return null;
   }
 }

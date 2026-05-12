@@ -83,6 +83,15 @@ export const useNavigation = () => {
     },
   ]);
 
+  // For gallery page navigation
+  const galleryNavItems: ComputedRef<publicNavItem[]> = computed(() => [
+    {
+      to: "/",
+      name: "index",
+      label: "Portfolio",
+    }
+  ])
+
   // For admin sidebar page navigation
   const adminPageItems: ComputedRef<adminNavItem[]> = computed(() =>
     pages.map((p) => ({
@@ -97,6 +106,7 @@ export const useNavigation = () => {
     pages,
     publicNavItems,
     eventsNavItems,
+    galleryNavItems,
     adminPageItems,
   };
 };

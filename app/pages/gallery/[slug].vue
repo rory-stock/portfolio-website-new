@@ -64,6 +64,17 @@ provide("publicSubFolders", subFolders);
 
 async function onVerified() {
   await refresh();
+
+  // Redirect to first subfolder if at root
+  if (
+    !activeSubSlug.value &&
+    subFolders.value.length > 0 &&
+    subFolders.value[0]
+  ) {
+    await navigateTo(`/gallery/${slug}/${subFolders.value[0].slug}`, {
+      replace: true,
+    });
+  }
 }
 
 useHead({

@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
 
   const updates: Record<string, unknown> = {
     updatedAt: new Date(),
+    accessVersion: (folder.accessVersion) + 1,
   };
 
   // Handle private link toggle

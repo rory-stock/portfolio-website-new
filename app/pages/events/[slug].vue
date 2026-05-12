@@ -70,6 +70,17 @@ provide("publicSubEvents", subEvents);
 
 async function onVerified() {
   await refresh();
+
+  // Redirect to first subfolder if at root
+  if (
+    !activeSubSlug.value &&
+    subEvents.value.length > 0 &&
+    subEvents.value[0]
+  ) {
+    await navigateTo(`/events/${slug}/${subEvents.value[0].slug}`, {
+      replace: true,
+    });
+  }
 }
 
 useHead({

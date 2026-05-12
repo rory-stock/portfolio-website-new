@@ -64,7 +64,7 @@ const columns = computed(() => {
   if (isMobile.value) return 1;
   if (isTablet.value) return 2;
   return 3;
-})
+});
 
 // Lightbox
 const selectedImage = ref<DisplayImage | null>(null);
@@ -77,9 +77,7 @@ const selectedImage = ref<DisplayImage | null>(null);
       v-if="isNotFound"
       class="py-16 text-center selection:bg-black selection:text-white"
     >
-      <p class="font-ghost text-2xl text-black">
-        Page not found
-      </p>
+      <p class="font-ghost text-2xl text-black">Page not found</p>
       <NuxtLink
         :to="`/events/${route.params.slug}`"
         class="mt-3 inline-block font-ghost text-xl text-neutral-500 underline hover:text-black"
@@ -99,15 +97,22 @@ const selectedImage = ref<DisplayImage | null>(null);
 
     <!-- Image grid -->
     <template v-else>
-      <MasonryImageGrid
-        :images="displayImages"
-        :max-columns="columns"
-        :min-columns="columns"
-        :column-width="isMobile ? 1 : isTablet ? 2 : 3"
-        :gap="8"
-        :show-download="true"
-        @image-click="selectedImage = $event"
-      />
+      <ClientOnly>
+        <MasonryImageGrid
+          :images="displayImages"
+          :max-columns="columns"
+          :min-columns="columns"
+          :column-width="isMobile ? 1 : isTablet ? 2 : 3"
+          :gap="8"
+          :show-download="true"
+          @image-click="selectedImage = $event"
+        />
+        <template #fallback>
+          <div class="py-12 text-center text-neutral-400">
+            Loading images...
+          </div>
+        </template>
+      </ClientOnly>
 
       <!-- Lightbox -->
       <ImageLightbox

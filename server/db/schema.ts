@@ -110,6 +110,7 @@ export const imageFolders = sqliteTable("image_folders", {
   requireEmail: integer("require_email", { mode: "boolean" })
     .notNull()
     .default(false),
+  accessVersion: integer("access_version").notNull().default(1),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
