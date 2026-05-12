@@ -12,8 +12,10 @@ interface AccessCookieData {
 const COOKIE_PREFIX = "folder_access_";
 const COOKIE_MAX_AGE = 60 * 60 * 48; // 48 hours
 
-let cachedSignKey: CryptoKey | null = null;
-let cachedVerifyKey: CryptoKey | null = null;
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
+const keyCache = new Map<string, CryptoKey>();
 
 function getCookieName(rootFolderId: number): string {
   return `${COOKIE_PREFIX}${rootFolderId}`;
@@ -29,43 +31,35 @@ function getSessionPassword(): string {
   return password;
 }
 
-async function getSignKey(secret: string): Promise<CryptoKey> {
-  if (cachedSignKey) {
-    return cachedSignKey;
-  }
-  cachedSignKey = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    {
-      name: "HMAC",
-      hash: "SHA-256",
-    },
-    false,
-    ["sign"]
-  );
-  return cachedSignKey;
-}
+async function getKey(
+  secret: string,
+  usage: "sign" | "verify"
+): Promise<CryptoKey> {
+  const cacheKey = `${usage}:${secret}`;
+  const existing = keyCache.get(cacheKey);
 
-async function getVerifyKey(secret: string): Promise<CryptoKey> {
-  if (cachedVerifyKey) {
-    return cachedVerifyKey;
+  if (existing) {
+    return existing;
   }
-  cachedVerifyKey = await crypto.subtle.importKey(
+
+  const key = await crypto.subtle.importKey(
     "raw",
-    new TextEncoder().encode(secret),
+    encoder.encode(secret),
     {
       name: "HMAC",
       hash: "SHA-256",
     },
     false,
-    ["verify"]
+    [usage]
   );
-  return cachedVerifyKey;
+
+  keyCache.set(cacheKey, key);
+  return key;
 }
 
 function toBase64Url(input: string | Uint8Array): string {
   const bytes =
-    typeof input === "string" ? new TextEncoder().encode(input) : input;
+    typeof input === "string" ? encoder.encode(input) : input;
   let binary = "";
   for (const byte of bytes) {
     binary += String.fromCharCode(byte);
@@ -85,11 +79,11 @@ function fromBase64Url(base64url: string): Uint8Array {
 }
 
 async function sign(payload: string, secret: string): Promise<string> {
-  const key = await getSignKey(secret);
+  const key = await getKey(secret, "sign");
   const signature = await crypto.subtle.sign(
     "HMAC",
     key,
-    new TextEncoder().encode(payload)
+    encoder.encode(payload)
   );
   return `${payload}.${toBase64Url(new Uint8Array(signature))}`;
 }
@@ -102,30 +96,21 @@ async function verify(signed: string, secret: string): Promise<string | null> {
   const payload = signed.slice(0, lastDot);
   const signature = signed.slice(lastDot + 1);
 
-  const key = await getVerifyKey(secret);
+  const key = await getKey(secret, "verify");
   const valid = await crypto.subtle.verify(
     "HMAC",
     key,
     fromBase64Url(signature) as Uint8Array<ArrayBuffer>,
-    new TextEncoder().encode(payload)
+    encoder.encode(payload)
   );
   return valid ? payload : null;
 }
 
 function getCookiePath(pathname?: string): string {
-  if (!pathname) {
-    return "/";
-  }
+  if (!pathname) return "/";
 
-  if (pathname.startsWith("/events/")) {
-    return "/events/";
-  }
-
-  if (pathname.startsWith("/gallery/")) {
-    return "/gallery/";
-  }
-
-  return "/";
+  const match = pathname.match(/^\/(gallery|events)\/[^/]+/);
+  return match ? `${match[0]}/` : "/";
 }
 
 export async function setAccessCookie(
@@ -152,7 +137,7 @@ export async function setAccessCookie(
     secure: true,
     sameSite: "lax",
     maxAge: COOKIE_MAX_AGE,
-    path: getCookiePath(event.path),
+    path: getCookiePath(getRequestURL(event).pathname),
   });
 }
 
@@ -174,7 +159,7 @@ export async function getAccessCookie(
       return null;
     }
 
-    const decoded = new TextDecoder().decode(fromBase64Url(verifiedPayload));
+    const decoded = decoder.decode(fromBase64Url(verifiedPayload));
     const data = JSON.parse(decoded) as AccessCookieData;
 
     if (
@@ -212,6 +197,6 @@ export async function getAccessCookie(
 
 export function clearAccessCookie(event: H3Event, rootFolderId: number): void {
   deleteCookie(event, getCookieName(rootFolderId), {
-    path: getCookiePath(event.path),
+    path: getCookiePath(getRequestURL(event).pathname),
   });
 }
