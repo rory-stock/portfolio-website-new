@@ -58,8 +58,7 @@ async function getKey(
 }
 
 function toBase64Url(input: string | Uint8Array): string {
-  const bytes =
-    typeof input === "string" ? encoder.encode(input) : input;
+  const bytes = typeof input === "string" ? encoder.encode(input) : input;
   let binary = "";
   for (const byte of bytes) {
     binary += String.fromCharCode(byte);
@@ -106,13 +105,6 @@ async function verify(signed: string, secret: string): Promise<string | null> {
   return valid ? payload : null;
 }
 
-function getCookiePath(pathname?: string): string {
-  if (!pathname) return "/";
-
-  const match = pathname.match(/^\/(gallery|events)\/[^/]+/);
-  return match ? `${match[0]}/` : "/";
-}
-
 export async function setAccessCookie(
   event: H3Event,
   data: {
@@ -137,7 +129,7 @@ export async function setAccessCookie(
     secure: true,
     sameSite: "lax",
     maxAge: COOKIE_MAX_AGE,
-    path: getCookiePath(getRequestURL(event).pathname),
+    path: "/",
   });
 }
 
@@ -197,6 +189,6 @@ export async function getAccessCookie(
 
 export function clearAccessCookie(event: H3Event, rootFolderId: number): void {
   deleteCookie(event, getCookieName(rootFolderId), {
-    path: getCookiePath(getRequestURL(event).pathname),
+    path: "/",
   });
 }
