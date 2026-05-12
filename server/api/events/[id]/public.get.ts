@@ -3,6 +3,7 @@ import { useDB } from "~~/server/db/client";
 import * as schema from "~~/server/db/schema";
 import { imageWithInstanceToDisplay } from "~~/server/utils/imageTransform";
 import { getFolderImages } from "~~/server/utils/queries/folders";
+import { validateFolderAccess } from "~~/server/utils/folderAccess";
 
 interface PublicSubEvent {
   id: number;
@@ -14,6 +15,10 @@ interface PublicSubEvent {
 }
 
 interface PublicEventResponse {
+  requiresAccess?: boolean;
+  folderName?: string;
+  requiredGates?: string[];
+  rootFolderId?: number;
   id: number;
   name: string;
   slug: string;
@@ -45,6 +50,36 @@ export default defineEventHandler(
     if (!eventRecord) {
       throw createError({ statusCode: 404, message: "Event not found" });
     }
+
+    // Check folder access control
+    if (eventRecord.folderId) {
+      const accessResult = await validateFolderAccess(
+        event,
+        db,
+        eventRecord.folderId
+      );
+
+      if (!accessResult.allowed) {
+        return {
+          requiresAccess: true,
+          folderName: accessResult.folderName || eventRecord.name,
+          requiredGates: accessResult.requiredGates || [],
+          rootFolderId: accessResult.rootFolderId,
+          id: eventRecord.id,
+          name: eventRecord.name,
+          slug: eventRecord.slug,
+          start_date: eventRecord.startDate,
+          end_date: eventRecord.endDate,
+          location: eventRecord.location,
+          description: eventRecord.description,
+          external_url: eventRecord.externalUrl,
+          sub_events: [],
+          images: [],
+        };
+      }
+    }
+
+    // Access granted — return full data
 
     // Get sub-events
     const subEvents = await db
