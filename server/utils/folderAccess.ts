@@ -86,7 +86,7 @@ export async function validateFolderAccess(
   }
 
   // Check for valid access cookie
-  const cookie = getAccessCookie(event, rootFolder.id);
+  const cookie = await getAccessCookie(event, rootFolder.id);
 
   if (cookie) {
     // Verify cookie covers all active gates

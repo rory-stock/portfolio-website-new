@@ -27,8 +27,8 @@ interface PublicEventResponse {
   location: string;
   description: string | null;
   external_url: string | null;
-  sub_events: PublicSubEvent[];
-  images: ReturnType<typeof imageWithInstanceToDisplay>[];
+  sub_events?: PublicSubEvent[];
+  images?: ReturnType<typeof imageWithInstanceToDisplay>[];
 }
 
 export default defineEventHandler(
@@ -73,8 +73,6 @@ export default defineEventHandler(
           location: eventRecord.location,
           description: eventRecord.description,
           external_url: eventRecord.externalUrl,
-          sub_events: [],
-          images: [],
         };
       }
     }

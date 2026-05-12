@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { getOgImageUrl, getTwitterImageUrl } from "~/utils/meta";
 import type { DisplayImage } from "~~/types/imageTypes";
-import App from "~/app.vue";
 
 definePageMeta({
   layout: "events",
@@ -20,6 +19,10 @@ interface SubEvent {
 }
 
 interface PublicEventData {
+  requiresAccess?: boolean;
+  folderName?: string;
+  requiredGates?: string[];
+  rootFolderId?: number;
   id: number;
   name: string;
   slug: string;
@@ -32,11 +35,12 @@ interface PublicEventData {
   images: DisplayImage[];
 }
 
-const { data: eventData } = await useFetch<PublicEventData>(
+const { data: eventData, refresh } = await useFetch<PublicEventData>(
   `/api/events/${slug}/public`
 );
 
 const event = computed(() => eventData.value);
+const requiresAccess = computed(() => event.value?.requiresAccess === true);
 const subEvents = computed(() => event.value?.sub_events ?? []);
 const hasSubEvents = computed(() => subEvents.value.length > 0);
 
@@ -46,7 +50,12 @@ const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 watch(
   activeSubSlug,
   (subSlug) => {
-    if (!subSlug && hasSubEvents.value && subEvents.value[0]) {
+    if (
+      !subSlug &&
+      !requiresAccess.value &&
+      hasSubEvents.value &&
+      subEvents.value[0]
+    ) {
       void navigateTo(`/events/${slug}/${subEvents.value[0].slug}`, {
         replace: true,
       });
@@ -58,6 +67,10 @@ watch(
 // Provide data to child route
 provide("publicEventData", eventData);
 provide("publicSubEvents", subEvents);
+
+async function onVerified() {
+  await refresh();
+}
 
 useHead({
   title: event.value?.name || "Event",
@@ -72,7 +85,21 @@ useSeoMeta({
 
 <template>
   <div class="md:mt-20">
-    <div v-if="event" class="px-4 py-4 md:py-4">
+    <!-- Access Gate -->
+    <div
+      v-if="requiresAccess && event"
+      class="flex min-h-[60vh] items-center justify-center"
+    >
+      <AccessGate
+        :folder-name="event.folderName || event.name"
+        :required-gates="event.requiredGates || []"
+        :folder-id="event.rootFolderId || 0"
+        @verified="onVerified"
+      />
+    </div>
+
+    <!-- Event Content -->
+    <div v-else-if="event" class="px-4 py-4 md:py-4">
       <!-- Event header -->
       <div
         class="mb-6 flex max-w-fit flex-col gap-1 selection:bg-black selection:text-white"
