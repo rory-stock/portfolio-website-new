@@ -17,7 +17,7 @@ const props = withDefaults(
   }>(),
   {
     size: 24,
-    decorative: true
+    decorative: true,
   }
 );
 
@@ -54,6 +54,26 @@ const CAMEL_TO_KEBAB: Record<string, string> = {
   clipRule: "clip-rule",
 };
 
+const baseDefaults = computed(() => {
+  const i = icon.value;
+  const defaults: Record<string, unknown> = {};
+
+  if (i.fill != null) defaults.fill = i.fill;
+  if (i.stroke != null) defaults.stroke = i.stroke;
+  if (i.strokeWidth != null) defaults["stroke-width"] = i.strokeWidth;
+  if (i.opacity != null) defaults.opacity = i.opacity;
+  if (i.fillOpacity != null) defaults["fill-opacity"] = i.fillOpacity;
+  if (i.strokeOpacity != null) defaults["stroke-opacity"] = i.strokeOpacity;
+  if (i.strokeLinecap != null) defaults["stroke-linecap"] = i.strokeLinecap;
+  if (i.strokeLinejoin != null) defaults["stroke-linejoin"] = i.strokeLinejoin;
+  if (i.strokeMiterlimit != null)
+    defaults["stroke-miterlimit"] = i.strokeMiterlimit;
+  if (i.fillRule != null) defaults["fill-rule"] = i.fillRule;
+  if (i.clipRule != null) defaults["clip-rule"] = i.clipRule;
+
+  return defaults;
+});
+
 function toSvgAttrs(
   source: Record<string, unknown>,
   allowed: readonly string[]
@@ -76,15 +96,8 @@ function toSvgAttrs(
 function resolve(el: IconElement): Record<string, unknown> {
   const allowed = ELEMENT_KEYS[el.type];
 
-  // Layer 1: icon-level defaults (lowest priority)
-  const iconAttrs = toSvgAttrs(
-    icon.value as unknown as Record<string, unknown>,
-    allowed
-  );
-  // Layer 2: element-level overrides
   const elAttrs = toSvgAttrs(el as unknown as Record<string, unknown>, allowed);
 
-  // Layer 3: component prop overrides (highest priority)
   const propOverrides: Record<string, unknown> = {};
   if (props.fill != null) propOverrides.fill = props.fill;
   if (props.stroke != null) propOverrides.stroke = props.stroke;
@@ -92,30 +105,34 @@ function resolve(el: IconElement): Record<string, unknown> {
     propOverrides["stroke-width"] = props.strokeWidth;
   if (props.opacity != null) propOverrides.opacity = props.opacity;
 
-  const result = { ...iconAttrs, ...elAttrs, ...propOverrides };
+  const result = { ...baseDefaults.value, ...elAttrs, ...propOverrides };
 
   if (result.fill == null) result.fill = "currentColor";
   if (result.stroke == null) result.stroke = "none";
 
   return result;
 }
+
+const resolvedElements = computed(() =>
+  icon.value.elements.map((el) => resolve(el))
+);
 </script>
 
 <template>
   <svg
     :viewBox="icon.viewBox"
-    :width=props.size
-    :height=props.size
+    :width="props.size"
+    :height="props.size"
     xmlns="http://www.w3.org/2000/svg"
     :aria-hidden="decorative || !title"
     :role="decorative ? undefined : 'img'"
   >
     <title v-if="title">{{ title }}</title>
     <component
-      v-for="(el, i) in icon.elements"
+      v-for="(attrs, i) in resolvedElements"
       :key="i"
-      :is="el.type"
-      v-bind="resolve(el)"
+      :is="icon.elements[i]!.type"
+      v-bind="attrs"
     />
   </svg>
 </template>
