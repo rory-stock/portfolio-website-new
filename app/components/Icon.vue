@@ -1,98 +1,121 @@
 <script setup lang="ts">
-import { iconData, type IconName } from "./icons/iconData";
+import { computed } from "vue";
+import { iconData, type IconName, type IconElement } from "./icons/iconData";
 
 const props = withDefaults(
   defineProps<{
     name: IconName;
-    size?: string | number;
+    size?: number;
+
     fill?: string;
-    fillOpacity?: string | number;
     stroke?: string;
     strokeWidth?: string | number;
-    strokeOpacity?: string | number;
-    strokeLinecap?: "round" | "butt" | "square" | "inherit";
-    strokeLinejoin?: "round" | "inherit" | "bevel" | "miter";
-    strokeMiterlimit?: string | number;
-    fillRule?: "nonzero" | "evenodd" | "inherit";
-    clipRule?: "nonzero" | "evenodd" | "inherit";
     opacity?: string | number;
+
+    title?: string;
+    decorative?: boolean;
   }>(),
   {
     size: 24,
+    decorative: true
   }
 );
 
 const icon = computed(() => iconData[props.name]);
 
-const sizeValue = computed(() =>
-  typeof props.size === "number" ? `${props.size}px` : props.size
-);
+const SHARED_KEYS = [
+  "fill",
+  "stroke",
+  "stroke-width",
+  "opacity",
+  "fill-opacity",
+  "stroke-opacity",
+  "fill-rule",
+  "clip-rule",
+  "stroke-linecap",
+  "stroke-linejoin",
+  "stroke-miterlimit",
+] as const;
 
-// Computed values that allow prop overrides
-const fillValue = computed(
-  () => props.fill ?? icon.value.fill ?? "currentColor"
-);
-const fillOpacityValue = computed(
-  () => props.fillOpacity ?? icon.value.fillOpacity
-);
-const strokeValue = computed(() => props.stroke ?? icon.value.stroke);
-const strokeWidthValue = computed(
-  () => props.strokeWidth ?? icon.value.strokeWidth
-);
-const strokeOpacityValue = computed(
-  () => props.strokeOpacity ?? icon.value.strokeOpacity
-);
-const strokeLinecapValue = computed(
-  () => props.strokeLinecap ?? icon.value.strokeLinecap
-);
-const strokeLinejoinValue = computed(
-  () => props.strokeLinejoin ?? icon.value.strokeLinejoin
-);
-const strokeMiterlimitValue = computed(
-  () => props.strokeMiterlimit ?? icon.value.strokeMiterlimit
-);
-const fillRuleValue = computed(() => props.fillRule ?? icon.value.fillRule);
-const clipRuleValue = computed(() => props.clipRule ?? icon.value.clipRule);
-const opacityValue = computed(() => props.opacity ?? icon.value.opacity);
+const ELEMENT_KEYS: Record<IconElement["type"], readonly string[]> = {
+  path: ["d", ...SHARED_KEYS],
+  circle: ["cx", "cy", "r", ...SHARED_KEYS],
+  line: ["x1", "y1", "x2", "y2", ...SHARED_KEYS],
+};
+
+const CAMEL_TO_KEBAB: Record<string, string> = {
+  fillOpacity: "fill-opacity",
+  strokeOpacity: "stroke-opacity",
+  strokeWidth: "stroke-width",
+  strokeLinecap: "stroke-linecap",
+  strokeLinejoin: "stroke-linejoin",
+  strokeMiterlimit: "stroke-miterlimit",
+  fillRule: "fill-rule",
+  clipRule: "clip-rule",
+};
+
+function toSvgAttrs(
+  source: Record<string, unknown>,
+  allowed: readonly string[]
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(source)) {
+    if (value == null) continue;
+    const svgKey = CAMEL_TO_KEBAB[key] ?? key;
+    if (allowed.includes(svgKey)) {
+      result[svgKey] = value;
+    }
+  }
+  return result;
+}
+
+/**
+ * Final attributes for an element
+ * Priority: component props > element-level > icon-level defaults
+ */
+function resolve(el: IconElement): Record<string, unknown> {
+  const allowed = ELEMENT_KEYS[el.type];
+
+  // Layer 1: icon-level defaults (lowest priority)
+  const iconAttrs = toSvgAttrs(
+    icon.value as unknown as Record<string, unknown>,
+    allowed
+  );
+  // Layer 2: element-level overrides
+  const elAttrs = toSvgAttrs(el as unknown as Record<string, unknown>, allowed);
+
+  // Layer 3: component prop overrides (highest priority)
+  const propOverrides: Record<string, unknown> = {};
+  if (props.fill != null) propOverrides.fill = props.fill;
+  if (props.stroke != null) propOverrides.stroke = props.stroke;
+  if (props.strokeWidth != null)
+    propOverrides["stroke-width"] = props.strokeWidth;
+  if (props.opacity != null) propOverrides.opacity = props.opacity;
+
+  const result = { ...iconAttrs, ...elAttrs, ...propOverrides };
+
+  if (result.fill == null) result.fill = "currentColor";
+  if (result.stroke == null) result.stroke = "none";
+
+  return result;
+}
 </script>
 
 <template>
   <svg
     :viewBox="icon.viewBox"
-    :style="{ width: sizeValue, height: sizeValue }"
+    :width=props.size
+    :height=props.size
     xmlns="http://www.w3.org/2000/svg"
+    :aria-hidden="decorative || !title"
+    :role="decorative ? undefined : 'img'"
   >
-    <path
-      v-if="icon.path"
-      :d="icon.path"
-      :fill="fillValue"
-      :fill-opacity="fillOpacityValue"
-      :fill-rule="fillRuleValue"
-      :stroke="strokeValue"
-      :stroke-width="strokeWidthValue"
-      :stroke-opacity="strokeOpacityValue"
-      :stroke-linecap="strokeLinecapValue"
-      :stroke-linejoin="strokeLinejoinValue"
-      :stroke-miterlimit="strokeMiterlimitValue"
-      :clip-rule="clipRuleValue"
-      :opacity="opacityValue"
-    />
-    <path
-      v-else
-      v-for="(pathData, index) in icon.paths"
-      :key="index"
-      :d="pathData"
-      :fill="fillValue"
-      :fill-opacity="fillOpacityValue"
-      :fill-rule="fillRuleValue"
-      :stroke="strokeValue"
-      :stroke-width="strokeWidthValue"
-      :stroke-opacity="strokeOpacityValue"
-      :stroke-linecap="strokeLinecapValue"
-      :stroke-linejoin="strokeLinejoinValue"
-      :stroke-miterlimit="strokeMiterlimitValue"
-      :clip-rule="clipRuleValue"
-      :opacity="opacityValue"
+    <title v-if="title">{{ title }}</title>
+    <component
+      v-for="(el, i) in icon.elements"
+      :key="i"
+      :is="el.type"
+      v-bind="resolve(el)"
     />
   </svg>
 </template>
