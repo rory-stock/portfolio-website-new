@@ -40,6 +40,18 @@ const hasSubFolders = computed(() => subFolders.value.length > 0);
 
 const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 
+// Build the share URL
+const shareUrl = computed(() => {
+  const origin =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : "https://rorystock.com";
+  return `${origin}${route.fullPath.split("?")[0]}`;
+});
+
+// Read access token from current URL if present
+const accessToken = computed(() => (route.query.access as string) || undefined);
+
 // Redirect to first subfolder when at gallery root with subfolders
 watch(
   activeSubSlug,
@@ -101,22 +113,34 @@ useHead({
     <div v-else-if="gallery" class="px-4 py-4 md:py-4">
       <!-- Gallery header -->
       <div
-        class="mb-6 flex max-w-fit flex-col gap-1 selection:bg-black selection:text-white"
+        class="mb-4 md:mb-6 flex items-start justify-between selection:bg-black selection:text-white"
       >
-        <h1
-          class="w-fit font-lausanne-500 text-2xl tracking-tight text-black uppercase md:text-3xl lg:text-2xl"
-        >
-          {{ gallery.name }}
-        </h1>
+        <div class="flex max-w-fit flex-col md:gap-1">
+          <h1
+            class="w-fit font-lausanne-500 text-xl tracking-tight text-black uppercase md:text-3xl lg:text-2xl"
+          >
+            {{ gallery.name }}
+          </h1>
 
-        <p
-          v-if="gallery.client_name || gallery.shoot_date"
-          class="w-fit font-lausanne-400 text-sm text-neutral-600 md:text-base"
-        >
-          <span v-if="gallery.client_name">{{ gallery.client_name }}</span>
-          <span v-if="gallery.client_name && gallery.shoot_date"> · </span>
-          <span v-if="gallery.shoot_date">{{ gallery.shoot_date }}</span>
-        </p>
+          <p
+            v-if="gallery.client_name || gallery.shoot_date"
+            class="w-fit font-lausanne-400 text-sm text-neutral-600 md:text-base"
+          >
+            <span v-if="gallery.client_name">{{ gallery.client_name }}</span>
+            <span v-if="gallery.client_name && gallery.shoot_date"> · </span>
+            <span v-if="gallery.shoot_date">{{ gallery.shoot_date }}</span>
+          </p>
+        </div>
+
+        <!-- Share -->
+        <div class="flex items-center">
+          <ShareButton
+            :url="shareUrl"
+            :access-token="accessToken"
+            class="text-neutral-500 hover:text-neutral-800"
+            :icon-size="34"
+          />
+        </div>
       </div>
 
       <!-- Subfolder tabs -->

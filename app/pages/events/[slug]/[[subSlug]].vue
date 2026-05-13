@@ -56,9 +56,7 @@ const isEmpty = computed(
   () => !isNotFound.value && displayImages.value.length === 0
 );
 
-const breakpoints = useBreakpoints(breakpointsTailwind);
-const isMobile = breakpoints.smaller("md");
-const isTablet = breakpoints.smaller("lg");
+const { isMobile, isTablet } = useResponsive();
 
 const columns = computed(() => {
   if (isMobile.value) return 1;
@@ -89,7 +87,7 @@ const selectedImage = ref<DisplayImage | null>(null);
     <!-- No images -->
     <div v-else-if="isEmpty" class="py-16 text-center">
       <p
-        class="font-ghost text-2xl text-black selection:bg-black selection:text-white"
+        class="font-ghost text-lg text-black selection:bg-black selection:text-white md:text-xl lg:text-2xl"
       >
         Nothing here yet — check back soon
       </p>

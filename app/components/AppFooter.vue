@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
-
 const { loggedIn } = useUserSession();
 
 const { data: footer } = await useContentData("footer");
@@ -11,8 +9,7 @@ onMounted(() => {
   contactEmail.value = footer.value?.email ?? "";
 });
 
-const breakpoints = useBreakpoints(breakpointsTailwind);
-const isMobile = breakpoints.smaller("md");
+const { isMobile } = useResponsive();
 
 const adminIconSize = computed(() => (isMobile.value ? 21 : 24));
 

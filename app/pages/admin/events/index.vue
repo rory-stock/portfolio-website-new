@@ -2,7 +2,6 @@
 import BaseModal from "~/pages/admin/components/BaseModal.vue";
 import EventCreateForm from "~/pages/admin/components/EventCreateForm.vue";
 import { formatDateShort } from "~/utils/format";
-import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 
 definePageMeta({
   middleware: "authenticated",
@@ -30,8 +29,7 @@ const error = ref<string | null>(null);
 const events = ref<EventListItem[]>([]);
 const showCreateModal = ref(false);
 
-const breakpoints = useBreakpoints(breakpointsTailwind);
-const isMobile = computed(() => breakpoints.isSmaller("md"));
+const { isMobile } = useResponsive();
 
 const contentFields = [
   {

@@ -45,12 +45,10 @@ const isSelected = (image: DisplayImage) =>
 const isCover = (image: DisplayImage) =>
   props.coverImageInstanceId === image.instanceId;
 
-const breakpoints = useBreakpoints(breakpointsTailwind);
-const isMobile = computed(() => breakpoints.isSmaller("md"));
+const { isMobile, isDesktop } = useResponsive();
 
 const minColumns = computed(() => {
-  if (breakpoints.isGreaterOrEqual("lg")) return 4;
-  else return 1;
+  return isDesktop.value ? 4 : 1;
 });
 
 function handleImageClick(image: DisplayImage, event: MouseEvent) {

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { FolderAccessFlags } from "~~/types/api";
 
 const props = defineProps<{
   folderId: number;

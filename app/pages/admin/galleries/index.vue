@@ -2,7 +2,6 @@
 import BaseModal from "~/pages/admin/components/BaseModal.vue";
 import GalleryCreateForm from "~/pages/admin/components/GalleryCreateForm.vue";
 import { formatDateShort } from "~/utils/format";
-import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 
 definePageMeta({
   middleware: "authenticated",
@@ -27,8 +26,7 @@ const error = ref<string | null>(null);
 const galleries = ref<GalleryListItem[]>([]);
 const showCreateModal = ref(false);
 
-const breakpoints = useBreakpoints(breakpointsTailwind);
-const isMobile = computed(() => breakpoints.isSmaller("md"));
+const { isMobile } = useResponsive();
 
 async function fetchGalleries() {
   loading.value = true;

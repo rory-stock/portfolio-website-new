@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { formatDateShort } from "~/utils/format";
-import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import GalleryEditForm from "~/pages/admin/components/GalleryEditForm.vue";
 import GallerySubfolderCreateForm from "../components/GallerySubfolderCreateForm.vue";
 import type { FolderAccessFlags } from "~~/types/api";
@@ -47,8 +46,7 @@ const folderData = ref<FolderData | null>(null);
 
 const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 
-const breakpoints = useBreakpoints(breakpointsTailwind);
-const isMobile = computed(() => breakpoints.isSmaller("md"));
+const { isMobile } = useResponsive();
 
 async function fetchGallery() {
   loading.value = true;

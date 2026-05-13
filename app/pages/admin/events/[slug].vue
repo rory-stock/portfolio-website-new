@@ -56,8 +56,7 @@ const folderData = ref<FolderData | null>(null);
 
 const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 
-const breakpoints = useBreakpoints(breakpointsTailwind);
-const isMobile = computed(() => breakpoints.isSmaller("md"));
+const { isMobile } = useResponsive();
 
 async function fetchEvent() {
   loading.value = true;
