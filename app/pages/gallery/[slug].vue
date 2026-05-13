@@ -137,7 +137,7 @@ useHead({
           <ShareButton
             :url="shareUrl"
             :access-token="accessToken"
-            class="text-neutral-500 hover:text-neutral-800"
+            buttonClass="text-neutral-500 hover:text-neutral-800"
             :icon-size="34"
           />
         </div>

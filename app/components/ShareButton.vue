@@ -3,7 +3,7 @@ const props = withDefaults(
   defineProps<{
     url: string;
     accessToken?: string;
-    class?: string;
+    buttonClass?: string;
     iconSize?: number;
   }>(),
   {
@@ -24,7 +24,7 @@ async function handleClick(event: MouseEvent) {
 <template>
   <AppButton
     variant="secondary-simple"
-    :class="`px-0 py-0 md:px-0 ${props.class}`"
+    :class="['px-0 py-0 md:px-0', buttonClass]"
     :disabled="isSharing"
     title="Share"
     aria-label="Share link"

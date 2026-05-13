@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { twMerge } from "tailwind-merge";
+import { type ClassNameValue, twMerge } from "tailwind-merge";
 
 type ButtonVariant =
   | "primary"
@@ -7,8 +7,8 @@ type ButtonVariant =
   | "secondary-simple"
   | "danger"
   | "danger-simple";
+
 type ButtonType = "button" | "submit" | "reset";
-type ButtonClass = string;
 type TextSize = "sm" | "md" | "lg";
 
 const props = withDefaults(
@@ -17,7 +17,6 @@ const props = withDefaults(
     disabled?: boolean;
     loading?: boolean;
     type?: ButtonType;
-    class?: ButtonClass;
     textSize?: TextSize;
   }>(),
   {
@@ -25,10 +24,15 @@ const props = withDefaults(
     type: "button",
     disabled: false,
     loading: false,
-    class: "",
     textSize: "md",
   }
 );
+
+defineOptions({
+  inheritAttrs: false,
+});
+
+const attrs = useAttrs();
 
 const baseClasses =
   "cursor-pointer rounded px-2 py-2 transition-all duration-300 md:px-4 disabled:cursor-not-allowed disabled:opacity-50";
@@ -42,19 +46,31 @@ const variantClasses: Record<ButtonVariant, string> = {
     "text-xs border text-red-400 border-red-500 hover:bg-red-950/50 hover:text-red-300 disabled:opacity-50",
 };
 
-const textSize = computed(() => {
-  if (props.textSize === "sm") return "text-sm";
-  if (props.textSize === "md") return "text-base";
-  if (props.textSize === "lg") return "text-lg";
-})
+const externalClass = computed(() => attrs.class as ClassNameValue);
 
-const buttonClass = computed(() => {
-  return twMerge(baseClasses, variantClasses[props.variant], props.class, textSize.value);
+const textSizeClass = computed(() => {
+  switch (props.textSize) {
+    case "sm":
+      return "text-sm";
+    case "lg":
+      return "text-lg";
+    default:
+      return "text-base";
+  }
 });
+
+const buttonClass = computed(() =>
+  twMerge(
+    baseClasses,
+    variantClasses[props.variant],
+    textSizeClass.value,
+    externalClass.value
+  )
+);
 </script>
 
 <template>
-  <button :type="type" :class="buttonClass" :disabled="disabled || loading">
+  <button v-bind="$attrs" :type="type" :class="buttonClass" :disabled="disabled || loading">
     <span v-if="loading" class="flex items-center justify-center gap-2">
       <svg
         class="h-4 w-4 animate-spin"

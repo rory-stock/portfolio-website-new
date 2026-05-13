@@ -1,9 +1,8 @@
-/**
- * Composable for sharing URLs via the Web Share API or clipboard fallback.
- */
+import { useClipboard } from "@vueuse/core";
 
 export function useShare() {
   const isSharing = ref(false);
+  const { copy } = useClipboard();
   const { success, error: showError } = useToast();
 
   /**
@@ -41,32 +40,15 @@ export function useShare() {
     const shareUrl = buildShareUrl(url, accessToken);
 
     try {
-      if (typeof navigator !== "undefined" && navigator.share) {
+      if (navigator.share) {
         await navigator.share({ url: shareUrl });
         return true;
       }
 
-      if (typeof navigator !== "undefined" && navigator.clipboard) {
-        await navigator.clipboard.writeText(shareUrl);
-        success("Link copied");
-        return true;
-      }
-
-      const textarea = document.createElement("textarea");
-      textarea.value = shareUrl;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
+      await copy(shareUrl);
       success("Link copied");
       return true;
-    } catch (err: any) {
-      if (err?.name === "AbortError") {
-        return false;
-      }
-
+    } catch {
       showError("Failed to share link");
       return false;
     } finally {
