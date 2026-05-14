@@ -6,7 +6,7 @@ export interface ToastAction {
 export interface Toast {
   id: number;
   message: string;
-  type: "success" | "error" | "info";
+  type: "success" | "error" | "info" | "successMono";
   duration?: number; // For countdown bar
   action?: ToastAction; // For cancel button
   countdownStarted?: boolean; // Internal flag for animation
@@ -59,6 +59,8 @@ export const useToast = () => {
     duration = 3000,
     options?: { action?: ToastAction }
   ) => show(message, "info", duration, options);
+  const successMono = (message: string, duration = 3000) =>
+    show(message, "successMono", duration);
 
   return {
     toasts: readonly(toasts),
@@ -67,5 +69,6 @@ export const useToast = () => {
     success,
     error,
     info,
+    successMono
   };
 };

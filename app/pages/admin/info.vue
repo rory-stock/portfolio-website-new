@@ -11,7 +11,6 @@
         :fields="imageFields"
       />
     </div>
-    <Toast />
   </div>
 </template>
 

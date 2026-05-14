@@ -7,8 +7,6 @@
     <MetaImagesSection />
 
     <ContentSection table="footer" title="Footer" :fields="contentFields" />
-
-    <Toast />
   </div>
 </template>
 

@@ -319,7 +319,5 @@ provide("refreshGallery", fetchGallery);
         />
       </div>
     </BaseModal>
-
-    <Toast />
   </div>
 </template>

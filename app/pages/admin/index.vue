@@ -9,7 +9,6 @@
       :fields="imageFields"
       :show-layout-wizard="true"
     />
-    <Toast />
   </div>
 </template>
 

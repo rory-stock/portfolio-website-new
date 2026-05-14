@@ -1,18 +1,17 @@
 <template>
-  <div class="fixed top-4 right-4 z-50 space-y-2">
+  <div class="fixed top-4 right-4 z-50 flex flex-col gap-2">
     <TransitionGroup name="slide">
       <div
-        v-for="toast in toasts"
+        v-for="toast in orderedToasts"
         :key="toast.id"
-        :class="[
-          'relative max-w-sm overflow-hidden rounded shadow-lg sm:max-w-md',
-          toastClasses[toast.type],
-        ]"
+        class="relative max-w-sm overflow-hidden rounded shadow-lg sm:max-w-md"
+        :class="toastClasses[toast.type]"
       >
         <!-- Countdown bar -->
         <div
           v-if="toast.duration && toast.duration > 0"
           class="absolute bottom-0 left-0 h-1 bg-current opacity-30"
+          id="countdown"
           :class="{
             'transition-all ease-linear': hasCountdownStarted(toast.id),
           }"
@@ -48,18 +47,22 @@ import type { IconName } from "~/components/icons/iconData";
 
 const { toasts } = useToast();
 
+const orderedToasts = computed(() => [...toasts.value].reverse());
+
 const startedCountdowns = ref<Set<number>>(new Set());
 
 const toastClasses: Record<Toast["type"], string> = {
   success: "bg-green-900 text-green-100 border border-green-700",
   error: "bg-red-900 text-red-100 border border-red-700",
   info: "bg-blue-900 text-blue-100 border border-blue-700",
+  successMono: "bg-black select-none text-white [&_#countdown]:opacity-60",
 } as const;
 
 const toastIcons: Record<Toast["type"], IconName> = {
   success: "check",
   error: "cross",
   info: "info",
+  successMono: "check",
 };
 
 function hasCountdownStarted(toastId: number): boolean {

@@ -8,7 +8,6 @@
       <hr class="my-4" />
       <ImageSection context="personal" title="Personal" :fields="imageFields" />
     </div>
-    <Toast />
   </div>
 </template>
 

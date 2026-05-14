@@ -3,7 +3,7 @@ import { useClipboard } from "@vueuse/core";
 export function useShare() {
   const isSharing = ref(false);
   const { copy } = useClipboard();
-  const { success, error: showError } = useToast();
+  const { successMono, error: showError } = useToast();
 
   /**
    * Build the full shareable URL with an optional access token.
@@ -46,7 +46,7 @@ export function useShare() {
       }
 
       await copy(shareUrl);
-      success("Link copied");
+      successMono("Link copied");
       return true;
     } catch {
       showError("Failed to share link");
