@@ -48,7 +48,11 @@ export function useShare() {
       await copy(shareUrl);
       successMono("Link copied");
       return true;
-    } catch {
+    } catch (err: any) {
+      if (err?.name === "AbortError") {
+        return false;
+      }
+      
       showError("Failed to share link");
       return false;
     } finally {
