@@ -3,7 +3,7 @@ import { onClickOutside, onKeyStroke } from "@vueuse/core";
 
 const props = defineProps<{
   iconSize?: number;
-  class?: string;
+  buttonClass?: string;
 }>();
 
 const isOpen = ref(false);
@@ -30,11 +30,12 @@ onKeyStroke("Escape", (e) => {
 </script>
 
 <template>
-  <div ref="menuRef" class="relative" :class="props.class">
+  <div ref="menuRef" class="relative">
     <!-- Trigger -->
     <AppButton
       variant="secondary-simple"
       class="px-0 py-0 md:px-0"
+      :class="buttonClass"
       title="More options"
       aria-label="More options"
       :aria-expanded="isOpen"
@@ -48,7 +49,7 @@ onKeyStroke("Escape", (e) => {
     <Transition name="dropdown">
       <div
         v-if="isOpen"
-        class="absolute right-0 z-50 mt-1 min-w-40 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg"
+        class="absolute right-0 z-50 mt-1 min-w-25 rounded-xs border border-neutral-200 bg-white py-1"
         role="menu"
         @click="close"
       >

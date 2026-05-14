@@ -129,15 +129,15 @@ useSeoMeta({
       <div
         class="mb-4 flex items-start justify-between selection:bg-black selection:text-white md:mb-6"
       >
-        <div class="flex max-w-fit flex-col md:gap-1">
+        <div class="flex grow flex-col md:gap-1">
           <h1
-            class="w-fit font-lausanne-500 text-xl tracking-tight text-black uppercase md:text-3xl lg:text-2xl"
+            class="w-fit max-w-64 truncate font-lausanne-500 text-xl tracking-tight text-black uppercase md:max-w-1/2 md:text-2xl"
           >
             {{ event.name }}
           </h1>
 
           <p
-            class="w-fit font-lausanne-400 text-sm text-neutral-600 md:text-base"
+            class="w-fit max-w-64 truncate font-lausanne-400 text-sm text-neutral-600 md:max-w-1/2 md:text-base"
           >
             <span>{{ event.start_date }}</span>
             <span v-if="event.end_date"> — {{ event.end_date }}</span>
@@ -161,8 +161,28 @@ useSeoMeta({
           </NuxtLink>
         </div>
 
+        <!-- Mobile Options -->
+        <div v-if="isMobile" class="mt-0.5 shrink">
+          <MoreOptions buttonClass="text-black">
+            <ShareButton
+              :url="shareUrl"
+              :access-token="accessToken"
+              :icon-size="25"
+              :icon="false"
+              :use-tooltip="false"
+            >
+              <div class="flex gap-1.5 pl-2">
+                <Icon name="share" :size="20" class="text-black" />
+                <p class="font-lausanne-400 text-sm text-black uppercase">
+                  Share
+                </p>
+              </div>
+            </ShareButton>
+          </MoreOptions>
+        </div>
+
         <!-- Share -->
-        <div class="flex items-center">
+        <div v-else class="flex shrink items-center">
           <ShareButton
             :url="shareUrl"
             :access-token="accessToken"

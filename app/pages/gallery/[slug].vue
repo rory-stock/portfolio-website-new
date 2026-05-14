@@ -40,6 +40,8 @@ const hasSubFolders = computed(() => subFolders.value.length > 0);
 
 const activeSubSlug = computed(() => (route.params.subSlug as string) || null);
 
+const { isMobile } = useResponsive();
+
 // Build the share URL
 const shareUrl = computed(() => {
   const origin =
@@ -113,18 +115,18 @@ useHead({
     <div v-else-if="gallery" class="px-4 py-4 md:py-4">
       <!-- Gallery header -->
       <div
-        class="mb-4 md:mb-6 flex items-start justify-between selection:bg-black selection:text-white"
+        class="mb-4 flex items-start justify-between selection:bg-black selection:text-white md:mb-6"
       >
-        <div class="flex max-w-fit flex-col md:gap-1">
+        <div class="flex grow flex-col md:gap-1">
           <h1
-            class="w-fit font-lausanne-500 text-xl tracking-tight text-black uppercase md:text-3xl lg:text-2xl"
+            class="w-fit max-w-64 truncate md:max-w-1/2 font-lausanne-500 text-xl tracking-tight text-black uppercase md:text-2xl"
           >
             {{ gallery.name }}
           </h1>
 
           <p
             v-if="gallery.client_name || gallery.shoot_date"
-            class="w-fit font-lausanne-400 text-sm text-neutral-600 md:text-base"
+            class="w-fit max-w-64 truncate md:max-w-1/2 font-lausanne-400 text-sm text-neutral-600 md:text-base"
           >
             <span v-if="gallery.client_name">{{ gallery.client_name }}</span>
             <span v-if="gallery.client_name && gallery.shoot_date"> · </span>
@@ -132,8 +134,23 @@ useHead({
           </p>
         </div>
 
+        <!-- Mobile Options -->
+        <div v-if="isMobile" class="mt-0.5 shrink">
+          <MoreOptions buttonClass="text-black">
+            <ShareButton
+              :url="shareUrl"
+              :access-token="accessToken"
+              :icon-size="25"
+              :icon=false
+              :use-tooltip=false
+            >
+              <p class="font-lausanne-400 uppercase text-sm text-black pl-2">Share</p>
+            </ShareButton>
+          </MoreOptions>
+        </div>
+
         <!-- Share -->
-        <div class="flex items-center">
+        <div v-else class="flex shrink items-center">
           <ShareButton
             :url="shareUrl"
             :access-token="accessToken"
