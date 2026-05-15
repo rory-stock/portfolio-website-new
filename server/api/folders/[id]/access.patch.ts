@@ -1,9 +1,7 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { useDB } from "~~/server/db/client";
 import * as schema from "~~/server/db/schema";
-import { requireAuth } from "~~/server/utils/requireAuth";
-import { getFolderById } from "~~/server/utils/queries/folders";
+import { resolveFolder } from "~~/server/utils/resolveFolder";
 import { generatePrivateLinkToken } from "~~/server/utils/tokenGenerator";
 
 const bodySchema = z.object({
@@ -14,25 +12,13 @@ const bodySchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event);
-
-  const db = useDB(event);
-  const id = Number(getRouterParam(event, "id"));
-
-  if (!id || isNaN(id)) {
-    throw createError({ statusCode: 400, message: "Invalid folder ID" });
-  }
-
-  const folder = await getFolderById(db, id);
-  if (!folder) {
-    throw createError({ statusCode: 404, message: "Folder not found" });
-  }
+  const { db, folder } = await resolveFolder(event);
 
   const body = await readValidatedBody(event, bodySchema.parse);
 
   const updates: Record<string, unknown> = {
     updatedAt: new Date(),
-    accessVersion: (folder.accessVersion) + 1,
+    accessVersion: folder.accessVersion + 1,
   };
 
   // Handle private link toggle
@@ -64,7 +50,7 @@ export default defineEventHandler(async (event) => {
   const [updated] = await db
     .update(schema.imageFolders)
     .set(updates)
-    .where(eq(schema.imageFolders.id, id))
+    .where(eq(schema.imageFolders.id, folder.id))
     .returning();
 
   if (!updated) {

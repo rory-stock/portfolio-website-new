@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useBreakpoints, breakpointsTailwind } from "@vueuse/core";
 import { MasonryWall } from "@yeger/vue-masonry-wall";
 
 interface DisplayImage {

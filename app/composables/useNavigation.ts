@@ -3,6 +3,7 @@ import type {
   adminNavItem,
   publicNavItem,
 } from "~~/types/navTypes";
+import { computed } from "vue";
 import type { ComputedRef } from "vue";
 
 const pages: PageConfig[] = [

@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { useDB } from "#server/db/client";
-import { requireAuth } from "#server/utils/requireAuth";
+import { useDB } from "~~/server/db/client";
+import { requireAuth } from "~~/server/utils/requireAuth";
 import type { EventResponse } from "~~/types/api";
-import { updateEvent } from "#server/utils/mutations";
-import { eventToResponse } from "#server/utils/eventTransform";
+import { updateEvent } from "~~/server/utils/mutations";
+import { eventToResponse } from "~~/server/utils/eventTransform";
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 

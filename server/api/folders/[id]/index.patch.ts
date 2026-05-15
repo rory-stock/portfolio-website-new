@@ -1,8 +1,8 @@
 import { eq, and, isNull, ne } from "drizzle-orm";
-import { useDB } from "#server/db/client";
-import * as schema from "#server/db/schema";
-import { requireAuth } from "#server/utils/requireAuth";
-import { getFolderById } from "#server/utils/queries/folders";
+import { useDB } from "~~/server/db/client";
+import * as schema from "~~/server/db/schema";
+import { requireAuth } from "~~/server/utils/requireAuth";
+import { getFolderById } from "~~/server/utils/queries/folders";
 
 export default defineEventHandler(async (event) => {
   await requireAuth(event);

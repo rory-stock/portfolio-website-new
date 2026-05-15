@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { formatDateShort } from "~/utils/format";
-import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import type { FolderAccessFlags } from "~~/types/api";
 
 definePageMeta({

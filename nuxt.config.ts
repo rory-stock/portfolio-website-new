@@ -48,6 +48,25 @@ export default defineNuxtConfig({
   nitro: {
     preset: "cloudflare-pages",
   },
+  typescript: {
+    strict: true,
+    typeCheck: true,
+
+    tsConfig: {
+      compilerOptions: {
+        noUncheckedIndexedAccess: true,
+        noImplicitOverride: true,
+        skipLibCheck: true,
+      },
+    },
+    sharedTsConfig: {
+      compilerOptions: {
+        noUncheckedIndexedAccess: true,
+        noImplicitOverride: true,
+        skipLibCheck: true,
+      },
+    },
+  },
   css: ["./app/assets/css/main.css"],
   app: {
     pageTransition: { name: "page", mode: "out-in" },

@@ -1,28 +1,13 @@
-import { useDB } from "#server/db/client";
-import { requireAuth } from "#server/utils/requireAuth";
-import { getFolderById } from "#server/utils/queries/folders";
-import { deleteFolder } from "#server/utils/mutations/folders";
+import { resolveFolder } from "~~/server/utils/resolveFolder";
+import { deleteFolder } from "~~/server/utils/mutations/folders";
 import { deleteR2Object } from "~/utils/r2";
 import { logger } from "~/utils/logger";
 
 export default defineEventHandler(async (event) => {
-  await requireAuth(event);
-
-  const db = useDB(event);
-  const id = Number(getRouterParam(event, "id"));
-
-  if (!id || isNaN(id)) {
-    throw createError({ statusCode: 400, message: "Invalid folder ID" });
-  }
-
-  // Verify folder exists
-  const folder = await getFolderById(db, id);
-  if (!folder) {
-    throw createError({ statusCode: 404, message: "Folder not found" });
-  }
+  const { db, folder } = await resolveFolder(event);
 
   try {
-    const result = await deleteFolder(db, id);
+    const result = await deleteFolder(db, folder.id);
 
     // Clean up R2 for any fully deleted base images
     for (const deletion of result.deletionResults) {

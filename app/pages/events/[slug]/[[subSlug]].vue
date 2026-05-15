@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { DisplayImage } from "~~/types/imageTypes";
-import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 
 const route = useRoute();
 
