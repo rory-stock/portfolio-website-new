@@ -4,7 +4,7 @@ import { logger } from "~/utils/logger";
 import type { LoginResponse } from "~~/types/api";
 
 const bodySchema = z.object({
-  email: z.email(),
+  email: z.email("Please enter a valid email address"),
   password: z.string().min(8),
 });
 

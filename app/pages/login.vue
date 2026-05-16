@@ -65,7 +65,6 @@ async function logout() {
               id="form-email"
               v-model="credentials.email"
               type="email"
-              placeholder="user@example.com"
               class="w-fit rounded border border-neutral-700 bg-neutral-800 py-1 pl-1 text-sm font-light text-neutral-300 focus:border-neutral-600 focus:outline-none"
             />
           </div>

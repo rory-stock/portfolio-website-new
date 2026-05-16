@@ -70,9 +70,13 @@ watch(
       hasSubEvents.value &&
       subEvents.value[0]
     ) {
-      void navigateTo(`/events/${slug}/${subEvents.value[0].slug}`, {
-        replace: true,
-      });
+      void navigateTo(
+        {
+          path: `/events/${slug}/${subEvents.value[0].slug}`,
+          query: route.query,
+        },
+        { replace: true }
+      );
     }
   },
   { immediate: true }
@@ -91,9 +95,13 @@ async function onVerified() {
     subEvents.value.length > 0 &&
     subEvents.value[0]
   ) {
-    await navigateTo(`/events/${slug}/${subEvents.value[0].slug}`, {
-      replace: true,
-    });
+    await navigateTo(
+      {
+        path: `/events/${slug}/${subEvents.value[0].slug}`,
+        query: route.query,
+      },
+      { replace: true }
+    );
   }
 }
 
@@ -198,7 +206,7 @@ useSeoMeta({
           <NuxtLink
             v-for="sub in subEvents"
             :key="sub.id"
-            :to="`/events/${slug}/${sub.slug}`"
+            :to="{ path: `/events/${slug}/${sub.slug}`, query: route.query }"
             class="shrink-0 border-b-2 pb-2 font-lausanne-500 text-sm uppercase transition-colors select-none md:text-base"
             :class="
               activeSubSlug === sub.slug

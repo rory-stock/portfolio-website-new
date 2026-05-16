@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
         } catch (r2Error) {
           logger.error(
             `R2 deletion failed for ${deletion.r2Path} during folder delete`,
-            r2Error
+            { r2Error }
           );
         }
       }

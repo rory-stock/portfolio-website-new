@@ -64,9 +64,13 @@ watch(
       hasSubFolders.value &&
       subFolders.value[0]
     ) {
-      void navigateTo(`/gallery/${slug}/${subFolders.value[0].slug}`, {
-        replace: true,
-      });
+      void navigateTo(
+        {
+          path: `/gallery/${slug}/${subFolders.value[0].slug}`,
+          query: route.query,
+        },
+        { replace: true }
+      );
     }
   },
   { immediate: true }
@@ -85,9 +89,13 @@ async function onVerified() {
     subFolders.value.length > 0 &&
     subFolders.value[0]
   ) {
-    await navigateTo(`/gallery/${slug}/${subFolders.value[0].slug}`, {
-      replace: true,
-    });
+    await navigateTo(
+      {
+        path: `/gallery/${slug}/${subFolders.value[0].slug}`,
+        query: route.query,
+      },
+      { replace: true }
+    );
   }
 }
 
@@ -119,14 +127,14 @@ useHead({
       >
         <div class="flex grow flex-col md:gap-1">
           <h1
-            class="w-fit max-w-64 truncate md:max-w-1/2 font-lausanne-500 text-xl tracking-tight text-black uppercase md:text-2xl"
+            class="w-fit max-w-64 truncate font-lausanne-500 text-xl tracking-tight text-black uppercase md:max-w-1/2 md:text-2xl"
           >
             {{ gallery.name }}
           </h1>
 
           <p
             v-if="gallery.client_name || gallery.shoot_date"
-            class="w-fit max-w-64 truncate md:max-w-1/2 font-lausanne-400 text-sm text-neutral-600 md:text-base"
+            class="w-fit max-w-64 truncate font-lausanne-400 text-sm text-neutral-600 md:max-w-1/2 md:text-base"
           >
             <span v-if="gallery.client_name">{{ gallery.client_name }}</span>
             <span v-if="gallery.client_name && gallery.shoot_date"> · </span>
@@ -141,10 +149,12 @@ useHead({
               :url="shareUrl"
               :access-token="accessToken"
               :icon-size="25"
-              :icon=false
-              :use-tooltip=false
+              :icon="false"
+              :use-tooltip="false"
             >
-              <p class="font-lausanne-400 uppercase text-sm text-black pl-2">Share</p>
+              <p class="pl-2 font-lausanne-400 text-sm text-black uppercase">
+                Share
+              </p>
             </ShareButton>
           </MoreOptions>
         </div>
@@ -166,7 +176,7 @@ useHead({
           <NuxtLink
             v-for="sub in subFolders"
             :key="sub.id"
-            :to="`/gallery/${slug}/${sub.slug}`"
+            :to="{ path: `/gallery/${slug}/${sub.slug}`, query: route.query }"
             class="shrink-0 border-b-2 pb-2 font-lausanne-500 text-sm uppercase transition-colors select-none md:text-base"
             :class="
               activeSubSlug === sub.slug

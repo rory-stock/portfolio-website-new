@@ -3,7 +3,6 @@ import * as schema from "~~/server/db/schema";
 import { useDB } from "~~/server/db/client";
 import { isValidLayoutType, LAYOUT_TYPES } from "~/utils/layouts";
 import { requireAuth } from "~~/server/utils/requireAuth";
-import { logger } from "~/utils/logger";
 import type { LayoutAssignRequest, LayoutAssignResponse } from "~~/types/api";
 
 export default defineEventHandler(
@@ -90,8 +89,6 @@ export default defineEventHandler(
         await db
           .delete(schema.layoutGroups)
           .where(eq(schema.layoutGroups.id, groupId));
-
-        logger.info("Removed old layout group", { groupId, context });
       }
     }
 

@@ -4,17 +4,26 @@ import * as schema from "~~/server/db/schema";
 import { resolveRootFolder } from "~~/server/utils/folderAccess";
 import type { AccessGate } from "~~/server/utils/folderAccess";
 import { setAccessCookie, getAccessCookie } from "~~/server/utils/accessCookie";
+import { and, eq } from "drizzle-orm";
 
 const bodySchema = z.object({
   folder_id: z.number().int().positive(),
-  email: z.email().optional(),
+  email: z.email("Please enter a valid email address").optional(),
   access_code: z.string().optional(),
   token: z.string().optional(),
 });
 
 export default defineEventHandler(async (event) => {
   const db = useDB(event);
-  const body = await readValidatedBody(event, bodySchema.parse);
+  const rawBody = await readBody(event);
+  const result = bodySchema.safeParse(rawBody);
+
+  if (!result.success) {
+    const firstMessage = result.error.issues[0]?.message || "Invalid request";
+    throw createError({ statusCode: 400, message: firstMessage });
+  }
+
+  const body = result.data;
 
   // Resolve root folder
   const rootFolder = await resolveRootFolder(db, body.folder_id);
@@ -70,13 +79,30 @@ export default defineEventHandler(async (event) => {
   // Validate email
   if (rootFolder.requireEmail) {
     if (body.email) {
-      // Store the email
-      await db.insert(schema.folderAccessEmails).values({
-        folderId: rootFolder.id,
-        email: body.email,
-        accessedAt: new Date(),
-        createdAt: new Date(),
-      });
+      const [existing] = await db
+        .select({ id: schema.folderAccessEmails.id })
+        .from(schema.folderAccessEmails)
+        .where(
+          and(
+            eq(schema.folderAccessEmails.folderId, rootFolder.id),
+            eq(schema.folderAccessEmails.email, body.email)
+          )
+        )
+        .limit(1);
+
+      if (existing) {
+        await db
+          .update(schema.folderAccessEmails)
+          .set({ accessedAt: new Date() })
+          .where(eq(schema.folderAccessEmails.id, existing.id));
+      } else {
+        await db.insert(schema.folderAccessEmails).values({
+          folderId: rootFolder.id,
+          email: body.email,
+          accessedAt: new Date(),
+          createdAt: new Date(),
+        });
+      }
 
       if (!gatesCleared.includes("email")) {
         gatesCleared.push("email");

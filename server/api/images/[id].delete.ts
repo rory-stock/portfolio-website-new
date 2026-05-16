@@ -30,12 +30,12 @@ export default defineEventHandler(
     try {
       const result = await deleteImageInstance(db, id);
 
-      // If this was the last instance, also delete from R2
+      // If this was the last instance, also delete it from R2
       if (result.deletedBaseImage && result.r2Path) {
         try {
           await deleteR2Object(result.r2Path);
         } catch (error) {
-          logger.error("R2 Delete Error - DB record already deleted", error);
+          logger.error("R2 Delete Error - DB record already deleted", { error });
           // Don't throw - DB record is already deleted
         }
       }

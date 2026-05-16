@@ -135,7 +135,7 @@ export default defineEventHandler(
       try {
         await deleteR2Object(body.r2_path);
       } catch (e) {
-        logger.error("Failed to cleanup R2 file after processing error", e);
+        logger.error("Failed to cleanup R2 file after processing error", { e });
       }
 
       throw createError({

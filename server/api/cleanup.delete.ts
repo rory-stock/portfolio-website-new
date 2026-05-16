@@ -19,7 +19,7 @@ export default defineEventHandler(async (event): Promise<CleanupResponse> => {
       await deleteR2Object(file.key);
       deleted.push(file.key);
     } catch (error) {
-      logger.error(`Failed to delete R2 file: ${file.key}`, error);
+      logger.error(`Failed to delete R2 file: ${file.key}`, { error });
       errors.push({ key: file.key, error });
     }
   }

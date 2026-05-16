@@ -92,7 +92,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // No subfolders — fetch root folder images
-  let rootImages: ReturnType<typeof imageWithInstanceToDisplay>[] = [];
+  let rootImages: ReturnType<typeof imageWithInstanceToDisplay>[];
 
   const result = await getFolderImages(db, gallery.folderId, {
     page: 1,

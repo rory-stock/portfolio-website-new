@@ -51,7 +51,7 @@
 
     @font-face {
         font-family: "Neue Montreal Medium Semi";
-        src: url("/assets/fonts/neue-montreal-semi-squeezed-530.woff2") format("woff2");
+        src: url("../fonts/neue-montreal-semi-squeezed-530.woff2") format("woff2");
         font-weight: 530;
         font-style: normal;
         font-display: swap;
@@ -59,35 +59,35 @@
 
     @font-face {
         font-family: "Ghost";
-        src: url("/assets/fonts/ghost.woff2") format("woff2");
+        src: url("../fonts/ghost.woff2") format("woff2");
         font-style: normal;
-        font-display: swap;
+        font-display: block;
     }
 
     @font-face {
         font-family: "Ghost Italic";
-        src: url("/assets/fonts/ghost-italic.woff2") format("woff2");
+        src: url("../fonts/ghost-italic.woff2") format("woff2");
         font-style: italic;
-        font-display: swap;
+        font-display: block;
     }
 
     @font-face {
         font-family: "Animo Condensed Regular";
-        src: url("/assets/fonts/animo-condensed-regular.woff2") format("woff2");
+        src: url("../fonts/animo-condensed-regular.woff2") format("woff2");
         font-style: normal;
-        font-display: swap;
+        font-display: block;
     }
 
     @font-face {
         font-family: "Lausanne 500";
-        src: url("/assets/fonts/lausanne-500.woff2") format("woff2");
+        src: url("../fonts/lausanne-500.woff2") format("woff2");
         font-style: normal;
         font-display: swap;
     }
 
     @font-face {
         font-family: "Lausanne 400";
-        src: url("/assets/fonts/lausanne-400.woff2") format("woff2");
+        src: url("../fonts/lausanne-400.woff2") format("woff2");
         font-style: normal;
         font-display: swap;
     }

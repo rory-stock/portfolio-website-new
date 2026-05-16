@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { formatDateShort } from "~/utils/format";
 
 interface AccessEmail {
   id: number;
@@ -282,7 +281,7 @@ function toggleEmailList() {
             >
               <span class="truncate text-neutral-200">{{ entry.email }}</span>
               <span class="shrink-0 pl-3 text-neutral-600">
-                {{ formatDateShort(entry.accessed_at) }}
+                {{ formatDate(entry.accessed_at) }}
               </span>
             </div>
           </div>

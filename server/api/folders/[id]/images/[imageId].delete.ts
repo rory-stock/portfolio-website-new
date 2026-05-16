@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
       } catch (r2Error) {
         logger.error(
           `R2 deletion failed for ${result.r2Path} (DB record already deleted)`,
-          r2Error
+          { r2Error }
         );
       }
     }

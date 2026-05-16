@@ -35,7 +35,7 @@ defineOptions({
 const attrs = useAttrs();
 
 const baseClasses =
-  "cursor-pointer rounded px-2 py-2 transition-all duration-300 md:px-4 disabled:cursor-not-allowed disabled:opacity-50";
+  "cursor-pointer select-none rounded px-2 py-2 transition-all duration-300 md:px-4 disabled:cursor-not-allowed disabled:opacity-50";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-neutral-100 text-neutral-980 hover:bg-neutral-300",
