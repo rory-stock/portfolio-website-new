@@ -141,7 +141,7 @@ export default defineNuxtConfig({
   },
   robots: {
     blockAiBots: true,
-    disallow: ["/admin", "/login", "/admin/*"],
+    disallow: ["/admin", "/login", "/admin/*", "/gallery", "/gallery/*"],
   },
   seo: {
     // redirectToCanonicalSiteUrl: true, TODO: Enable when using a custom domain

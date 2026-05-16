@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import { formatDateShort } from "~/utils/format";
+
+interface AccessEmail {
+  id: number;
+  email: string;
+  accessed_at: Date;
+  created_at: Date;
+}
 
 const props = defineProps<{
   folderId: number;
@@ -17,8 +25,10 @@ const { success, error: showError } = useToast();
 const saving = ref(false);
 const showAccessCode = ref(false);
 const localAccessCode = ref(props.accessCode || "");
+const emails = ref<AccessEmail[]>([]);
 const emailCount = ref<number | null>(null);
 const loadingEmails = ref(false);
+const showEmails = ref(false);
 
 // Sync local access code when prop changes
 watch(
@@ -31,18 +41,20 @@ watch(
 // Fetch email count on mount if email gate is enabled
 onMounted(async () => {
   if (props.requireEmail) {
-    await fetchEmailCount();
+    await fetchEmails();
   }
 });
 
-async function fetchEmailCount() {
+async function fetchEmails() {
   loadingEmails.value = true;
   try {
-    const data = await $fetch<{ total: number }>(
+    const data = await $fetch<{ emails: AccessEmail[]; total: number }>(
       `/api/folders/${props.folderId}/access-emails`
     );
+    emails.value = data.emails;
     emailCount.value = data.total;
   } catch {
+    emails.value = [];
     emailCount.value = null;
   } finally {
     loadingEmails.value = false;
@@ -91,7 +103,7 @@ async function clearAccessCode() {
 async function toggleEmailGate() {
   await updateAccess({ require_email: !props.requireEmail });
   if (!props.requireEmail) {
-    await fetchEmailCount();
+    await fetchEmails();
   }
 }
 
@@ -100,10 +112,14 @@ function copyToken() {
   navigator.clipboard.writeText(props.privateLinkToken);
   success("Token copied to clipboard");
 }
+
+function toggleEmailList() {
+  showEmails.value = !showEmails.value;
+}
 </script>
 
 <template>
-  <div class="space-y-5">
+  <div class="space-y-5 overflow-y-scroll max-h-125">
     <h3 class="text-sm font-medium text-neutral-300">Access Control</h3>
 
     <!-- Private Link -->
@@ -235,12 +251,49 @@ function copyToken() {
         </button>
       </div>
 
-      <!-- Email count (when enabled) -->
-      <div v-if="requireEmail" class="text-xs text-neutral-500">
-        <span v-if="loadingEmails">Loading...</span>
-        <span v-else-if="emailCount !== null">
-          {{ emailCount }} email{{ emailCount !== 1 ? "s" : "" }} collected
-        </span>
+      <!-- Email list (when enabled) -->
+      <div v-if="requireEmail">
+        <button
+          type="button"
+          class="flex w-full cursor-pointer items-center justify-between text-xs text-neutral-500 hover:text-neutral-300"
+          @click="toggleEmailList"
+        >
+          <span v-if="loadingEmails">Loading...</span>
+          <span v-else-if="emailCount !== null">
+            {{ emailCount }} email{{ emailCount !== 1 ? "s" : "" }} collected
+          </span>
+          <Icon
+            name="chevron"
+            :size="16"
+            class="transition-transform duration-200"
+            :class="{ 'rotate-180': showEmails }"
+          />
+        </button>
+
+        <Transition name="dropdown">
+          <div
+            v-if="showEmails && emails.length > 0"
+            class="mt-3 max-h-44 lg:max-h-48 space-y-1 overflow-y-scroll rounded border border-neutral-800 bg-neutral-950 p-2"
+          >
+            <div
+              v-for="entry in emails"
+              :key="entry.id"
+              class="flex items-center justify-between px-2 py-1.5 text-xs"
+            >
+              <span class="truncate text-neutral-200">{{ entry.email }}</span>
+              <span class="shrink-0 pl-3 text-neutral-600">
+                {{ formatDateShort(entry.accessed_at) }}
+              </span>
+            </div>
+          </div>
+        </Transition>
+
+        <p
+          v-if="showEmails && !loadingEmails && emails.length === 0"
+          class="mt-2 text-xs text-neutral-600"
+        >
+          No emails collected yet.
+        </p>
       </div>
     </div>
   </div>

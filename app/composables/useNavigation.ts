@@ -3,7 +3,7 @@ import type {
   adminNavItem,
   publicNavItem,
 } from "~~/types/navTypes";
-import { computed } from "vue";
+import { computed } from "@vue/reactivity";
 import type { ComputedRef } from "vue";
 
 const pages: PageConfig[] = [
