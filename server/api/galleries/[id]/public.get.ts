@@ -40,7 +40,6 @@ export default defineEventHandler(async (event) => {
       folderName: accessResult.folderName || gallery.name,
       requiredGates: accessResult.requiredGates || [],
       rootFolderId: accessResult.rootFolderId,
-      // Return basic gallery info (no images)
       id: gallery.id,
       name: gallery.name,
       slug: gallery.slug,

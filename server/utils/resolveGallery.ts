@@ -5,7 +5,6 @@ import { getGalleryBySlug } from "~~/server/utils/queries/galleries";
 
 /**
  * Resolve a gallery by slug from the route params.
- * Handles auth, slug validation, and 404 in one call.
  */
 export async function resolveGallery(event: H3Event) {
   await requireAuth(event);

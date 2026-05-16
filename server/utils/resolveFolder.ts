@@ -5,7 +5,6 @@ import { getFolderById } from "~~/server/utils/queries/folders";
 
 /**
  * Resolve a folder by ID from the route params.
- * Handles auth, ID validation, and 404 in one call.
  */
 export async function resolveFolder(event: H3Event) {
   await requireAuth(event);

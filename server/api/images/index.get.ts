@@ -9,6 +9,7 @@ import {
   imageWithInstanceToDisplay,
 } from "~~/server/utils/imageTransform";
 import { isValidContext } from "~/utils/context";
+import { validateImageAccess } from "~~/server/utils/folderAccess";
 
 export default defineEventHandler(async (event): Promise<ImageListResponse> => {
   const db = useDB(event);
@@ -40,6 +41,19 @@ export default defineEventHandler(async (event): Promise<ImageListResponse> => {
     // Check auth for non-public
     if (!primaryData.instance.isPublic && !session?.user) {
       throw createError({ statusCode: 403, message: "Forbidden" });
+    }
+
+    // Check folder access control (unless admin)
+    if (!session?.user) {
+      const hasAccess = await validateImageAccess(
+        event,
+        db,
+        primaryData.instance.id
+      );
+
+      if (!hasAccess) {
+        return { images: [], total: 0 };
+      }
     }
 
     const displayImage = imageWithInstanceToDisplay({
@@ -74,10 +88,24 @@ export default defineEventHandler(async (event): Promise<ImageListResponse> => {
       })
     );
 
-    // Filter by auth if needed
-    const filteredImages = displayImages.filter((img) => {
+    // Filter by auth
+    const authFiltered = displayImages.filter((img) => {
       return img.is_public || session?.user;
     });
+
+    // Filter by folder access (unless admin)
+    let filteredImages = authFiltered;
+    if (!session?.user) {
+      const accessChecks = await Promise.all(
+        authFiltered.map(async (img) => ({
+          img,
+          hasAccess: await validateImageAccess(event, db, img.instanceId),
+        }))
+      );
+      filteredImages = accessChecks
+        .filter((check) => check.hasAccess)
+        .map((check) => check.img);
+    }
 
     return {
       images: filteredImages,
@@ -105,8 +133,22 @@ export default defineEventHandler(async (event): Promise<ImageListResponse> => {
 
   const displayImages = imageWithInstanceArrayToDisplay(validImagesData);
 
+  // Filter by folder access (unless admin)
+  let filteredImages = displayImages;
+  if (!session?.user) {
+    const accessChecks = await Promise.all(
+      displayImages.map(async (img) => ({
+        img,
+        hasAccess: await validateImageAccess(event, db, img.instanceId),
+      }))
+    );
+    filteredImages = accessChecks
+      .filter((check) => check.hasAccess)
+      .map((check) => check.img);
+  }
+
   return {
-    images: displayImages,
-    total: displayImages.length,
+    images: filteredImages,
+    total: filteredImages.length,
   };
 });

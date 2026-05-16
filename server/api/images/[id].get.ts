@@ -1,6 +1,7 @@
 import { useDB } from "~~/server/db/client";
 import { getImageWithInstance } from "~~/server/utils/queries";
 import { imageWithInstanceToDisplay } from "~~/server/utils/imageTransform";
+import { validateImageAccess } from "~~/server/utils/folderAccess";
 import type { DisplayImage } from "~~/types/imageTypes";
 
 export default defineEventHandler(
@@ -22,6 +23,18 @@ export default defineEventHandler(
     // Check auth for non-public
     if (!imageData.instance.isPublic && !session?.user) {
       throw createError({ statusCode: 403, message: "Forbidden" });
+    }
+
+    // Check folder access control (unless admin)
+    if (!session?.user) {
+      const hasAccess = await validateImageAccess(event, db, id);
+
+      if (!hasAccess) {
+        throw createError({
+          statusCode: 403,
+          message: "Access denied",
+        });
+      }
     }
 
     const displayImage = imageWithInstanceToDisplay(imageData);

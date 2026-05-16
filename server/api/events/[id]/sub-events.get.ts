@@ -1,4 +1,5 @@
 import { useDB } from "~~/server/db/client";
+import { requireAuth } from "~~/server/utils/requireAuth";
 import {
   getSubEvents,
   getEventCoverImage,
@@ -8,6 +9,8 @@ import { imageWithInstanceToDisplay } from "~~/server/utils/imageTransform";
 import { eventWithImagesToResponse } from "~~/server/utils/eventTransform";
 
 export default defineEventHandler(async (event) => {
+  await requireAuth(event);
+
   const db = useDB(event);
   const parentId = Number(getRouterParam(event, "id"));
 
